@@ -1,0 +1,320 @@
+<%- include('../partials/admin/header') %>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> <style>
+  body {background:#f8f9fa;font-family:"Poppins",sans-serif;margin:0}
+  .card{border:none;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .form-label{font-weight:500;color:#495057}
+  .required{color:#dc3545}
+  .form-control,.form-select{border:1px solid #ddd;border-radius:4px;padding:8px 12px}
+  textarea.form-control{min-height:100px;resize:vertical}
+  .variant-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .remove-variant-btn{background:#dc3545;color:#fff;border:none;border-radius:4px;padding:6px 10px;cursor:pointer}
+  .add-variant-btn{background:#000;color:#fff;border:none;padding:8px 12px;border-radius:4px;cursor:pointer}
+  .btn-primary{background:#000;color:#fff;border:none;padding:10px 25px;border-radius:4px}
+  .btn-secondary{background:#6c757d;color:#fff;border:none;padding:10px 25px;border-radius:4px;margin-right:10px}
+  .image-upload-container{border:2px dashed #ddd;padding:20px;text-align:center;cursor:pointer;background:#fafafa;border-radius:4px;transition:all .3s}
+  .image-upload-container:hover{border-color:#000;background:#f0f0f0}
+  .preview-container{display:flex;flex-wrap:wrap;gap:15px;margin-top:15px}
+  .preview-item{position:relative;width:120px;height:120px;border:1px solid #ddd;border-radius:4px;overflow:hidden}
+  .preview-item img{width:100%;height:100%;object-fit:cover}
+  .image-actions{position:absolute;bottom:5px;left:0;right:0;display:flex;justify-content:center;gap:5px}
+  .crop-image,.remove-image{background:rgba(255,255,255,.9);border:none;border-radius:4px;cursor:pointer;padding:4px 8px;font-size:11px;font-weight:500}
+  .crop-image:hover,.remove-image:hover{background:#fff}
+  .remove-image{color:#dc3545}
+</style>
+
+<body>
+<div class="container py-4">
+  <h4 class="mb-4">Add Product</h4>
+
+ <% if (typeof message !== "undefined") { %>
+<div class="alert alert-danger">
+    <%= message %>
+</div>
+<% } %>
+
+  <form id="addProductForm" method="POST" action="/admin/adminAddProduct" enctype="multipart/form-data">
+    <div class="card p-4">
+
+      <div class="mb-3">
+        <label class="form-label">Product Name <span class="required">*</span></label>
+        <input type="text" class="form-control" name="productName" required placeholder="Enter product name">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Description <span class="required">*</span></label>
+        <textarea class="form-control" name="description" required placeholder="Enter product description"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Stock (by Switch Type)</label>
+        <div id="variantContainer">
+          <div class="variant-row">
+            <input type="text" name="variantName[]" value="Red Switch" class="form-control" readonly>
+            <input type="number" name="variantQty[]" class="form-control" min="0" placeholder="Quantity">
+          </div>
+          <div class="variant-row">
+            <input type="text" name="variantName[]" value="Green Switch" class="form-control" readonly>
+            <input type="number" name="variantQty[]" class="form-control" min="0" placeholder="Quantity">
+          </div>
+          <div class="variant-row">
+            <input type="text" name="variantName[]" value="Brown Switch" class="form-control" readonly>
+            <input type="number" name="variantQty[]" class="form-control" min="0" placeholder="Quantity">
+          </div>
+        </div>
+        <button type="button" class="add-variant-btn mt-2" onclick="addVariant()">+ Add Variant</button>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Price (₹) <span class="required">*</span></label>
+        <input type="number" name="price" class="form-control" required placeholder="Enter price" min="0" step="0.01">
+      </div>
+
+      <div class="mb-3">
+  <label class="form-label">Select Category <span class="required">*</span></label>
+  <select class="form-select" name="category" required>
+    <option value="">-- Choose category --</option>
+    <% if (locals.categories && categories.length) { %>
+      <% categories.forEach(c=> { %>
+        <option value="<%=c._id%>"><%=c.name%></option>
+      <% }) %>
+    <% } else { %>
+      <option value="wired">Wired</option>
+      <option value="wireless">Wireless</option>
+      <% } %>
+  </select>
+</div>
+
+      <div class="mb-3">
+        <label class="form-label">Product Images</label>
+        <div class="image-upload-container" onclick="document.getElementById('imageInput').click()">
+          <p>Click or drag & drop to upload images</p>
+          <small class="text-muted">JPG, PNG, WEBP (Max 5 MB each)</small>
+        </div>
+        <input type="file" id="imageInput" multiple accept="image/*" style="display:none;"> 
+        <div class="preview-container"></div>
+      </div>
+
+      <div class="text-end">
+        <button type="button" class="btn btn-secondary" onclick="cancelForm()">Cancel</button>
+        <button type="submit" class="btn-primary">Add Product</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="modal fade" id="cropModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Crop Image</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div style="max-height: 70vh; max-width: 100%; overflow: hidden;">
+            <img id="crop-image" style="max-width:100%;" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="crop-btn" class="btn-primary">Crop & Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Mock functions to prevent errors if they are defined in another file
+function addVariant() {
+    const container = document.getElementById('variantContainer');
+    const newVariant = document.createElement('div');
+    newVariant.className = 'variant-row';
+    newVariant.innerHTML = `
+        <input type="text" name="variantName[]" class="form-control" placeholder="Switch Type">
+        <input type="number" name="variantQty[]" class="form-control" min="0" placeholder="Quantity">
+        <button type="button" class="remove-variant-btn" onclick="this.parentNode.remove()">X</button>
+    `;
+    container.appendChild(newVariant);
+}
+function cancelForm() {
+    console.log('Form cancelled');
+    window.history.back(); // Example action
+}
+// End Mock functions
+
+document.addEventListener('DOMContentLoaded', () => {
+    const imageInput = document.getElementById('imageInput');
+    const previewContainer = document.querySelector('.preview-container');
+    const addProductForm = document.getElementById('addProductForm');
+    const cropModalElement = document.getElementById('cropModal');
+    const cropModal = new bootstrap.Modal(cropModalElement);
+    const cropImage = document.getElementById('crop-image');
+    const cropBtn = document.getElementById('crop-btn');
+
+    let cropper;
+    let currentFileIndex = null;
+    // This array will hold the File objects (original or cropped) for submission
+    let productFiles = [];
+
+    // Helper to re-render the previews
+    const renderPreviews = () => {
+        previewContainer.innerHTML = '';
+        productFiles.forEach((file, index) => {
+            // Use FileReader to get a Data URL for the preview image
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                // Add data-index to associate the DOM element with the file in the array
+                previewItem.dataset.index = index; 
+                previewItem.innerHTML = `
+                    <img src="${e.target.result}" alt="preview">
+                    <div class="image-actions">
+                        <button type="button" class="crop-image" data-index="${index}">Crop</button>
+                        <button type="button" class="remove-image" data-index="${index}">Remove</button>
+                    </div>
+                `;
+                previewContainer.appendChild(previewItem);
+            };
+            // Read the actual File object
+            reader.readAsDataURL(file.file); 
+        });
+    };
+
+    // Upload handler: Adds new files to the productFiles array
+    imageInput.addEventListener('change', (event) => {
+        const newFiles = Array.from(event.target.files);
+        
+        newFiles.forEach((file) => {
+            // Store the file and its name/type for later use
+            productFiles.push({ file: file, originalName: file.name, type: file.type });
+        });
+        
+        // Clear the input value so the same file can be selected again
+        imageInput.value = ''; 
+        renderPreviews();
+    });
+
+    // Action button click (Crop/Remove)
+    previewContainer.addEventListener('click', (e) => {
+        const target = e.target;
+        const index = parseInt(target.dataset.index);
+
+        if (target.classList.contains('crop-image')) {
+            currentFileIndex = index;
+            const fileToCrop = productFiles[index].file;
+
+            // Use FileReader to load the file into the modal's image tag
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                cropImage.src = e.target.result;
+                cropModal.show();
+                
+                // Wait for modal to be shown before initializing Cropper
+                cropModalElement.addEventListener('shown.bs.modal', () => {
+                    if (cropper) cropper.destroy();
+                    cropper = new Cropper(cropImage, {
+                        aspectRatio: 1, // Square crop for typical product images
+                        viewMode: 1, // Restrict the crop box to not exceed the canvas
+                        autoCropArea: 0.9,
+                        responsive: true,
+                        background: false,
+                    });
+                }, { once: true });
+            };
+            reader.readAsDataURL(fileToCrop);
+
+        } else if (target.classList.contains('remove-image')) {
+            // Remove the file from the array and re-render
+            productFiles.splice(index, 1);
+            renderPreviews();
+        }
+    });
+
+    // Crop and save
+    cropBtn.addEventListener('click', () => {
+        if (cropper && currentFileIndex !== null) {
+            const originalFile = productFiles[currentFileIndex];
+
+            const canvas = cropper.getCroppedCanvas({
+                width: 800, // Good size for main product images
+                height: 800,
+            });
+
+            // Convert the canvas data to a Blob (file-like object)
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    // Create a new File object from the blob, using the original name and type
+                    const croppedFile = new File([blob], originalFile.originalName, { 
+                        type: originalFile.type,
+                        lastModified: Date.now()
+                    });
+
+                    // Replace the old file with the new cropped file in the array
+                    productFiles[currentFileIndex].file = croppedFile;
+                    
+                    // Clean up and update UI
+                    cropModal.hide();
+                    if(cropper) cropper.destroy(); // Check before destroy
+                    cropper = null;
+                    currentFileIndex = null;
+                    renderPreviews(); // Re-render previews to show the cropped image
+                } else {
+                    console.error('Failed to convert canvas to blob.');
+                }
+            }, originalFile.type, 0.9); // Use original file type and high quality (0.9)
+        }
+    });
+
+    // Form Submission Handler: Creates a custom FormData object
+    addProductForm.addEventListener('submit', function(e) {
+        e.preventDefault(); 
+
+        // Create a new FormData object to manually append files
+        const customFormData = new FormData(this);
+
+        // Remove the original files input's entry if it somehow made it (it shouldn't)
+        customFormData.delete('images'); 
+        
+        // Append all files from our managed array
+        productFiles.forEach((item) => {
+            // 'images' is the expected name for your server-side file handler (e.g., Multer)
+            customFormData.append('images', item.file, item.originalName); 
+        });
+
+        // --- Send the Form Data (AJAX/Fetch) ---
+        
+        fetch(this.action, {
+            method: this.method,
+            body: customFormData
+        })
+        .then(async response => { 
+            // Read the JSON body whether the response is ok or not
+            const data = await response.json().catch(() => ({ message: 'Server did not return JSON.' }));
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Network response was not ok');
+            }
+            return data;
+        })
+        .then(data => {
+            // SUCCESS
+            console.log('Submission data:', data);
+            alert(data.message || 'Product added successfully!');
+
+            window.location.href = '/admin/adminProduct'; 
+        })
+        .catch(error => {
+            
+            console.error('There was an error submitting the form:', error);
+           
+            alert(`Failed to add product: ${error.message}`);
+        });
+    });
+});
+</script>
+
+<%- include('../partials/admin/footer') %>
+</body>
+</html>

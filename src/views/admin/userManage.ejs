@@ -1,0 +1,416 @@
+<%- include('../partials/admin/header') %>
+
+<style>
+  body {
+    background-color: #f8f9fa;
+    font-family: "Poppins", sans-serif;
+  }
+
+  .page-title-box {
+    margin-top: 20px;
+  }
+
+  .search-container {
+    position: relative;
+    margin-bottom: 20px;
+    max-width: 400px;
+  }
+
+  .search-form {
+    display: flex;
+    align-items: center;
+  }
+
+  .search-input-wrapper {
+    position: relative;
+    flex-grow: 1;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 8px 35px 8px 35px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s;
+    outline: none;
+    height: 38px;
+  }
+
+  .search-input:focus {
+    border-color: #556ee6;
+    box-shadow: 0 0 0 2px rgba(85, 110, 230, 0.1);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  .cancel-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 16px;
+    cursor: pointer;
+    display: none;
+  }
+
+  .search-input:not(:placeholder-shown) ~ .cancel-icon {
+    display: block;
+  }
+
+  .search-button {
+    margin-left: 8px;
+    padding: 8px 15px;
+    background-color: #000;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    height: 38px;
+  }
+
+  .search-button:hover {
+    background-color: #333;
+  }
+
+  .pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 15px 0;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .pagination-info {
+    color: #6c757d;
+    font-size: 14px;
+  }
+
+  .pagination {
+    margin-bottom: 0;
+  }
+
+  .pagination .page-item .page-link {
+    border: 1px solid #dee2e6;
+    color: #495057;
+    padding: 8px 12px;
+    margin: 0 2px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s;
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: #000;
+    border-color: #000;
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #000;
+  }
+
+  .pagination .page-item.disabled .page-link {
+    background-color: #fff;
+    border-color: #dee2e6;
+    color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .pagination .page-item .page-link i {
+    font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    .pagination-container {
+      flex-direction: column;
+      gap: 15px;
+    }
+    .pagination-info {
+      order: 2;
+    }
+  }
+</style>
+
+<body data-sidebar="dark">
+  <div class="main-content">
+    <div class="page-content">
+      <div class="container-fluid">
+
+        <!-- Page Title -->
+        <div class="row">
+          <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+              <h4 class="mb-sm-0 font-size-18">Customers</h4>
+              <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                  <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+                  <li class="breadcrumb-item active">Customers</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <% if (locals.success) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <i class='bx bx-check-circle'></i> <%= success %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% } %>
+
+        <% if (locals.error) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class='bx bx-error-circle'></i> <%= error %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% } %>
+
+        <!-- Search -->
+        <div class="row mb-3">
+          <div class="col-sm-12 col-md-6">
+            <div class="search-container">
+              <form action="/admin/userManage" method="GET" class="search-form" id="searchForm">
+                <div class="search-input-wrapper">
+                  <i class="bx bx-search search-icon"></i>
+                  <input 
+                    type="text" 
+                    class="search-input form-control" 
+                    id="searchInput" 
+                    placeholder="Search users..." 
+                    name="search"
+                    value="<%= locals.search || '' %>" 
+                    autocomplete="off" />
+                  <% if (locals.search && locals.search.trim() !== '') { %>
+                    <i class="bx bx-x cancel-icon" onclick="clearSearch()" style="display: block;"></i>
+                  <% } else { %>
+                    <i class="bx bx-x cancel-icon" onclick="clearSearch()"></i>
+                  <% } %>
+                </div>
+                <button type="submit" class="search-button">Search</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Table -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="user-table table align-middle table-nowrap dt-responsive nowrap w-100" id="customerList-table">
+                    <thead class="table-light">
+                      <tr>
+                        <th>#</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Block/Unblock</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% if (users && users.length > 0) { %>
+                        <% users.forEach((user, index) => { %>
+                          <tr>
+                            <td><%= ((currentPage - 1) * limit) + index + 1 %></td>
+                            <td><%= user.username %></td>
+                            <td><%= user.email %></td>
+                            <td><%= user.phone || '-' %></td>
+                            <td>
+                              <% if (user.status) { %>
+                                <span class="badge bg-success">Active</span>
+                              <% } else { %>
+                                <span class="badge bg-danger">Blocked</span>
+                              <% } %>
+                            </td>
+                            <td>
+                              <% if (user.status) { %>
+                                <button onclick="confirmBlock('<%= user._id %>', '<%= user.username %>', true)" class="btn btn-danger btn-sm waves-effect waves-light">
+                                  Block
+                                </button>
+                              <% } else { %>
+                                <button onclick="confirmBlock('<%= user._id %>', '<%= user.username %>', false)" class="btn btn-success btn-sm waves-effect waves-light">
+                                  Unblock
+                                </button>
+                              <% } %>
+                            </td>
+                          </tr>
+                        <% }) %>
+                      <% } else { %>
+                        <tr>
+                          <td colspan="6" class="text-center text-muted py-4">
+                            <i class='bx bx-user-x' style="font-size: 48px; opacity: 0.3;"></i>
+                            <p class="mt-2"><strong>No users found</strong></p>
+                            <% if (locals.search) { %>
+                              <p>Try adjusting your search criteria</p>
+                            <% } %>
+                          </td>
+                        </tr>
+                      <% } %>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Pagination -->
+                <% if (totalUsers > 0) { %>
+                <div class="pagination-container">
+                  <div class="pagination-info">
+                    Showing <strong><%= ((currentPage - 1) * limit) + 1 %>-<%= Math.min(currentPage * limit, totalUsers) %></strong> 
+                    of <strong><%= totalUsers %></strong> users
+                  </div>
+                  <nav aria-label="User pagination">
+                    <ul class="pagination">
+                      <!-- Previous Button -->
+                      <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                        <a class="page-link" href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + search : '' %>">←</a>
+                      </li>
+
+                      <% 
+                        const totalPages = Math.ceil(totalUsers / limit);
+                        const maxVisiblePages = 5;
+                        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+                        
+                        if (endPage - startPage < maxVisiblePages - 1) {
+                          startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                        }
+                      %>
+
+                      <!-- Page Numbers -->
+                      <% for (let i = startPage; i <= endPage; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                          <a class="page-link" href="?page=<%= i %><%= locals.search ? '&search=' + search : '' %>"><%= i %></a>
+                        </li>
+                      <% } %>
+
+                      <!-- Next Button -->
+                      <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                        <a class="page-link" href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + search : '' %>">→</a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+                <% } %>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <%- include('../partials/admin/footer') %>
+
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      function confirmBlock(userId, username, currentStatus) {
+        const action = currentStatus ? 'Block' : 'Unblock';
+        const confirmColor = currentStatus ? '#dc3545' : '#28a745';
+
+        Swal.fire({
+          title: `${action} this user?`,
+          text: `Are you sure you want to ${action.toLowerCase()} "${username}"?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: confirmColor,
+          cancelButtonColor: "#6c757d",
+          confirmButtonText: `Yes, ${action.toLowerCase()}!`,
+          cancelButtonText: "Cancel"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Show loading
+            Swal.fire({
+              title: 'Processing...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
+            // Send AJAX request to block/unblock user
+            fetch(`/admin/blockUser/${userId}`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  title: action + 'ed!',
+                  text: data.message,
+                  icon: 'success',
+                  timer: 1500,
+                  showConfirmButton: false
+                }).then(() => {
+                  window.location.reload();
+                });
+              } else {
+                Swal.fire('Error!', data.message || 'Something went wrong.', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              Swal.fire('Error!', 'Failed to update user status.', 'error');
+            });
+          }
+        });
+      }
+
+      function clearSearch() {
+        window.location.href = '/admin/userManage';
+      }
+
+      // Auto-hide alerts after 5 seconds
+      document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+          setTimeout(() => {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+          }, 5000);
+        });
+
+        // Show/hide cancel icon based on search input
+        const searchInput = document.getElementById('searchInput');
+        const cancelIcon = document.querySelector('.cancel-icon');
+        
+        if (searchInput && cancelIcon) {
+          searchInput.addEventListener('input', function() {
+            cancelIcon.style.display = this.value.length > 0 ? 'block' : 'none';
+          });
+          
+          // Initial check
+          cancelIcon.style.display = searchInput.value.length > 0 ? 'block' : 'none';
+        }
+      });
+    </script>
+
+  </div>
+</body>
+</html>

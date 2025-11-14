@@ -1,0 +1,285 @@
+<%- include('../partials/user/header') %>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Questrial', sans-serif;
+        background: #f5f5f5;
+        color: #222;
+    }
+
+    .page-header {
+        color: #fff;
+        padding: 40px 0;
+        text-align: center;
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+            url('/images/header-bg.jpg') center/cover no-repeat;
+    }
+
+    .page-header h1 {
+        font-size: 36px;
+        font-weight: 900;
+    }
+
+    /* Layout */
+    .products-section {
+        padding: 50px 0;
+    }
+
+    .products-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 40px;
+    }
+
+    /* Sidebar */
+    .filters-sidebar {
+        background: #fff;
+        padding: 25px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .filter-title {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    /* Search & Price */
+    #searchInput {
+        padding: 8px 12px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        width: 180px;
+    }
+
+    .search-controls {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+
+    .clear-btn {
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        background: white;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .clear-btn:hover {
+        background: #ddd;
+    }
+
+    .price-slider {
+        width: 100%;
+    }
+
+    /* Product Grid */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    .product-card {
+        background: #fff;
+        border-radius: 10px;
+        padding-bottom: 15px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        transition: .3s;
+    }
+
+    .product-card:hover {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .1);
+        transform: translateY(-5px);
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 230px;
+        object-fit: contain;
+        background: #f7f7f7;
+    }
+
+    .product-info {
+        padding: 15px;
+    }
+
+    .product-name {
+        font-size: 17px;
+        margin-bottom: 5px;
+    }
+
+    .product-category {
+        font-size: 13px;
+        color: #666;
+    }
+
+    .product-price {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 10px 0;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-small {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #222;
+        background: white;
+        cursor: pointer;
+        border-radius: 5px;
+        text-transform: lowercase;
+    }
+
+    .btn-small:hover {
+        background: #222;
+        color: white;
+    }
+
+    .btn-primary {
+        background: #222;
+        color: white;
+    }
+
+    /* Pagination */
+    .pagination {
+        margin-top: 40px;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .pagination a {
+        padding: 8px 15px;
+        background: white;
+        border: 1px solid #ccc;
+        text-decoration: none;
+        color: #222;
+        border-radius: 5px;
+    }
+
+    .pagination a.active {
+        background: #222;
+        color: white;
+    }
+</style>
+
+<section class="page-header">
+    <h1>Shop</h1>
+    <p>Explore our product collection</p>
+</section>
+
+<section class="products-section">
+    <div class="container">
+        <div class="products-layout">
+
+            <!-- SIDEBAR -->
+            <aside class="filters-sidebar">
+                <h3 class="filter-title">Search</h3>
+                <div class="search-controls">
+                    <input id="searchInput" type="text" placeholder="Search..."
+                        value="<%= search %>" />
+                    <button class="clear-btn" onclick="clearSearch()">✕</button>
+                </div>
+
+                <h3 class="filter-title" style="margin-top:25px;">Price Range</h3>
+                <input type="range" id="priceRange" min="0" max="<%= maxPriceValue %>"
+                    value="<%= maxPrice %>" class="price-slider" />
+                <p>Max: ₹<span id="maxPriceLabel"><%= maxPrice %></span></p>
+
+                <button class="clear-btn" style="width:100%; margin-top:20px;"
+                    onclick="applyFilters(true)">Clear Filters</button>
+            </aside>
+
+            <!-- PRODUCTS -->
+            <div>
+
+                <div class="product-grid">
+                    <% if (products.length === 0) { %>
+                    <p>No products found</p>
+                    <% } %>
+
+                    <% products.forEach(p => { %>
+                    <div class="product-card">
+
+                        <div class="product-image">
+                            <% if (p.images && p.images.length > 0) { %>
+                                <img src="<%= p.images[0] %>" alt="<%= p.name %>" /> 
+                            <% } else { %>
+                                <img src="/images/default-product.png" alt="No Image" />
+                            <% } %>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">
+                                <%= p.category ? p.category.name : "Uncategorized" %>
+                            </div>
+
+                            <div class="product-name"><%= p.name %></div>
+                            <div class="product-price">₹<%= p.price %></div>
+
+                            <div class="product-actions">
+                                <a href="/singleProduct/<%= p._id %>"
+                                    class="btn-small btn-primary">details</a>
+
+                                <button class="btn-small" disabled>add to cart</button>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+                </div>
+
+                <!-- PAGINATION -->
+                <div class="pagination">
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="/shop?page=<%= i %>&search=<%= search %>&maxPrice=<%= maxPrice %>"
+                        class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                    <% } %>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    const priceSlider = document.getElementById("priceRange");
+    const maxPriceLabel = document.getElementById("maxPriceLabel");
+
+    priceSlider.oninput = function () {
+        maxPriceLabel.textContent = this.value;
+    };
+
+    function applyFilters(reset = false) {
+        const url = new URL(window.location.href);
+
+        if (reset) {
+            url.searchParams.delete("search");
+            url.searchParams.set("maxPrice", "<%= maxPriceValue %>");
+        } else {
+            url.searchParams.set("search", document.getElementById("searchInput").value);
+            url.searchParams.set("maxPrice", priceSlider.value);
+        }
+
+        window.location.href = url.toString();
+    }
+
+    function clearSearch() {
+        document.getElementById("searchInput").value = "";
+        applyFilters();
+    }
+</script>
+
+<%- include('../partials/user/footer') %>

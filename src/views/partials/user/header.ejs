@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'KeyCraft - Premium Mechanical Keyboards' %></title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Questrial|Raleway:700,900" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Questrial', sans-serif;
+            background: #f5f5f5;
+            color: #222;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .header-top {
+            background: #222;
+            color: #fff;
+            padding: 10px 0;
+            font-size: 13px;
+        }
+
+        .header-top .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-contact {
+            display: flex;
+            gap: 30px;
+        }
+
+        .header-contact a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .header-contact a:hover {
+            color: #ccc;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .header-actions a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .header-actions a:hover {
+            color: #ccc;
+        }
+
+        .header-main {
+            padding: 20px 0;
+        }
+
+        .header-main .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 900;
+            font-family: 'Raleway', sans-serif;
+            color: #222;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #666;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            color: #222;
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: lowercase;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #666;
+        }
+
+        .cart-icon {
+            position: relative;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #222;
+            color: #fff;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-contact {
+                display: none;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+    <div class="header-top">
+        <div class="container">
+            <div class="header-contact">
+                <span><b>contact:</b> <a href="tel:+1234567890">+1 (234) 567-890</a></span>
+                <span><b>email:</b> <a href="mailto:info@keycraft.com">info@keycraft.com</a></span>
+            </div>
+            <div class="header-actions">
+
+                <% if (typeof user !== 'undefined' && user) { %>
+                <a href="/cart" class="cart-icon">
+                    <i class="fa fa-shopping-cart"></i>
+                    <span class="cart-badge"><%= typeof cartCount !== 'undefined' ? cartCount : '3' %></span>
+                </a>
+                <a href="/auth/logout" class="btn btn-outline-danger">
+                    <i class="fas fa-sign-out-alt"></i> <b>logout</b>
+                </a>
+                
+                <% } else { %>
+                <a href="/login"><b>login</b></a>
+                <span>or</span>
+                <a href="/register"><b>register</b></a>
+                <% } %>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="header-main">
+        <div class="container">
+            <a href="/" class="logo">key<span>craft</span></a>
+            <nav>
+                <ul>
+                    <li><a href="/home">home</a></li>
+                    <li><a href="/shop">Shop</a></li>
+                    <li><a href="/about">about</a></li>
+                    <li><a href="/contact">contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,879 @@
+<%- include('../partials/user/header') %>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Questrial', sans-serif;
+            background: #f5f5f5;
+            color: #222;
+        }
+
+        .breadcrumb {
+            padding: 20px 0;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .breadcrumb a {
+            color: #666;
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: #222;
+        }
+
+        .breadcrumb span {
+            color: #999;
+            margin: 0 8px;
+        }
+
+        .product-section {
+            padding: 60px 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .product-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .product-images {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .main-image {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-in;
+        }
+
+        .main-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .main-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #222;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 12px;
+            text-transform: uppercase;
+            border-radius: 5px;
+            z-index: 1;
+        }
+
+        .zoom-icon {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #222;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .main-image:hover .zoom-icon {
+            opacity: 1;
+        }
+
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .thumbnail {
+            background: #fff;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .thumbnail:hover {
+            border-color: #222;
+            transform: translateY(-3px);
+        }
+
+        .thumbnail.active {
+            border-color: #222;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 10px;
+        }
+
+        .zoom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoom-modal.active {
+            display: flex;
+        }
+
+        .zoom-modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .zoom-modal img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .zoom-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #222;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .zoom-close:hover {
+            background: #fff;
+            transform: rotate(90deg);
+        }
+
+        .product-info {
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .product-category {
+            color: #666;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .product-title {
+            font-size: 36px;
+            font-family: 'Raleway', sans-serif;
+            font-weight: 900;
+            text-transform: lowercase;
+            margin-bottom: 15px;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stars {
+            color: #ffa500;
+            font-size: 14px;
+        }
+
+        .rating-text {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .product-price {
+            font-size: 42px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 25px;
+        }
+
+        .product-description {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .spec-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .spec-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        .spec-value {
+            font-size: 14px;
+            color: #222;
+            font-weight: 500;
+        }
+
+        .option-group {
+            margin-bottom: 25px;
+        }
+
+        .option-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: lowercase;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .color-option {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid #e5e5e5;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+            border-color: #222;
+        }
+
+        .color-option.active {
+            border-color: #222;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+        }
+
+        .switch-options {
+            display: flex;
+            gap: 15px;
+        }
+
+        .switch-option {
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 10px 20px; /* Adjusted padding */
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: lowercase;
+            font-weight: 600;
+        }
+
+        .switch-option:hover {
+            border-color: #222;
+            transform: translateY(-3px);
+        }
+
+        .switch-option.active {
+            border-color: #222;
+        }
+        
+        /* Removed .switch-option img styles */
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .quantity-controls {
+            display: flex;
+            border: 1px solid #e5e5e5;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .quantity-controls button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+
+        .quantity-controls button:hover {
+            background: #f5f5f5;
+        }
+
+        .quantity-controls input {
+            width: 60px;
+            height: 40px;
+            border: none;
+            border-left: 1px solid #e5e5e5;
+            border-right: 1px solid #e5e5e5;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 18px 30px;
+            border: none;
+            font-size: 14px;
+            text-transform: lowercase;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-family: 'Questrial', sans-serif;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #222;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #222;
+            border: 2px solid #222;
+        }
+
+        .btn-secondary:hover {
+            background: #222;
+            color: #fff;
+        }
+
+        .btn-icon {
+            width: 55px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 25px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .features-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e5e5;
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+
+        .features-list li:before {
+            content: "✓";
+            color: #222;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .product-tabs {
+            margin-top: 60px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #e5e5e5;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            text-transform: lowercase;
+            cursor: pointer;
+            color: #666;
+            font-family: 'Questrial', sans-serif;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab-button:hover {
+            color: #222;
+        }
+
+        .tab-button.active {
+            color: #222;
+            font-weight: 600;
+        }
+
+        .tab-button.active:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #222;
+        }
+
+        .tab-content {
+            display: none;
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 968px) {
+            .product-layout {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .product-images {
+                position: relative;
+                top: 0;
+            }
+
+            .product-title {
+                font-size: 28px;
+            }
+
+            .product-price {
+                font-size: 32px;
+            }
+
+            .specs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-contact {
+                display: none;
+            }
+
+            nav ul {
+                display: none;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+
+            .thumbnail-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .main-image {
+                height: 350px;
+            }
+        }
+    </style>
+
+    <section class="breadcrumb">
+        <div class="container">
+            <a href="/">home</a>
+            <span>/</span>
+            <a href="/keyboards"><%= product.category.name.toLowerCase() %></a>
+            <span>/</span>
+            <span style="color: #222;"><%= product.name.toLowerCase() %></span>
+        </div>
+    </section>
+
+    <section class="product-section">
+        <div class="container">
+            <div class="product-layout">
+                <div class="product-images">
+                    <div class="main-image" onclick="openZoom()">
+                        <% if (product.badge) { %>
+                            <div class="product-badge"><%= product.badge.toLowerCase() %></div>
+                        <% } %>
+                        <img src="<%= product.images[0] %>" alt="<%= product.name %>" id="mainImage">
+                        <div class="zoom-icon">
+                            <i class="fa fa-search-plus"></i>
+                        </div>
+                    </div>
+                    <div class="thumbnail-grid">
+                        <% product.images.forEach((image, index) => { %>
+                            <div class="thumbnail <%= index === 0 ? 'active' : '' %>" onclick="changeImage(this, '<%= image %>')">
+                                <img src="<%= image %>" alt="<%= product.name %> view <%= index + 1 %>">
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <div class="product-info">
+                    <div class="product-category"><%= product.category.name.toLowerCase() %></div>
+                    <h1 class="product-title"><%= product.name.toLowerCase() %></h1>
+                    
+                    <div class="product-rating">
+                        <div class="stars">
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star-half-o"></i>
+                        </div>
+                        <span class="rating-text">4.5 (127 reviews)</span>
+                    </div>
+
+                    <div class="product-price">₹<%= product.price.toFixed(2) %></div>
+
+                    <p class="product-description">
+                        <%= product.description %>
+                    </p>
+
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <div class="spec-label">Layout</div>
+                            <div class="spec-value">65% Compact</div> </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Default Switch</div>
+                            <div class="spec-value"><%= product.variants[0].name %></div> 
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Total Stock</div>
+                            <div class="spec-value"><%= product.totalStock %></div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Category</div>
+                            <div class="spec-value"><%= product.category.name %></div>
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <div class="option-label">color</div>
+                        <div class="color-options">
+                            <div class="color-option active" style="background: #000;" onclick="selectColor(this)"></div>
+                            <div class="color-option" style="background: #fff; border-color: #ccc;" onclick="selectColor(this)"></div>
+                            <div class="color-option" style="background: #4a5568;" onclick="selectColor(this)"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="option-group">
+                        <div class="option-label">variant / switch type</div>
+                        <div class="switch-options">
+                            <% product.variants.forEach((variant, index) => { %>
+                                <div class="switch-option <%= index === 0 ? 'active' : '' %>" onclick="selectSwitch(this, '<%= variant._id %>')" data-variant-id="<%= variant._id %>" data-switch-name="<%= variant.name.toLowerCase() %>">
+                                    <%= variant.name.toLowerCase() %>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <div class="option-label">quantity</div>
+                        <div class="quantity-selector">
+                            <div class="quantity-controls">
+                                <button onclick="decreaseQty()">−</button>
+                                <input type="number" id="quantity" value="1" min="1" max="<%= product.totalStock %>">
+                                <button onclick="increaseQty('<%= product.totalStock %>')">+</button>
+                            </div>
+                            <span style="color: #27ae60; font-size: 13px;">
+                                <% if (product.totalStock > 0) { %>
+                                    ✓ In Stock (<span id="currentStock"><%= product.totalStock %></span> remaining)
+                                <% } else { %>
+                                    Out of Stock
+                                <% } %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="product-actions">
+                        <button class="btn btn-primary" onclick="addToCart('<%= product._id %>', document.querySelector('.switch-option.active').dataset.variantId, document.getElementById('quantity').value)">
+                            <i class="fa fa-shopping-cart"></i> add to cart
+                        </button>
+                        <button class="btn btn-secondary">
+                            buy now
+                        </button>
+                        <button class="btn btn-secondary btn-icon">
+                            <i class="fa fa-heart-o"></i>
+                        </button>
+                    </div>
+
+                    <ul class="features-list">
+                        <li>Hot-swappable switches - no soldering required</li>
+                        <li>QMK/VIA support for full customization</li>
+                        <li>Up to 240 hours battery life</li>
+                        <li>Premium aluminum CNC frame</li>
+                        <li>Double-shot PBT keycaps included</li>
+                        <li>Free shipping on orders over ₹50</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="product-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="switchTab(0)">description</button>
+                    <button class="tab-button" onclick="switchTab(1)">specifications</button>
+                    <button class="tab-button" onclick="switchTab(2)">reviews</button>
+                </div>
+
+                <div class="tab-content active" id="tab-0">
+                    <h3 style="margin-bottom: 20px; text-transform: lowercase;">product description</h3>
+                    <p style="line-height: 1.8; color: #666; margin-bottom: 15px;">
+                        <%= product.description %>
+                    </p>
+                    <p style="line-height: 1.8; color: #666; margin-bottom: 15px;">
+                        The <%= product.name %> combines a premium build with a compact design. It features multiple switch variants to customize your typing feel.
+                    </p>
+                    <p style="line-height: 1.8; color: #666;">
+                        With a durable build and a high total stock of <%= product.totalStock %>, this product is ready to ship immediately.
+                    </p>
+                </div>
+
+                <div class="tab-content" id="tab-1">
+                    <h3 style="margin-bottom: 20px; text-transform: lowercase;">technical specifications</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <div>
+                            <strong>Category:</strong> <%= product.category.name %><br><br>
+                            <strong>Price:</strong> ₹<%= product.price.toFixed(2) %><br><br>
+                            <strong>Status:</strong> <%= product.status ? 'Active' : 'Inactive' %><br><br>
+                            <strong>Created At:</strong> <%= new Date(product.createdAt).toLocaleDateString() %><br><br>
+                            <strong>Total Variants:</strong> <%= product.variants.length %><br><br>
+                        </div>
+                        <div>
+                            <strong>Total Stock:</strong> <%= product.totalStock %><br><br>
+                            <strong>Variant Switches:</strong> 
+                            <% product.variants.forEach(variant => { %>
+                                <%= variant.name %> (<%= variant.quantity %> in stock), 
+                            <% }) %>
+                            <br><br>
+                            <strong>Case Material:</strong> CNC Aluminum (Static Example)<br><br>
+                            <strong>Connectivity:</strong> Wireless & USB-C (Static Example)<br><br>
+                            <strong>Compatibility:</strong> Windows, Mac, Linux (Static Example)<br><br>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="tab-2">
+                    <h3 style="margin-bottom: 20px; text-transform: lowercase;">customer reviews</h3>
+                    <div style="margin-bottom: 20px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <strong>Amazing keyboard!</strong>
+                            <span style="color: #ffa500;">★★★★★</span>
+                        </div>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">
+                            Best mechanical keyboard I've ever owned. The build quality is exceptional and the hot-swap feature is incredibly convenient.
+                        </p>
+                        <small style="color: #999;">- John D., 2 weeks ago</small>
+                    </div>
+                    <div style="padding: 20px; background: #f5f5f5; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <strong>Great value for money</strong>
+                            <span style="color: #ffa500;">★★★★☆</span>
+                        </div>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">
+                            Excellent keyboard with tons of features. Only minor issue is the keycaps feel a bit light, but overall fantastic purchase.
+                        </p>
+                        <small style="color: #999;">- Sarah M., 1 month ago</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="zoom-modal" id="zoomModal" onclick="closeZoom()">
+        <button class="zoom-close">&times;</button>
+        <div class="zoom-modal-content">
+            <img src="" alt="Zoomed Image" id="zoomedImage">
+        </div>
+    </div>
+
+    <%- include('../partials/user/footer') %>
+
+    <script>
+        // Store product variants data in JS for quick lookup
+        const productVariants = '<%- JSON.stringify(product.variants) %>';
+
+        function changeImage(thumbnail, src) {
+            document.getElementById('mainImage').src = src;
+            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+            thumbnail.classList.add('active');
+        }
+
+        function openZoom() {
+            const mainImage = document.getElementById('mainImage').src;
+            document.getElementById('zoomedImage').src = mainImage;
+            document.getElementById('zoomModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeZoom() {
+            document.getElementById('zoomModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function selectColor(element) {
+            document.querySelectorAll('.color-option').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function selectSwitch(element, variantId) {
+            document.querySelectorAll('.switch-option').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            // Find selected variant and update max quantity/stock info
+            const selectedVariant = productVariants.find(v => v._id === variantId);
+            const qtyInput = document.getElementById('quantity');
+            const currentStockSpan = document.getElementById('currentStock');
+            
+            if (selectedVariant) {
+                qtyInput.max = selectedVariant.quantity;
+                currentStockSpan.textContent = selectedVariant.quantity;
+                // Ensure quantity doesn't exceed new max stock
+                if (parseInt(qtyInput.value) > selectedVariant.quantity) {
+                    qtyInput.value = selectedVariant.quantity > 0 ? 1 : 0;
+                }
+            }
+        }
+        
+        // Initialize active switch and stock info on load (first variant is default active)
+        window.onload = function() {
+            const defaultVariant = productVariants[0];
+            if (defaultVariant) {
+                document.getElementById('quantity').max = defaultVariant.quantity;
+                const currentStockSpan = document.getElementById('currentStock');
+                if(currentStockSpan) currentStockSpan.textContent = defaultVariant.quantity;
+            }
+        }
+
+        function decreaseQty() {
+            const qtyInput = document.getElementById('quantity');
+            let qty = parseInt(qtyInput.value);
+            if (qty > 1) {
+                qtyInput.value = qty - 1;
+            }
+        }
+
+        function increaseQty(maxStock) {
+            const qtyInput = document.getElementById('quantity');
+            let qty = parseInt(qtyInput.value);
+            let max = parseInt(qtyInput.max) || maxStock; // Use current max from attribute or total stock as fallback
+            
+            if (qty < max) {
+                qtyInput.value = qty + 1;
+            }
+        }
+
+        function switchTab(index) {
+            document.querySelectorAll('.tab-button').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.tab-content').forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+        }
+
+        function addToCart(productId, variantId, quantity) {
+            console.log(`Adding to cart: Product ID: ${productId}, Variant ID: ${variantId}, Quantity: ${quantity}`);
+            // Implement your actual AJAX/fetch request here to add the item to the cart
+            alert(`Added ${quantity} of ${document.querySelector('.switch-option.active').dataset.switchName} (Variant ID: ${variantId}) to cart!`);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeZoom();
+            }
+        });
+    </script>

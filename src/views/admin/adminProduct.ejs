@@ -1,0 +1,628 @@
+<%- include('../partials/admin/header') %>
+ 
+<style>
+  /* Base Styles */
+  body {
+    background-color: #f8f9fa;
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+  }
+
+  .page-title-box {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    border: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  /* --- Search Bar Styles (Copied from Category Page) --- */
+  .search-container {
+    position: relative;
+    margin-bottom: 20px;
+    max-width: 400px;
+  }
+
+  .search-form {
+    display: flex;
+    align-items: center;
+  }
+
+  .search-input-wrapper {
+    position: relative;
+    flex-grow: 1;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 8px 35px 8px 35px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s;
+    outline: none;
+    height: 38px;
+  }
+
+  .search-input:focus {
+    border-color: #556ee6;
+    box-shadow: 0 0 0 2px rgba(85, 110, 230, 0.1);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  .cancel-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 16px;
+    cursor: pointer;
+    display: none;
+  }
+
+  /* Show cancel icon only when input has value (using JavaScript now) */
+  .search-button {
+    margin-left: 8px;
+    padding: 8px 15px;
+    background-color: #000;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    height: 38px;
+  }
+  .cancel-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 16px;
+    cursor: pointer;
+    display: none;
+  }
+
+  .search-input:not(:placeholder-shown) ~ .cancel-icon {
+    display: block;
+  }
+
+  .search-button:hover {
+    background-color: #333;
+  }
+
+  /* --- Add Product Button Style --- */
+  .add-product-btn {
+    background-color: #000;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .add-product-btn:hover {
+    background-color: #333;
+  }
+
+  /* --- Table Styles --- */
+  .user-table thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px;
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  .user-table tbody td {
+    padding: 12px;
+    vertical-align: middle;
+    font-size: 14px;
+  }
+  
+  .user-table tbody tr:hover { 
+    background-color: #f8f9fa; 
+  }
+  
+  .product-image { 
+    width: 60px; 
+    height: 60px; 
+    object-fit: cover; 
+    border-radius: 4px;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+  }
+
+  .product-name {
+    font-weight: 500;
+    color: #000;
+    display: block;
+  }
+
+  .product-desc {
+    font-size: 12px;
+    color: #6c757d;
+  }
+
+  /* --- Status and Action Button Styles --- */
+  .badge { 
+    padding: 6px 10px; 
+    border-radius: 4px; 
+    font-weight: 500;
+    font-size: 12px;
+  }
+  .badge-stock-high { background-color: #d4edda; color: #155724; }
+  .badge-stock-low { background-color: #fff3cd; color: #856404; }
+  .badge-stock-out { background-color: #f8d7da; color: #721c24; }
+
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .status-active {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .status-blocked {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  .action-icons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .edit-btn {
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+    background-color: #ffc107; 
+    color: #000;
+  }
+
+  .edit-btn:hover {
+    background-color: #e0a800;
+  }
+
+  .block-btn, .unblock-btn {
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+  }
+
+  .block-btn {
+    background-color: #dc3545;
+    color: #fff;
+  }
+
+  .block-btn:hover {
+    background-color: #b02a37;
+  }
+
+  .unblock-btn {
+    background-color: #28a745;
+    color: #fff;
+  }
+
+  .unblock-btn:hover {
+    background-color: #218838;
+  }
+
+  .soft-deleted-row {
+    opacity: 0.7;
+    background-color: #f8d7da20;
+  }
+
+  .pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 15px 0;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .pagination-info {
+    color: #6c757d;
+    font-size: 14px;
+  }
+
+  .pagination {
+    margin-bottom: 0;
+  }
+
+  .pagination .page-item .page-link {
+    border: 1px solid #dee2e6;
+    color: #495057;
+    padding: 8px 12px;
+    margin: 0 2px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s;
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: #000;
+    border-color: #000;
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #000;
+  }
+
+  
+  /* No Data Styling */
+  .no-data {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+  }
+
+  .no-data i {
+    font-size: 48px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+  }
+
+</style>
+
+<body>
+  <div class="container-fluid">
+    
+    <div class="row">
+      <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+          <h4 class="mb-sm-0 font-size-18">Products</h4>
+          <div class="page-title-right">
+            <ol class="breadcrumb m-0">
+              <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
+              <li class="breadcrumb-item active">Products</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-sm-12 col-md-6">
+        <div class="search-container">
+
+          <form action="/admin/adminProduct" method="GET" class="search-form" id="searchForm">
+            <div class="search-input-wrapper">
+              <i class="bx bx-search search-icon"></i>
+              <input 
+                type="text" 
+                class="search-input form-control" 
+                id="searchInput" 
+                placeholder="Search Products..." 
+                name="search"
+                value="<%= locals.search || '' %>" />
+              <i class="bx bx-x cancel-icon" onclick="clearSearch()"></i>
+            </div>
+            <button type="submit" class="search-button">Search</button>
+          </form>
+          
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-6 text-end">
+        <a href="/admin/adminAddProduct" style="text-decoration: none;">
+          <button class="add-product-btn">
+            <i class='bx bx-plus'></i> Add New Product
+          </button>
+        </a>
+      </div>
+    </div>
+
+    <% if (locals.success) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class='bx bx-check-circle'></i> <%= success %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+
+    <% if (locals.error) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class='bx bx-error-circle'></i> <%= error %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <% if (locals.products && products.length > 0) { %>
+              <div class="table-responsive">
+                <table class="user-table table align-middle table-nowrap dt-responsive nowrap w-100" id="productTable">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 5%;">#</th>
+                      <th style="width: 10%;">Image</th>
+                      <th style="width: 25%;">Name</th>
+                      <th style="width: 15%;">Category</th>
+                      <th style="width: 10%;">Price</th>
+                      <th style="width: 10%;">Stock</th>
+                      <th style="width: 15%;">Status</th>
+                      <th style="width: 10%;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% products.forEach((product, index) => { %>
+                      <tr class="<%= !product.status ? 'soft-deleted-row' : '' %>">
+                        <td><%= index + 1 %></td> 
+                        <td>
+                          <% if (product.images && product.images.length > 0) { %>
+                            <img src="<%= product.images[0] %>" alt="<%= product.name %>" class="product-image">
+                          <% } else { %>
+                            <div class="product-image">
+                              <i class='bx bx-image-alt' ></i>
+                            </div>
+                          <% } %>
+                        </td>
+                        <td>
+                          <span class="product-name"><%= product.name %></span>
+                          <span class="product-desc"><%= product.description.substring(0, 50) %>...</span>
+                        </td>
+                        <td>
+                          <% if (product.category && product.category.name) { %>
+                            <%= product.category.name %>
+                          <% } else { %>
+                            <span class="text-muted">N/A</span>
+                          <% } %>
+                        </td>
+                        <td>
+                          <strong>₹<%= product.price.toLocaleString('en-IN') %></strong>
+                        </td>
+                        <td>
+                          <% 
+                            let stockBadgeClass = '';
+                            if (product.totalStock > 50) {
+                              stockBadgeClass = 'badge-stock-high';
+                            } else if (product.totalStock > 0) {
+                              stockBadgeClass = 'badge-stock-low';
+                            } else {
+                              stockBadgeClass = 'badge-stock-out';
+                            }
+                          %>
+                          <span class="badge <%= stockBadgeClass %>">
+                            <%= product.totalStock > 0 ? product.totalStock : 'Out of Stock' %>
+                          </span>
+                        </td>
+                        <td>
+                          <span class="status-badge <%= product.status ? 'status-active' : 'status-blocked' %>">
+                            <%= product.status ? 'Active' : 'Blocked' %>
+                          </span>
+                        </td>
+                        <td>
+                          <div class="action-icons">
+                            <button class="btn btn-sm edit-btn" title="Edit" 
+                                    onclick="editProduct('<%= product._id %>')">
+                              <i class="fas fa-edit"></i>
+                            </button>
+                            
+                            <% if (!product.status) { %>
+                              <button class="btn btn-sm unblock-btn" title="Unblock"
+                                      onclick="toggleStatus('<%= product._id %>', '<%= product.name %>', '<%= product.status %>')">
+                                <i class="fas fa-check"></i>
+                              </button>
+                            <% } else { %>
+                              <button class="btn btn-sm block-btn" title="Block"
+                                      onclick="toggleStatus('<%= product._id %>', '<%= product.name %>', '<%= product.status %>')">
+                                <i class="fas fa-ban"></i>
+                              </button>
+                            <% } %>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <div class="no-data">
+                <i class='bx bx-box'></i>
+                <p><strong>No products found</strong></p>
+                <% if (locals.search) { %>
+                  <p>Try adjusting your search criteria</p>
+                <% } else { %>
+                  <p>Start by adding your first product</p>
+                  <a href="/admin/adminAddProduct" class="btn add-product-btn mt-3">Add Product</a>
+                <% } %>
+              </div>
+            <% } %>
+
+            <!-- Pagination -->
+            <% if (totalProducts > 0) { %>
+              <div class="pagination-container">
+                <div class="pagination-info">
+                  Showing <strong><%= ((currentPage - 1) * limit) + 1 %>-<%= Math.min(currentPage * limit, totalProducts) %></strong> 
+                  of <strong><%= totalProducts %></strong> products
+                </div>
+                <nav aria-label="Product pagination">
+                  <ul class="pagination">
+                    <!-- Previous Button -->
+                    <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                      <a class="page-link" href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + search : '' %>">←</a>
+                    </li>
+
+                    <% 
+                      const totalPages = Math.ceil(totalProducts / limit);
+                      const maxVisiblePages = 5;
+                      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+                      
+                      if (endPage - startPage < maxVisiblePages - 1) {
+                        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                      }
+                    %>
+
+                    <!-- Page Numbers -->
+                    <% for (let i = startPage; i <= endPage; i++) { %>
+                      <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %><%= locals.search ? '&search=' + search : '' %>"><%= i %></a>
+                      </li>
+                    <% } %>
+
+                    <!-- Next Button -->
+                    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                      <a class="page-link" href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + search : '' %>">→</a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            <% } %>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/admin/footer') %>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <script>
+    // --- Utility Functions ---
+    
+    function clearSearch() {
+      window.location.href = '/admin/adminProduct';
+      console.log("je")
+    }
+
+    function editProduct(id) {
+      window.location.href = `/admin/editProduct/${id}`;
+    }
+
+    // --- SweetAlert Status Toggle Function (Modified for Products) ---
+    function toggleStatus(productId, productName, currentStatus) {
+      // EJS passes status as a string 'true' or 'false'
+      const isCurrentlyActive = currentStatus === 'true'; 
+      const action = isCurrentlyActive ? 'Block' : 'Unblock';
+      const confirmColor = isCurrentlyActive ? '#dc3545' : '#28a745';
+      const successMessage = isCurrentlyActive 
+        ? 'Product has been blocked.' 
+        : 'Product has been unblocked.';
+
+      Swal.fire({
+        title: `${action} this product?`,
+        text: `Are you sure you want to ${action.toLowerCase()} "${productName}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: confirmColor,
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: `Yes, ${action.toLowerCase()} it!`,
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Show loading
+          Swal.fire({
+            title: 'Processing...',
+            text: 'Please wait',
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+            }
+          });
+
+          // Redirect or send AJAX request to toggle product status
+          // You must have a route defined for this URL on the server-side
+          fetch(`/admin/toggleProductStatus/${productId}`, { 
+            method: 'PATCH', // Using PATCH is standard for status updates
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                title: action + 'ed!',
+                text: successMessage,
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+              }).then(() => {
+                window.location.reload();
+              });
+            } else {
+              Swal.fire('Error!', data.message || 'Something went wrong.', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error!', 'Failed to update product status.', 'error');
+          });
+        }
+      });
+    }
+
+    // --- DOMContentLoaded for dynamic elements and alerts ---
+    document.addEventListener('DOMContentLoaded', function() {
+      // Auto-hide alerts after 5 seconds
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        setTimeout(() => {
+          const bsAlert = new bootstrap.Alert(alert);
+          bsAlert.close();
+        }, 5000);
+      });
+
+      // Show/hide cancel icon based on search input
+      const searchInput = document.getElementById('productSearchInput');
+      const cancelIcon = document.getElementById('clearSearchButton');
+      
+      if (searchInput && cancelIcon) {
+        // Function to update the visibility of the clear icon
+        const updateCancelIcon = () => {
+          cancelIcon.style.display = searchInput.value.length > 0 ? 'block' : 'none';
+        };
+
+        searchInput.addEventListener('input', updateCancelIcon);
+        
+        // Initial check on page load if a search term is present
+        updateCancelIcon();
+      }
+    });
+  </script>
+</body>
+</html>
