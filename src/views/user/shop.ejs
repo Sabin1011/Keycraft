@@ -81,6 +81,40 @@
         width: 100%;
     }
 
+    /* Category List Style */
+    .category-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .category-list li {
+        margin-bottom: 8px;
+    }
+
+    .category-link {
+        display: block;
+        padding: 8px 12px;
+        text-decoration: none;
+        color: #666;
+        font-size: 14px;
+        border-radius: 5px;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        text-transform: lowercase;
+    }
+
+    .category-link:hover {
+        color: #222;
+        background: #f7f7f7;
+    }
+
+    .category-link.active-cat {
+        color: #fff;
+        background: #222;
+        border-color: #222;
+        font-weight: 600;
+    }
+
     /* Product Grid */
     .product-grid {
         display: grid;
@@ -186,14 +220,31 @@
     <div class="container">
         <div class="products-layout">
 
-            <!-- SIDEBAR -->
             <aside class="filters-sidebar">
+
                 <h3 class="filter-title">Search</h3>
                 <div class="search-controls">
                     <input id="searchInput" type="text" placeholder="Search..."
-                        value="<%= search %>" />
+                        value="<%= search %>" onkeyup="if(event.key === 'Enter') applyFilters()" />
                     <button class="clear-btn" onclick="clearSearch()">✕</button>
                 </div>
+
+                <h3 class="filter-title" style="margin-top:25px;">Categories</h3>
+                <ul class="category-list">
+                    <li>
+                        <a href="#" class="category-link <%= activeCategory === '' ? 'active-cat' : '' %>"
+                           onclick="event.preventDefault(); applyCategoryFilter('')">all products</a>
+                    </li>
+                    <% categories.forEach(cat => { %>
+                    <li>
+                        <a href="#" class="category-link <%= activeCategory === cat._id.toString() ? 'active-cat' : '' %>"
+                           onclick="event.preventDefault(); applyCategoryFilter('<%= cat._id %>')">
+                            <%= cat.name.toLowerCase() %>
+                        </a>
+                    </li>
+                    <% }) %>
+                </ul>
+
 
                 <h3 class="filter-title" style="margin-top:25px;">Price Range</h3>
                 <input type="range" id="priceRange" min="0" max="<%= maxPriceValue %>"
@@ -201,15 +252,14 @@
                 <p>Max: ₹<span id="maxPriceLabel"><%= maxPrice %></span></p>
 
                 <button class="clear-btn" style="width:100%; margin-top:20px;"
-                    onclick="applyFilters(true)">Clear Filters</button>
+                    onclick="applyFilters(true)">Clear All Filters</button>
             </aside>
 
-            <!-- PRODUCTS -->
             <div>
 
                 <div class="product-grid">
                     <% if (products.length === 0) { %>
-                    <p>No products found</p>
+                    <p style="grid-column: 1 / -1; text-align: center; color: #888; font-size: 1.2em;">No products found</p>
                     <% } %>
 
                     <% products.forEach(p => { %>
@@ -222,13 +272,14 @@
                                 <img src="/images/default-product.png" alt="No Image" />
                             <% } %>
                         </div>
+
                         <div class="product-info">
                             <div class="product-category">
                                 <%= p.category ? p.category.name : "Uncategorized" %>
                             </div>
 
                             <div class="product-name"><%= p.name %></div>
-                            <div class="product-price">₹<%= p.price %></div>
+                            <div class="product-price">₹<%= p.price.toFixed(2) %></div>
 
                             <div class="product-actions">
                                 <a href="/singleProduct/<%= p._id %>"
@@ -241,10 +292,9 @@
                     <% }) %>
                 </div>
 
-                <!-- PAGINATION -->
                 <div class="pagination">
                     <% for (let i = 1; i <= totalPages; i++) { %>
-                    <a href="/shop?page=<%= i %>&search=<%= search %>&maxPrice=<%= maxPrice %>"
+                    <a href="/shop?page=<%= i %>&search=<%= search %>&maxPrice=<%= maxPrice %>&category=<%= activeCategory %>"
                         class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
                     <% } %>
                 </div>
@@ -257,27 +307,72 @@
 <script>
     const priceSlider = document.getElementById("priceRange");
     const maxPriceLabel = document.getElementById("maxPriceLabel");
+    const searchInput = document.getElementById("searchInput");
+
+    // Initial update of max price label to show current value
+    maxPriceLabel.textContent = priceSlider.value;
 
     priceSlider.oninput = function () {
         maxPriceLabel.textContent = this.value;
+        // Trigger filter on price range change
+        applyFilters();
     };
 
+    /**
+     * Applies all filters by constructing and redirecting to a new URL.
+     * @param {boolean} reset If true, clears search and sets max price/category to default.
+     */
     function applyFilters(reset = false) {
         const url = new URL(window.location.href);
 
+        // Always reset the page to 1 when filters change
+        url.searchParams.set("page", 1);
+
+        // Handle Clear All Filters
         if (reset) {
             url.searchParams.delete("search");
             url.searchParams.set("maxPrice", "<%= maxPriceValue %>");
-        } else {
-            url.searchParams.set("search", document.getElementById("searchInput").value);
-            url.searchParams.set("maxPrice", priceSlider.value);
+            url.searchParams.delete("category");
+            window.location.href = url.toString();
+            return;
+        }
+
+        // Apply current Search and Price values
+        url.searchParams.set("search", searchInput.value);
+        url.searchParams.set("maxPrice", priceSlider.value);
+
+        // Preserve the current category filter if one is active
+        const currentCategory = url.searchParams.get("category");
+        if (!currentCategory) {
+            url.searchParams.delete("category");
         }
 
         window.location.href = url.toString();
     }
 
+    /**
+     * Handles category filtering by setting the category query parameter.
+     * @param {string} categoryId The ID of the category to filter by (empty string for 'All').
+     */
+    function applyCategoryFilter(categoryId) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("page", 1); // Reset to page 1
+
+        if (categoryId) {
+            url.searchParams.set("category", categoryId);
+        } else {
+            url.searchParams.delete("category");
+        }
+
+        // Preserve current search and price filters
+        url.searchParams.set("search", searchInput.value);
+        url.searchParams.set("maxPrice", priceSlider.value);
+
+        window.location.href = url.toString();
+    }
+
     function clearSearch() {
-        document.getElementById("searchInput").value = "";
+        searchInput.value = "";
         applyFilters();
     }
 </script>

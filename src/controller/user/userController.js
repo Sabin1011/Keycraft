@@ -1,5 +1,7 @@
 const User = require("../../models/userSchema");
-const Product = require("../../models/productSchema")
+const Product = require("../../models/productSchema");
+const Category = require("../../models/categorySchema");
+const mongoose = require('mongoose')
 
 const bcrypt = require("bcrypt");
 
@@ -55,7 +57,7 @@ const loadSingleProduct = async (req, res) => {
 };
 
 
-// SHOP PAGE
+
 const loadShop = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -63,22 +65,39 @@ const loadShop = async (req, res) => {
 
         const search = req.query.search || "";
         const maxPrice = req.query.maxPrice || 999999;
+        const categoryId = req.query.category || ""; 
 
-        const filter = {
+        let filter = {
             status: true,
             price: { $lte: maxPrice },
-            name: { $regex: search, $options: "i" }
         };
 
+        // Add search filter (by name)
+        if (search) {
+            filter.name = { $regex: search, $options: "i" };
+        }
+        
+        // NEW: Add category filter
+        if (categoryId && mongoose.Types.ObjectId.isValid(categoryId)) {
+            filter.category = categoryId;
+        }
+
+
+        // 1. Fetch filtered and paginated products
         const products = await Product.find(filter)
             .populate("category", "name")
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();
 
+        // 2. Count total products for pagination
         const totalProducts = await Product.countDocuments(filter);
         const totalPages = Math.ceil(totalProducts / limit);
 
+        // 3. Get all active categories for the sidebar
+        const categories = await Category.find({ status: true }).lean();
+
+        // 4. Get the maximum price for the slider (unchanged)
         const maxProductPrice = await Product.findOne({ status: true })
             .sort({ price: -1 })
             .select("price")
@@ -86,18 +105,22 @@ const loadShop = async (req, res) => {
 
         res.render("shop", {
             products,
+            categories, // NEW: Pass categories to the EJS
             totalPages,
             currentPage: page,
             search,
             maxPrice,
+            activeCategory: categoryId, // NEW: Pass active category ID
             maxPriceValue: maxProductPrice ? maxProductPrice.price : 0
         });
+
     } catch (err) {
         console.log("Error loading shop:", err);
         res.status(500).send("Error loading shop page");
     }
 };
 
+// module.exports = { loadShop, ... }
 
 
 
