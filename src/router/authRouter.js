@@ -12,19 +12,23 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "/login"}),(req, res)=>{
-      req.session.userId = req.user._id;
-      res.redirect("/home")
-    }
+    failureRedirect: "/login",
+  }),
+  (req, res) => {
+    req.session.userId = req.user._id;
+    res.redirect("/home");
+  }
 );
 
 // Logout
 router.get("/logout", (req, res, next) => {
-  req.logout(err => {
+  req.logout((err) => {
     if (err) {
       console.error("Logout error:", err);
       // If there’s a problem, render your home page
-      return res.render("home", { message: "Logout failed. Please try again." });
+      return res.render("home", {
+        message: "Logout failed. Please try again.",
+      });
     }
 
     // Destroy session and redirect to login
@@ -33,7 +37,5 @@ router.get("/logout", (req, res, next) => {
     });
   });
 });
-
-
 
 module.exports = router;
