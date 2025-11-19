@@ -10,30 +10,30 @@ const Product = require('../models/productSchema');
 const category = require('../models/categorySchema');
 const Users = require('../models/userSchema');
 
+const auth=require("../middleware/auth")
 
 
-
-router.get("/login", adminController.loadLogin);
+router.get("/login",auth.adminLogoutCheck,adminController.loadLogin);
 router.post("/adminlogin", adminController.adminlogin);
 
-router.get("/category", categoryController.loadCategory);
+router.get("/category",auth.ifLoggedAdmin,categoryController.loadCategory);
 
 
-router.get("/addCategory", categoryController.loadAddCategory);
+router.get("/addCategory",auth.ifLoggedAdmin, categoryController.loadAddCategory);
 router.post('/addcategory', categoryController.addCategory);
 
-router.get("/editCategory/:id", categoryController.loadEditCategory);
+router.get("/editCategory/:id",auth.ifLoggedAdmin,categoryController.loadEditCategory);
 
 router.post("/updateCategory/:id", categoryController.updateCategory);
 
 router.patch("/blockCategory/:id", categoryController.blockCategory);
 
-router.get("/userManage", userManageController.loadUserManage);
+router.get("/userManage",auth.ifLoggedAdmin, userManageController.loadUserManage);
 
 router.patch("/blockUser/:id", userManageController.blockUser);
 
-router.get("/adminProduct", productController.loadAdminProduct);
-router.get("/adminAddProduct", productController.loadAddProduct);
+router.get("/adminProduct",auth.ifLoggedAdmin, productController.loadAdminProduct);
+router.get("/adminAddProduct", auth.ifLoggedAdmin,productController.loadAddProduct);
 
 
 router.post("/adminAddProduct", upload.array("images",4),productController.AddProduct);

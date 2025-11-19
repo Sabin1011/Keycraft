@@ -1,15 +1,12 @@
+const User = require("../models/userSchema");
+
+
 
 // Middleware for protecting user routes
 
-const userAuth = (req, res, next)=>{
-    if(req.session && req.session.user) {
-        next();
-    } else {
-        res.redirect("/login")
-    }
-};
 
-const ifLogged = async (req, res, next) => {
+
+const isLogged = async (req, res, next) => {
     try {
       if (req.session && req.session.userId) {
         return res.redirect("/home");
@@ -21,10 +18,55 @@ const ifLogged = async (req, res, next) => {
     }
   };
 
+const ifLoggedAdmin = (req, res, next) => {
+  try {
+    if (req.session && req.session.admin) {
+      return next();  // return is required
+    }
 
-  const ifLogout = async(req,res,next)=>{
+    return res.redirect("/admin/login");
+
+  } catch (error) {
+    console.error(error);
+    return res.redirect("/admin/login");
+  }
+};
+
+// If admin is already logged in, prevent opening login page
+const adminLogoutCheck = (req, res, next) => {
+  try {
+    if (req.session.admin) {
+      return res.redirect("/admin/category"); // redirect to admin home
+    }
+    next(); // proceed to login page
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+module.exports = adminLogoutCheck;
+
+
+
+
+  const isLogout = async(req,res,next)=>{
     try {
       if(req.session.userId){
+        const userId = req.session.userId;
+        const user = await User.findOne({_id: userId, status:true})
+
+        if(!user){
+          req.session.destroy((err) => {
+            if (err) {
+              console.error("Error destroying session:", err);
+              return res.status(500).send("Error logging out");
+            };
+          });
+           return res.redirect("/login")
+        };
+
+            
         return next()
       }else{
         res.redirect("/login")
@@ -58,4 +100,4 @@ isAuthenticated = (req, res, next) => {
 };
 
 
-module.exports = {userAuth, adminAuth, isAuthenticated,ifLogged,ifLogout }
+module.exports = { adminAuth, isAuthenticated,isLogged,isLogout,ifLoggedAdmin,adminLogoutCheck }

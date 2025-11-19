@@ -234,6 +234,10 @@
           placeholder="____"
         />
 
+        <% if(error){ %> 
+              <p style="color: #e74c3c; font-size: 14px; margin-top: 14px;"><%= error %></p>
+        <% } %>
+
         <div class="otp-timer" id="timerDisplay">
           <i class="fa fa-clock-o"></i>
           <span>code expires in <span class="timer-count" id="timer">05:00</span></span>

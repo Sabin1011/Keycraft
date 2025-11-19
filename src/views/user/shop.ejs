@@ -256,6 +256,14 @@
             </aside>
 
             <div>
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                    <select id="sortSelect" onchange="applyFilters()">
+                        <option value="a-z" <%= activeSort === 'a-z' ? 'selected' : '' %>>Sort by: Name A-Z</option>
+                        <option value="z-a" <%= activeSort === 'z-a' ? 'selected' : '' %>>Sort by: Name Z-A</option>
+                        <option value="low-high" <%= activeSort === 'low-high' ? 'selected' : '' %>>Sort by: Price Low-High</option>
+                        <option value="high-low" <%= activeSort === 'high-low' ? 'selected' : '' %>>Sort by: Price High-Low</option>
+                    </select>
+                </div>
 
                 <div class="product-grid">
                     <% if (products.length === 0) { %>
@@ -267,7 +275,7 @@
 
                         <div class="product-image">
                             <% if (p.images && p.images.length > 0) { %>
-                                <img src="<%= p.images[0] %>" alt="<%= p.name %>" /> 
+                                <img src="<%= p.images[0] %>" alt="<%= p.name %>" />
                             <% } else { %>
                                 <img src="/images/default-product.png" alt="No Image" />
                             <% } %>
@@ -294,7 +302,7 @@
 
                 <div class="pagination">
                     <% for (let i = 1; i <= totalPages; i++) { %>
-                    <a href="/shop?page=<%= i %>&search=<%= search %>&maxPrice=<%= maxPrice %>&category=<%= activeCategory %>"
+                    <a href="/shop?page=<%= i %>&search=<%= search %>&maxPrice=<%= maxPrice %>&category=<%= activeCategory %>&sort=<%= activeSort %>"
                         class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
                     <% } %>
                 </div>
@@ -308,6 +316,7 @@
     const priceSlider = document.getElementById("priceRange");
     const maxPriceLabel = document.getElementById("maxPriceLabel");
     const searchInput = document.getElementById("searchInput");
+    const sortSelect = document.getElementById("sortSelect");
 
     // Initial update of max price label to show current value
     maxPriceLabel.textContent = priceSlider.value;
@@ -319,8 +328,8 @@
     };
 
     /**
-     * Applies all filters by constructing and redirecting to a new URL.
-     * @param {boolean} reset If true, clears search and sets max price/category to default.
+     * Applies all filters (Search, Price, Sort, Category) by constructing and redirecting to a new URL.
+     * @param {boolean} reset If true, clears search and sets max price/category/sort to default.
      */
     function applyFilters(reset = false) {
         const url = new URL(window.location.href);
@@ -333,15 +342,17 @@
             url.searchParams.delete("search");
             url.searchParams.set("maxPrice", "<%= maxPriceValue %>");
             url.searchParams.delete("category");
+            url.searchParams.set("sort", "a-z"); // Reset sort to default A-Z
             window.location.href = url.toString();
             return;
         }
 
-        // Apply current Search and Price values
+        // Apply current Search, Price, and Sort values
         url.searchParams.set("search", searchInput.value);
         url.searchParams.set("maxPrice", priceSlider.value);
+        url.searchParams.set("sort", sortSelect.value);
 
-        // Preserve the current category filter if one is active
+        // Preserve the current category filter
         const currentCategory = url.searchParams.get("category");
         if (!currentCategory) {
             url.searchParams.delete("category");
@@ -352,6 +363,7 @@
 
     /**
      * Handles category filtering by setting the category query parameter.
+     * Preserves other filters.
      * @param {string} categoryId The ID of the category to filter by (empty string for 'All').
      */
     function applyCategoryFilter(categoryId) {
@@ -364,9 +376,10 @@
             url.searchParams.delete("category");
         }
 
-        // Preserve current search and price filters
+        // Preserve current search, price, and sort filters
         url.searchParams.set("search", searchInput.value);
         url.searchParams.set("maxPrice", priceSlider.value);
+        url.searchParams.set("sort", sortSelect.value); // Preserve sort
 
         window.location.href = url.toString();
     }
