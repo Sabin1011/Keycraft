@@ -1,7 +1,8 @@
 const Category = require("../../models/categorySchema");
 
-// CATEGORY PAGE
-
+// =======================
+// LOAD CATEGORY PAGE
+// =======================
 const loadCategory = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -9,21 +10,18 @@ const loadCategory = async (req, res) => {
     const skip = (page - 1) * limit;
     const search = req.query.search || "";
 
-    // Build search query
     let searchQuery = {};
     if (search) {
       searchQuery = {
         $or: [
           { name: { $regex: search, $options: "i" } },
-          { description: { $regex: search, $options: "i" } },
-        ],
+          { description: { $regex: search, $options: "i" } }
+        ]
       };
     }
 
-    // Get total count for pagination
     const totalCategories = await Category.countDocuments(searchQuery);
 
-    // Fetch categories with pagination
     const categories = await Category.find(searchQuery)
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -36,12 +34,12 @@ const loadCategory = async (req, res) => {
       limit,
       search,
       success: req.session.success,
-      error: req.session.error,
+      error: req.session.error
     });
 
-    // Clear session messages after rendering
     delete req.session.success;
     delete req.session.error;
+
   } catch (error) {
     console.error("Error loading categories page:", error);
     res.status(500).render("category", {
@@ -50,36 +48,29 @@ const loadCategory = async (req, res) => {
       totalCategories: 0,
       limit: 10,
       search: "",
-      error: "Failed to load categories",
+      error: "Failed to load categories"
     });
   }
 };
-    
-// CATEGORY PAGE:
-// const category = async(req, res)=>{
-//     try {
 
-//     } catch (error) {
-
-//     }
-// }
-
-// ADD CATEGORY PAGE
+// =======================
+// LOAD ADD CATEGORY PAGE
+// =======================
 const loadAddCategory = async (req, res) => {
   try {
     res.render("addCategory");
   } catch (error) {
-    console.log("error rendering the addcategory page", error);
+    console.log("Error loading add category page:", error);
   }
 };
 
-// LOAD ADD CATEGORY
-
+// =======================
+// ADD CATEGORY
+// =======================
 const addCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
 
-    // Check duplicate (case-insensitive)
     const exist = await Category.findOne({
       name: { $regex: new RegExp(`^${name}$`, "i") }
     });
@@ -92,7 +83,6 @@ const addCategory = async (req, res) => {
       });
     }
 
-    // If new category → save
     const category = new Category({ name, description });
     await category.save();
 
@@ -103,57 +93,68 @@ const addCategory = async (req, res) => {
   }
 };
 
-
-// EDIT CATEGORY PAGE
-
+// =======================
+// LOAD EDIT CATEGORY PAGE
+// =======================
 const loadEditCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
-    const category = await Category.findOne({ _id: categoryId });
-    console.log(category);
+    const category = await Category.findById(categoryId);
     res.render("editCategory", { category });
   } catch (error) {
-    console.log("error rendering the edit Category page ", error);
+    console.log("Error loading edit category page:", error);
   }
 };
 
+// =======================
+// UPDATE CATEGORY
+// =======================
 const updateCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
     const { name, description } = req.body;
-    const category = await Category.updateOne(
+
+    await Category.updateOne(
       { _id: categoryId },
       { name, description }
     );
 
     res.redirect("/admin/category");
-  } catch (error) {}
+  } catch (error) {
+    console.log("Error updating category:", error);
+  }
 };
 
+// =======================
+// BLOCK / UNBLOCK CATEGORY
+// =======================
 const blockCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
-    const category = await Category.findById(categoryId)
-    if(!category){
-        return res.status(404).json({success: false, message:"category not found"});
+    const category = await Category.findById(categoryId);
 
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found"
+      });
     }
-    // toggle status;
 
     category.status = !category.status;
     await category.save();
-    
 
     res.json({
-        success: true,
-        message: `Category ${category.status ? "unblocked": "blocked"}  successfully`,
-        newStatus: category.status,
+      success: true,
+      message: `Category ${category.status ? "unblocked" : "blocked"} successfully`,
+      newStatus: category.status
     });
 
-
   } catch (error) {
-     console.error("Error toggling category:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    console.error("Error toggling category:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -163,5 +164,5 @@ module.exports = {
   loadAddCategory,
   addCategory,
   updateCategory,
-  blockCategory,
+  blockCategory
 };

@@ -73,6 +73,7 @@
         input[type="text"],
         input[type="email"],
         input[type="password"],
+        input[type="tel"],
         input[type="phone"] {
             width: 100%;
             padding: 15px 20px;
@@ -89,6 +90,7 @@
         input[type="text"]:focus,
         input[type="email"]:focus,
         input[type="password"]:focus,
+        input[type="tel"]:focus,
         input[type="phone"]:focus  {
             border-color: #222;
             transform: translateY(-1px);
@@ -247,6 +249,19 @@
             vertical-align: middle;
         }
 
+        .input-error {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 6px;
+            font-weight: 500;
+            min-height: 18px; 
+        }
+
+        /* Optional: Red border on invalid inputs */
+        .input-wrapper input:invalid:focus {
+            border-color: #e74c3c !important;
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -286,38 +301,99 @@
         <div class="register-content">
             <h1 class="register-title">create account</h1>
 
-            <div class="error-message" id="errorMessage">
-                <i class="fa fa-exclamation-circle"></i> <span id="errorText"></span>
-            </div>
             
-            <form id="registerForm" method="post">
+            <!-- General Server Error (only for unexpected crashes) -->
+            <div class="error-message <%= generalError ? 'show' : '' %>" id="errorMessage">
+                <i class="fa fa-exclamation-circle"></i> <%= generalError || '' %>
+            </div>
+
+            <form id="registerForm" method="post" novalidate>
+                <!-- Username -->
                 <div class="input-wrapper">
-                    <input type="text" id="name" name="username" placeholder="your name" required>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="username" 
+                        placeholder="your name" 
+                        value="<%= oldInput?.username || '' %>" 
+                         
+                    >
+                    <% if (errors?.username) { %>
+                        <p class="input-error"><%= errors.username %></p>
+                    <% } %>
                 </div>
 
+                <!-- Email -->
                 <div class="input-wrapper">
-                    <input type="email" id="email" name="email"  placeholder="your email" required>
-                </div>
-                
-                <div class="input-wrapper">
-                    <input type="phone" id="phone" name="phone"  placeholder="phone number" required>
-                </div>
-                
-                <div class="input-wrapper">
-                    <input type="password" id="password" name="password" placeholder="enter password" required minlength="8">
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="your email" 
+                        value="<%= oldInput?.email || '' %>" 
+                         
+                    >
+                    <% if (errors?.email) { %>
+                        <p class="input-error"><%= errors.email %></p>
+                    <% } %>
                 </div>
 
+                <!-- Phone -->
                 <div class="input-wrapper">
-                    <input type="password" id="confirmPassword" name="confirm_password" placeholder="repeat password" required>
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        name="phone" 
+                        placeholder="phone number" 
+                        value="<%= oldInput?.phone || '' %>" 
+                         
+                    >
+                    <% if (errors?.phone) { %>
+                        <p class="input-error"><%= errors.phone %></p>
+                    <% } %>
                 </div>
-                
+
+                <!-- Password -->
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="enter password" 
+                        value="<%= oldInput?.password || '' %>" 
+                         
+                    >
+                    <% if (errors?.password) { %>
+                        <p class="input-error"><%= errors.password %></p>
+                    <% } %>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        name="confirm_password" 
+                        placeholder="repeat password" 
+                        value="<%= oldInput?.confirm_password || '' %>" 
+                         
+                    >
+                    <% if (errors?.confirmPassword) { %>
+                        <p class="input-error"><%= errors.confirmPassword %></p>
+                    <% } %>
+                </div>
+
+                <!-- Checkbox (Fixed!) -->
                 <div class="checkbox-wrapper">
                     <label class="checkbox-entry">
-                      
-                        <span>I agree to the <a href="/privacy-policy">privacy policy</a></span>
+                        <input type="checkbox" name="agree" required>
+                        <span>I agree to the <a href="/privacy-policy">privacy policy</a> and <a href="/terms">terms of service</a></span>
                     </label>
+                    <% if (errors?.agree) { %>
+                        <p class="input-error"><%= errors.agree %></p>
+                    <% } %>
                 </div>
-                
+
                 <button type="submit" class="btn btn-primary" id="submitBtn">
                     create account
                 </button>
@@ -344,43 +420,25 @@
     </div>
 
     <script>
-        function handleSubmit(event) {
-            event.preventDefault();
-            
-            const errorMsg = document.getElementById('errorMessage');
-            const errorText = document.getElementById('errorText');
-            const submitBtn = document.getElementById('submitBtn');
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const email = document.getElementById('email').value;
-            
-            // Reset error message
-            errorMsg.classList.remove('show');
-            
-            // Validate passwords match
-            if (password !== confirmPassword) {
-                errorText.textContent = 'Passwords do not match';
-                errorMsg.classList.add('show');
-                return;
-            }
-            
-            // Validate password length
-            if (password.length < 8) {
-                errorText.textContent = 'Password must be at least 8 characters';
-                errorMsg.classList.add('show');
-                return;
-            }
-            
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'creating account <span class="spinner"></span>';
-            
-            // Simulate API call
-            setTimeout(() => {
-                // Redirect to OTP verification
-                window.location.href = '/verify-otp?email=' + encodeURIComponent(email);
-            }, 1500);
-        }
+        document.getElementById("registerForm").addEventListener("submit", (event) => {
+
+            // reset all field errors
+            document.querySelectorAll(".input-error").forEach(e=>e.textContent = "");
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            // email regex
+            if (!email || !password) {
+                alert("Please fill all fields");
+            };
+
+            // minimum password length check
+            if(password.length<6){
+                alert("Password must be of atleast 6 characters");
+            };
+        });
         
         function handleGoogleSignIn() {
             // Simulate Google OAuth

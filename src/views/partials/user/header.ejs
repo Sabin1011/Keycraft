@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= typeof title !== 'undefined' ? title : 'KeyCraft - Premium Mechanical Keyboards' %></title>
+    <title>KeyCraft - Premium Mechanical Keyboards</title>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Questrial|Raleway:700,900" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     
     <style>
@@ -29,169 +28,290 @@
             padding: 0 20px;
         }
 
-        /* Header Styles */
+        /* Single Header Section */
         header {
             background: #fff;
             border-bottom: 1px solid #e5e5e5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        .header-top {
-            background: #222;
-            color: #fff;
-            padding: 10px 0;
-            font-size: 13px;
-        }
-
-        .header-top .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-contact {
-            display: flex;
-            gap: 30px;
-        }
-
-        .header-contact a {
-            color: #fff;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .header-contact a:hover {
-            color: #ccc;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .header-actions a {
-            color: #fff;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .header-actions a:hover {
-            color: #ccc;
-        }
-
-        .header-main {
+        .header-wrapper {
             padding: 20px 0;
         }
 
-        .header-main .container {
+        .header-wrapper .container {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 40px;
         }
 
+        /* Logo */
         .logo {
             font-size: 32px;
             font-weight: 900;
             font-family: 'Raleway', sans-serif;
             color: #222;
             text-decoration: none;
+            white-space: nowrap;
         }
 
         .logo span {
             color: #666;
         }
 
+        /* Navigation */
+        nav {
+            flex: 1;
+        }
+
         nav ul {
             display: flex;
             list-style: none;
-            gap: 30px;
+            gap: 35px;
+            justify-content: center;
         }
 
         nav a {
             color: #222;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 15px;
             text-transform: lowercase;
+            font-weight: 500;
             transition: color 0.3s;
+            position: relative;
         }
 
         nav a:hover {
             color: #666;
         }
 
-        .cart-icon {
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #222;
+            transition: width 0.3s;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* Cart Icon Button */
+        .cart-btn {
             position: relative;
+            background: #f8f9fa;
+            color: #222;
+            border: 2px solid #e5e5e5;
+            padding: 10px 18px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .cart-btn:hover {
+            background: #222;
+            color: #fff;
+            border-color: #222;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .cart-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
             background: #222;
             color: #fff;
             border-radius: 50%;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 11px;
+            font-weight: 600;
+        }
+
+        .cart-btn:hover .cart-badge {
+            background: #fff;
+            color: #222;
+        }
+
+        /* Login Button */
+        .login-btn {
+            background: #fff;
+            color: #222;
+            border: 2px solid #222;
+            padding: 10px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: lowercase;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .login-btn:hover {
+            background: #222;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Register Button */
+        .register-btn {
+            background: #222;
+            color: #fff;
+            border: 2px solid #222;
+            padding: 10px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: lowercase;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .register-btn:hover {
+            background: #000;
+            border-color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Logout Button */
+        .logout-btn {
+            background: #dc3545;
+            color: #fff;
+            border: 2px solid #dc3545;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: lowercase;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+            border-color: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
-            .header-contact {
-                display: none;
+        @media (max-width: 992px) {
+            .header-wrapper .container {
+                gap: 20px;
             }
 
             nav ul {
-                flex-direction: column;
+                gap: 20px;
+            }
+
+            nav a {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-wrapper .container {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .logo {
+                font-size: 28px;
+                order: 1;
+                width: 100%;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+
+            nav {
+                order: 3;
+                width: 100%;
+            }
+
+            nav ul {
+                justify-content: center;
                 gap: 15px;
+                flex-wrap: wrap;
+            }
+
+            .header-actions {
+                order: 2;
+                margin-bottom: 15px;
+            }
+
+            .cart-btn, .login-btn, .register-btn, .logout-btn {
+                padding: 8px 16px;
+                font-size: 13px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- Single Header Section -->
     <header>
-    <div class="header-top">
-        <div class="container">
-            <div class="header-contact">
-                <span><b>contact:</b> <a href="tel:+1234567890">+1 (234) 567-890</a></span>
-                <span><b>email:</b> <a href="mailto:info@keycraft.com">info@keycraft.com</a></span>
-            </div>
-            <div class="header-actions">
+        <div class="header-wrapper">
+            <div class="container">
+                <!-- Logo -->
+                <a href="/home" class="logo">key<span>craft</span></a>
 
-                <% if (typeof user !== 'undefined' && user) { %>
-                <a href="/cart" class="cart-icon">
-                    <i class="fa fa-shopping-cart"></i>
-                    <span class="cart-badge"><%= typeof cartCount !== 'undefined' ? cartCount : '3' %></span>
-                </a>
-                <a href="/auth/logout" class="btn btn-outline-danger">
-                    <i class="fas fa-sign-out-alt"></i> <b>logout</b>
-                </a>
-                
-                <% } else { %>
-                <a href="/login"><b>login</b></a>
-                <span>or</span>
-                <a href="/register"><b>register</b></a>
-                <% } %>
-                
+                <!-- Navigation -->
+                <nav>
+                    <ul>
+                        <li><a href="/home">home</a></li>
+                        <li><a href="/shop">shop</a></li>
+                        <li><a href="/about">about</a></li>
+                        <li><a href="/contact">contact</a></li>
+                    </ul>
+                </nav>
+
+                <!-- Header Actions -->
+                <div class="header-actions">
+                    <% if (typeof user !== 'undefined' && user) { %>
+                        <!-- Cart Button (Logged In) -->
+                        <a href="/cart" class="cart-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                            cart
+                            <span class="cart-badge"><%= typeof cartCount !== 'undefined' ? cartCount : '0' %></span>
+                        </a>
+
+                        <!-- Logout Button -->
+                        <a href="/logout" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            logout
+                        </a>
+                    <% } else { %>
+                        <!-- Login Button (Not Logged In) -->
+                        <a href="/login" class="login-btn">login</a>
+
+                        <!-- Register Button -->
+                        <a href="/register" class="register-btn">register</a>
+                    <% } %>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="header-main">
-        <div class="container">
-            <a href="/" class="logo">key<span>craft</span></a>
-            <nav>
-                <ul>
-                    <li><a href="/home">home</a></li>
-                    <li><a href="/shop">Shop</a></li>
-                    <li><a href="/about">about</a></li>
-                    <li><a href="/contact">contact</a></li>
-                </ul>
-            </nav>
-        </div>
-    </div>
-</header>
+    </header>
