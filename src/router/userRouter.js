@@ -9,8 +9,9 @@ router.get("/register",authController.loadRegister);
 router.post("/register", authController.register);
 
 router.get("/otp", authController.loadOtp);
+router.get("/verify-otp", authController.verifyOtp);
 router.post("/verify-otp", authController.verifyOtp);
-router.post("/resend-otp", authController.resendOtp);
+router.get("/resend-otp", authController.resendOtp);
 
 router.get("/login", auth.isLogged, authController.loadLogin);
 router.post("/login", authController.login);

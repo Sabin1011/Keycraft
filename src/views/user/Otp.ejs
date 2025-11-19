@@ -203,21 +203,9 @@
       <p class="otp-subtitle">we've sent a verification code to</p>
       <p class="otp-email" id="userEmail"></p>
 
-      <div
-        class="error-message<% if (locals.error) { %> show<% } %>"
-        id="errorMessage"
-      >
-        <i class="fa fa-exclamation-circle"></i>
-      </div>
+     
 
-      <div
-        class="success-message<% if (locals.success) { %> show<% } %>"
-        id="successMessage"
-      >
-        <i class="fa fa-check-circle"></i>
-      </div>
-
-      <form id="otpForm" method="POST" action="/verify-otp" ">
+      <form id="otpForm" method="POST" action="/verify-otp">
         <!-- Hidden email -->
         <input type="hidden" name="email" id="emailField" />
 
@@ -245,7 +233,7 @@
 
         <div class="resend-section">
           didn't receive the code?
-          <a href="#" class="resend-link" id="resendLink" onclick="resendOTP(event)">resend otp</a>
+          <a href="/resend-otp" class="resend-link">resend otp</a>
         </div>
 
         <button type="submit" class="btn btn-primary" id="verifyBtn">
@@ -287,101 +275,7 @@
       }
     }, 1000);
 
-    function handleSubmit(event) {
-      event.preventDefault();
-
-      const otp = document.getElementById("otpInput").value.trim();
-      const errorMsg = document.getElementById("errorMessage");
-      const successMsg = document.getElementById("successMessage");
-      const verifyBtn = document.getElementById("verifyBtn");
-
-      errorMsg.classList.remove("show");
-      successMsg.classList.remove("show");
-
-      if (otp.length !== 4 || !/^\d+$/.test(otp)) {
-        errorMsg.textContent = "Please enter a valid 4-digit OTP.";
-        errorMsg.classList.add("show");
-        return false;
-      }
-
-      verifyBtn.disabled = true;
-      verifyBtn.innerHTML = 'verifying <span class="spinner"></span>';
-
-      const form = document.getElementById("otpForm");
-      const formData = new FormData(form);
-
-      fetch(form.action, { method: "POST", body: formData })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            successMsg.textContent = "OTP verified successfully!";
-            successMsg.classList.add("show");
-            verifyBtn.innerHTML = '<i class="fa fa-check"></i> verified';
-            setTimeout(() => {
-              window.location.href =
-                data.redirect || "/welcome?email=" + encodeURIComponent(userEmail);
-            }, 2000);
-          } else {
-            errorMsg.textContent = data.message || "Invalid OTP. Please try again.";
-            errorMsg.classList.add("show");
-            document.getElementById("otpInput").classList.add("error");
-            document.getElementById("otpInput").value = "";
-            setTimeout(() => {
-              document.getElementById("otpInput").classList.remove("error");
-              document.getElementById("otpInput").focus();
-            }, 500);
-            verifyBtn.disabled = false;
-            verifyBtn.textContent = "verify & continue";
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          errorMsg.textContent = "An error occurred. Please try again.";
-          errorMsg.classList.add("show");
-          verifyBtn.disabled = false;
-          verifyBtn.textContent = "verify & continue";
-        });
-      return false;
-    }
-
-    function resendOTP(event) {
-      event.preventDefault();
-      const resendLink = document.getElementById("resendLink");
-      const successMsg = document.getElementById("successMessage");
-      resendLink.classList.add("disabled");
-
-      fetch("/resend-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userEmail }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            successMsg.textContent = "New OTP sent successfully!";
-            successMsg.classList.add("show");
-            document.getElementById("otpInput").disabled = false;
-            document.getElementById("otpInput").value = "";
-            setTimeout(() => successMsg.classList.remove("show"), 3000);
-            setTimeout(() => resendLink.classList.remove("disabled"), 30000);
-          } else {
-            successMsg.textContent = data.message || "Failed to resend OTP";
-            successMsg.classList.add("show");
-            setTimeout(() => {
-              successMsg.classList.remove("show");
-              resendLink.classList.remove("disabled");
-            }, 3000);
-          }
-        })
-        .catch(() => {
-          successMsg.textContent = "Failed to resend OTP";
-          successMsg.classList.add("show");
-          setTimeout(() => {
-            successMsg.classList.remove("show");
-            resendLink.classList.remove("disabled");
-          }, 3000);
-        });
-    }
+    
 
     window.addEventListener("load", () => {
       document.getElementById("otpInput").focus();

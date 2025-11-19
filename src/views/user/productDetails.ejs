@@ -68,7 +68,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: zoom-in;
+            cursor: crosshair;
         }
 
         .main-image img {
@@ -76,11 +76,29 @@
             height: 100%;
             object-fit: contain;
             padding: 20px;
-            transition: transform 0.3s ease;
+            transition: opacity 0.3s ease;
+        }
+
+        .main-image .zoom-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 200%;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .main-image:hover .zoom-overlay {
+            opacity: 1;
         }
 
         .main-image:hover img {
-            transform: scale(1.05);
+            opacity: 0;
         }
 
         .product-badge {
@@ -330,7 +348,7 @@
         .switch-option {
             border: 2px solid #e5e5e5;
             border-radius: 8px;
-            padding: 10px 20px; /* Adjusted padding */
+            padding: 10px 20px;
             cursor: pointer;
             transition: all 0.3s;
             text-transform: lowercase;
@@ -345,8 +363,6 @@
         .switch-option.active {
             border-color: #222;
         }
-        
-        /* Removed .switch-option img styles */
 
         .quantity-selector {
             display: flex;
@@ -584,11 +600,12 @@
         <div class="container">
             <div class="product-layout">
                 <div class="product-images">
-                    <div class="main-image" onclick="openZoom()">
+                    <div class="main-image" id="mainImageContainer" onclick="openZoom()">
                         <% if (product.badge) { %>
                             <div class="product-badge"><%= product.badge.toLowerCase() %></div>
                         <% } %>
                         <img src="<%= product.images[0] %>" alt="<%= product.name %>" id="mainImage">
+                        <div class="zoom-overlay" id="zoomOverlay"></div>
                         <div class="zoom-icon">
                             <i class="fa fa-search-plus"></i>
                         </div>
@@ -626,7 +643,8 @@
                     <div class="specs-grid">
                         <div class="spec-item">
                             <div class="spec-label">Layout</div>
-                            <div class="spec-value">65% Compact</div> </div>
+                            <div class="spec-value">65% Compact</div>
+                        </div>
                         <div class="spec-item">
                             <div class="spec-label">Default Switch</div>
                             <div class="spec-value"><%= product.variants[0].name %></div> 
@@ -779,75 +797,91 @@
             <img src="" alt="Zoomed Image" id="zoomedImage">
         </div>
     </div>
+
     <!-- RELATED PRODUCTS -->
-<section style="padding: 60px 0;">
-    <div class="container">
-        <h2 style="font-size: 28px; margin-bottom: 30px; text-transform: lowercase;">
-            related products
-        </h2>
+    <section style="padding: 60px 0;">
+        <div class="container">
+            <h2 style="font-size: 28px; margin-bottom: 30px; text-transform: lowercase;">
+                related products
+            </h2>
 
-        <div style="
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 25px;
-        ">
-            <% relatedProducts.forEach(rp => { %>
-                <a href="/singleProduct/<%= rp._id %>" style="text-decoration: none; color: inherit;">
-                    <div style="
-                        background: #fff;
-                        border-radius: 10px;
-                        overflow: hidden;
-                        border: 1px solid #eee;
-                        transition: all 0.3s;
-                    "
-                        onmouseover="this.style.transform='translateY(-5px)'"
-                        onmouseout="this.style.transform='translateY(0)'"
-                    >
-
+            <div style="
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 25px;
+            ">
+                <% relatedProducts.forEach(rp => { %>
+                    <a href="/singleProduct/<%= rp._id %>" style="text-decoration: none; color: inherit;">
                         <div style="
-                            width: 100%;
-                            height: 200px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            background: #fafafa;
-                            border-bottom: 1px solid #eee;
-                        ">
-                            <img src="<%= rp.images[0] %>" alt="<%= rp.name %>" style="width: 100%; height: 100%; object-fit: contain;">
-                        </div>
+                            background: #fff;
+                            border-radius: 10px;
+                            overflow: hidden;
+                            border: 1px solid #eee;
+                            transition: all 0.3s;
+                        "
+                            onmouseover="this.style.transform='translateY(-5px)'"
+                            onmouseout="this.style.transform='translateY(0)'"
+                        >
+                            <div style="
+                                width: 100%;
+                                height: 200px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                background: #fafafa;
+                                border-bottom: 1px solid #eee;
+                            ">
+                                <img src="<%= rp.images[0] %>" alt="<%= rp.name %>" style="width: 100%; height: 100%; object-fit: contain;">
+                            </div>
 
-                        <div style="padding: 20px;">
-                            <h3 style="font-size: 18px; font-weight: 600; text-transform: lowercase; margin-bottom: 10px;">
-                                <%= rp.name.toLowerCase() %>
-                            </h3>
+                            <div style="padding: 20px;">
+                                <h3 style="font-size: 18px; font-weight: 600; text-transform: lowercase; margin-bottom: 10px;">
+                                    <%= rp.name.toLowerCase() %>
+                                </h3>
 
-                            <p style="font-size: 16px; font-weight: bold; color: #222;">
-                                ₹<%= rp.price.toFixed(2) %>
-                            </p>
+                                <p style="font-size: 16px; font-weight: bold; color: #222;">
+                                    ₹<%= rp.price.toFixed(2) %>
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                </a>
-            <% }) %>
+                    </a>
+                <% }) %>
+            </div>
         </div>
-    </div>
-</section>
-
+    </section>
 
     <%- include('../partials/user/footer') %>
 
     <script>
         // Store product variants data in JS for quick lookup
-        const productVariants = '<%- JSON.stringify(product.variants) %>';
+        
+
+        // Image zoom on hover functionality
+        const mainImageContainer = document.getElementById('mainImageContainer');
+        const zoomOverlay = document.getElementById('zoomOverlay');
+        const mainImage = document.getElementById('mainImage');
+
+        function initializeZoom() {
+            zoomOverlay.style.backgroundImage = `url('${mainImage.src}')`;
+        }
+
+        mainImageContainer.addEventListener('mousemove', function(e) {
+            const rect = mainImageContainer.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            zoomOverlay.style.backgroundPosition = `${x}% ${y}%`;
+        });
 
         function changeImage(thumbnail, src) {
-            document.getElementById('mainImage').src = src;
+            mainImage.src = src;
+            zoomOverlay.style.backgroundImage = `url('${src}')`;
             document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
             thumbnail.classList.add('active');
         }
 
         function openZoom() {
-            const mainImage = document.getElementById('mainImage').src;
-            document.getElementById('zoomedImage').src = mainImage;
+            const mainImageSrc = mainImage.src;
+            document.getElementById('zoomedImage').src = mainImageSrc;
             document.getElementById('zoomModal').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -883,6 +917,7 @@
         
         // Initialize active switch and stock info on load (first variant is default active)
         window.onload = function() {
+            initializeZoom();
             const defaultVariant = productVariants[0];
             if (defaultVariant) {
                 document.getElementById('quantity').max = defaultVariant.quantity;
@@ -902,7 +937,7 @@
         function increaseQty(maxStock) {
             const qtyInput = document.getElementById('quantity');
             let qty = parseInt(qtyInput.value);
-            let max = parseInt(qtyInput.max) || maxStock; // Use current max from attribute or total stock as fallback
+            let max = parseInt(qtyInput.max) || maxStock;
             
             if (qty < max) {
                 qtyInput.value = qty + 1;
