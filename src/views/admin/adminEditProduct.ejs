@@ -1,4 +1,4 @@
-    <%- include('../partials/admin/header') %>
+<%- include('../partials/admin/header') %>
 
 <style>
   body {
@@ -159,7 +159,6 @@
     color: white;
   }
 
-  /* Crop Modal Styles */
   .crop-modal {
     display: none;
     position: fixed;
@@ -321,7 +320,6 @@
 
 <body>
   <div class="container-fluid">
-    <!-- Page Title -->
     <div class="row">
       <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
@@ -337,12 +335,9 @@
       </div>
     </div>
 
-    <!-- SINGLE FORM STARTS HERE -->
-    <form id="addProductForm" enctype="multipart/form-data">
+    <form id="editProductForm" enctype="multipart/form-data" action="/admin/updateProduct/<%= product._id %>" method="post">
       <div class="row">
-        <!-- Left Column -->
         <div class="col-lg-8">
-          <!-- Basic Information -->
           <div class="card">
             <div class="card-header">
               <h5 class="card-title">Basic Information</h5>
@@ -350,39 +345,45 @@
             <div class="card-body">
               <div class="mb-3">
                 <label for="productName" class="form-label">Product Name<span class="required">*</span></label>
-                <input type="text" name="productName" class="form-control" id="productName" placeholder="Enter product name" required>
+                <input type="text" name="productName" class="form-control" id="productName" 
+                       value="<%= product.name %>" placeholder="Enter product name" required>
               </div>
 
               <div class="mb-3">
                 <label for="description" class="form-label">Description<span class="required">*</span></label>
-                <textarea name="description" class="form-control" id="description" rows="4" placeholder="Enter product description" required></textarea>
+                <textarea name="description" class="form-control" id="description" rows="4" 
+                          placeholder="Enter product description" required><%= product.description %></textarea>
                 <div class="help-text">Provide a detailed description of the product</div>
               </div>
             </div>
           </div>
 
-          <!-- Stock Quantity by Variants -->
           <div class="card">
             <div class="card-header">
               <h5 class="card-title">Stock Quantity (by Variants)</h5>
             </div>
             <div class="card-body">
               <div class="stock-variants-container" id="stockVariantsContainer">
-                <div class="stock-variant-item">
-                  <div class="variant-label">Red Key</div>
-                  <input type="number" name="variantQty[]" class="form-control variant-input" placeholder="Enter quantity" min="0" value="0">
-                  <input type="hidden" name="variantName[]" value="Red Key">
-                </div>
-                <div class="stock-variant-item">
-                  <div class="variant-label">Brown Key</div>
-                  <input type="number" name="variantQty[]" class="form-control variant-input" placeholder="Enter quantity" min="0" value="0">
-                  <input type="hidden" name="variantName[]" value="Brown Key">
-                </div>
-                <div class="stock-variant-item">
-                  <div class="variant-label">Blue Key</div>
-                  <input type="number" name="variantQty[]" class="form-control variant-input" placeholder="Enter quantity" min="0" value="0">
-                  <input type="hidden" name="variantName[]" value="Blue Key">
-                </div>
+                <% if (product.variants && product.variants.length > 0) { %>
+                  <% product.variants.forEach((variant, index) => { %>
+                    <div class="stock-variant-item" data-variant-index="<%= index %>">
+                      <input type="text" name="variantName[]" class="form-control variant-label" 
+                             value="<%= variant.name %>" placeholder="Variant name" style="flex: 0 0 150px;">
+                      <input type="number" name="variantQty[]" class="form-control variant-input" 
+                             value="<%= variant.quantity %>" placeholder="Enter quantity" min="0">
+                      <button type="button" class="remove-variant-btn" onclick="removeVariantItem(this)">
+                        Remove
+                      </button>
+                    </div>
+                  <% }); %>
+                <% } else { %>
+                  <div class="stock-variant-item">
+                    <input type="text" name="variantName[]" class="form-control variant-label" 
+                           value="Red Key" placeholder="Variant name" style="flex: 0 0 150px;">
+                    <input type="number" name="variantQty[]" class="form-control variant-input" 
+                           placeholder="Enter quantity" min="0" value="0">
+                  </div>
+                <% } %>
               </div>
               <button type="button" class="add-variant-btn mt-3" onclick="addVariant()">
                 Add Custom Variant
@@ -391,25 +392,29 @@
             </div>
           </div>
 
-          <!-- Product Images -->
           <div class="card">
             <div class="card-header">
               <h5 class="card-title">Product Images</h5>
             </div>
             <div class="card-body">
-              <div class="image-upload-container" id="imageUploadContainer" onclick="document.getElementById('imageInput').click()">
+              <div class="image-upload-container" id="imageUploadContainer" 
+                   onclick="document.getElementById('imageInput').click()">
                 Click to upload or drag and drop
                 <div class="upload-hint">PNG, JPG or JPEG (MAX. 5MB)</div>
               </div>
-              <input type="file" name="images" id="imageInput" accept="image/*" multiple style="display: none;" onchange="handleImageUpload(event)">
+              <input type="file" name="images" id="imageInput" accept="image/*" multiple 
+                     style="display: none;" onchange="handleImageUpload(event)">
               <div class="preview-container" id="previewContainer"></div>
+              <div id="existingImagesContainer" style="display:none;">
+                <% (product.images || []).forEach(function(imgUrl, i) { %>
+                  <input type="hidden" class="existing-image-input" value="<%= imgUrl %>">
+                <% }); %>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Right Column -->
         <div class="col-lg-4">
-          <!-- Pricing -->
           <div class="card">
             <div class="card-header">
               <h5 class="card-title">Pricing</h5>
@@ -417,12 +422,12 @@
             <div class="card-body">
               <div class="mb-3">
                 <label for="price" class="form-label">Price<span class="required">*</span></label>
-                <input type="number" name="price" class="form-control" id="price" placeholder="Enter amount" step="1" min="0" required>
+                <input type="number" name="price" class="form-control" id="price" 
+                       value="<%= product.price %>" placeholder="Enter amount" step="1" min="0" required>
               </div>
             </div>
           </div>
 
-          <!-- Category -->
           <div class="card">
             <div class="card-header">
               <h5 class="card-title">Category</h5>
@@ -430,23 +435,23 @@
             <div class="card-body">
               <div class="mb-3">
                 <label for="category" class="form-label">Select Category<span class="required">*</span></label>
+
                 <select name="category" class="form-select" id="category" required>
-                  <option value="">Choose category...</option>
-                  <option value="wired">Wired</option>
-                  <option value="wireless">Wireless</option>
-                  <option value="bluetooth">Bluetooth</option>
-                  <option value="dual-mode">Dual Mode</option>
-                  <option value="tri-mode">Tri-Mode</option>
+                  <% categories.forEach(cat => { %>
+                    <option value="<%= cat._id %>" <%= product.category._id.toString() === cat._id.toString() ? 'selected' : '' %>>
+                      <%= cat.name %>
+                    </option>
+                  <% }) %>
                 </select>
+
               </div>
             </div>
           </div>
 
           
         </div>
-      </div>
+      </div>  
 
-      <!-- FORM ACTIONS (Add Product Button at Bottom) -->
       <div class="row mt-4">
         <div class="col-12">
           <div class="card">
@@ -460,9 +465,7 @@
         </div>
       </div>
     </form>
-    <!-- SINGLE FORM ENDS HERE -->
 
-    <!-- Crop Modal -->
     <div id="cropModal" class="crop-modal">
       <div class="crop-modal-content">
         <h5>Crop Image</h5>
@@ -478,188 +481,96 @@
 
   <%- include('../partials/admin/footer') %>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1....
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
   <script>
-    let uploadedImages = [];
-    let variantCounter = 3; // Start after default 3
-    let cropper = null;
-    let currentCropImageId = null;
+  const productId = '<%= product._id %>';   
 
-    // Image Upload Handling
-    function handleImageUpload(event) {
-      const files = Array.from(event.target.files);
-      files.forEach(file => {
-        if (file.size > 5 * 1024 * 1024) {
-          Swal.fire('Error', 'Image size should not exceed 5MB', 'error');
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          uploadedImages.push({
-            id: Date.now() + Math.random(),
-            url: e.target.result,
-            file: file
-          });
-          renderImagePreviews();
-        };
-        reader.readAsDataURL(file);
-      });
-      event.target.value = '';
-    }
 
-    function renderImagePreviews() {
-      const container = document.getElementById('previewContainer');
-      container.innerHTML = uploadedImages.map(img => `
-        <div class="preview-item">
-          <img src="${img.url}" alt="Preview" class="preview-image">
-          <div class="image-actions">
-            <button type="button" class="crop-image" onclick="openCropModal(${img.id})" title="Crop Image">
-              Crop
-            </button>
-            <button type="button" class="remove-image" onclick="removeImage(${img.id})" title="Remove Image">
-              Remove
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
+  const existingInputs = Array.from(document.querySelectorAll('.existing-image-input'));
+  const existingImages = existingInputs.map(i => i.value);
 
-    function removeImage(id) {
-      uploadedImages = uploadedImages.filter(img => img.id !== id);
-      renderImagePreviews();
-    }
 
-    // Crop Modal
-    function openCropModal(imageId) {
-      currentCropImageId = imageId;
-      const image = uploadedImages.find(img => img.id === imageId);
-      if (image) {
-        const cropImage = document.getElementById('cropImage');
-        cropImage.src = image.url;
-        document.getElementById('cropModal').style.display = 'block';
-        if (cropper) cropper.destroy();
-        setTimeout(() => {
-          cropper = new Cropper(cropImage, {
-            aspectRatio: NaN,
-            viewMode: 1,
-            autoCropArea: 1,
-            responsive: true,
-            background: false,
-            zoomable: true,
-            scalable: true,
-            rotatable: true,
-          });
-        }, 100);
-      }
-    }
+  let uploadedImages = [];  
+  let variantCounter = 0;
+  let cropper = null;
+  let currentCropImageId = null;
 
-    function closeCropModal() {
-      document.getElementById('cropModal').style.display = 'none';
-      if (cropper) { cropper.destroy(); cropper = null; }
-      currentCropImageId = null;
-    }
-
-    function applyCrop() {
-      if (cropper && currentCropImageId) {
-        const canvas = cropper.getCroppedCanvas();
-        const croppedUrl = canvas.toDataURL();
-        const imageIndex = uploadedImages.findIndex(img => img.id === currentCropImageId);
-        if (imageIndex !== -1) {
-          canvas.toBlob((blob) => {
-            const file = new File([blob], uploadedImages[imageIndex].file.name, {
-              type: 'image/png',
-              lastModified: Date.now()
-            });
-            uploadedImages[imageIndex] = { ...uploadedImages[imageIndex], url: croppedUrl, file: file };
-            renderImagePreviews();
-            closeCropModal();
-          });
-        }
-      }
-    }
-
-    // Drag and Drop
-    const uploadContainer = document.getElementById('imageUploadContainer');
-    ['dragover', 'dragleave', 'drop'].forEach(evt => {
-      uploadContainer.addEventListener(evt, e => {
-        e.preventDefault();
-        if (evt === 'dragover') uploadContainer.classList.add('dragover');
-        else if (evt === 'dragleave') uploadContainer.classList.remove('dragover');
-        else if (evt === 'drop') {
-          uploadContainer.classList.remove('dragover');
-          const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-          if (files.length) handleImageUpload({ target: { files, value: '' } });
-        }
+  window.addEventListener('DOMContentLoaded', () => {
+    existingImages.forEach(imgUrl => {
+      uploadedImages.push({
+        id: Date.now() + Math.random(), 
+        url: imgUrl, 
+        file: null,
+        existing: true
       });
     });
 
-    // Variants
-    function addVariant() {
-      variantCounter++;
-      const container = document.getElementById('stockVariantsContainer');
-      const variantHTML = `
-        <div class="stock-variant-item" id="variant-${variantCounter}">
-          <input type="text" name="variantName[]" class="form-control variant-label" placeholder="Variant name" style="flex: 0 0 150px;">
-          <input type="number" name="variantQty[]" class="form-control variant-input" placeholder="Enter quantity" min="0" value="0">
-          <button type="button" class="remove-variant-btn" onclick="removeVariant(${variantCounter})">
-            Remove
-          </button>
+    renderImagePreviews();
+
+  });
+
+  function renderImagePreviews() {
+    const container = document.getElementById('previewContainer');
+    if (!container) return;
+    container.innerHTML = uploadedImages.map(img => `
+      <div class="preview-item" data-id="${img.id}">
+        <img src="${img.existing ? img.url : img.url}" alt="Preview" class="preview-image">
+        <div class="image-actions">
+          <button type="button" class="crop-image" onclick="openCropModal('${img.id}')" title="Crop Image">Crop</button>
+          <button type="button" class="remove-image" onclick="removeImage('${img.id}')" title="Remove Image">Remove</button>
         </div>
-      `;
-      container.insertAdjacentHTML('beforeend', variantHTML);
+      </div>
+    `).join('');
+  }
+
+  function removeImage(id) {
+
+    uploadedImages = uploadedImages.filter(img => img.id !== id);
+
+    const existingContainer = document.getElementById('existingImagesContainer');
+    if (existingContainer) {
+
+      existingContainer.innerHTML = '';
+      uploadedImages.filter(img => img.existing).forEach(img => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.className = 'existing-image-input';
+        input.value = img.url;
+        existingContainer.appendChild(input);
+      });
     }
 
-    function removeVariant(id) {
-      document.getElementById(`variant-${id}`).remove();
-    }
+    renderImagePreviews();
+  }
 
-    // Form Submission
-    document.getElementById('addProductForm').addEventListener('submit', function(e) {
-      e.preventDefault();
 
-      const formData = new FormData(this);
-      uploadedImages.forEach(img => {
-        formData.append('images', img.file);
-      });
-
-      console.log('Submitting FormData:', [...formData.entries()]);
-
-      Swal.fire({
-        title: 'Adding Product...',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
-
-      setTimeout(() => {
-        Swal.fire({
-          title: 'Success!',
-          text: 'Product added successfully',
-          icon: 'success',
-          confirmButtonColor: '#000'
-        }).then(() => {
-          window.location.href = '/admin/products';
+  function handleImageUpload(event) {
+    const files = Array.from(event.target.files || []);
+    files.forEach(file => {
+      if (file.size > 5 * 1024 * 1024) {
+        Swal.fire('Error', 'Image size should not exceed 5MB', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        uploadedImages.push({
+          id: Date.now() + Math.random(),
+          url: e.target.result, 
+          file: file,
+          existing: false
         });
-      }, 1500);
+        renderImagePreviews();
+      };
+      reader.readAsDataURL(file);
     });
+    event.target.value = '';
+  }
 
-    function cancelForm() {
-      Swal.fire({
-        title: 'Discard Changes?',
-        text: 'All changes will be lost.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Yes, discard'
-      }).then(result => {
-        if (result.isConfirmed) window.location.href = '/admin/products';
-      });
-    }
-  </script>
+</script>
+ 
 </body>
 </html>

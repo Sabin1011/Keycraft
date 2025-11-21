@@ -152,8 +152,11 @@
                   id="categoryName" 
                   placeholder="Enter category name"
                   name="name"
-                  required
+                  
                 />
+                <div class="text-danger">
+                  <%= errors && errors.name ? errors.name : '' %>
+                </div>
                 <div class="form-text">Enter a unique and descriptive category name</div>
               </div>
 
@@ -168,8 +171,11 @@
                   placeholder="Enter category description"
                   rows="4"
                   name="description"
-                  required
-                ></textarea>
+                   
+                ><%= typeof description !== 'undefined' ? description : '' %></textarea>
+                <div class="text-danger">
+                  <%= errors && errors.description ? errors.description : '' %>
+                </div>
                 <div class="form-text">Provide a brief description of the category</div>
               </div>
 

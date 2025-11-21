@@ -15,18 +15,18 @@ const auth = require("../middleware/auth");
 router.get("/login", auth.adminLogoutCheck, adminController.loadLogin);
 router.post("/adminlogin", adminController.adminlogin);
 
-router.get("/category", auth.ifLoggedAdmin, categoryController.loadCategory);
+router.get("/category", auth.isAdminLoggedIn, categoryController.loadCategory);
 
 router.get(
   "/addCategory",
-  auth.ifLoggedAdmin,
+  auth.isAdminLoggedIn,
   categoryController.loadAddCategory
 );
 router.post("/addcategory", categoryController.addCategory);
 
 router.get(
   "/editCategory/:id",
-  auth.ifLoggedAdmin,
+  auth.isAdminLoggedIn,
   categoryController.loadEditCategory
 );
 
@@ -36,7 +36,7 @@ router.patch("/blockCategory/:id", categoryController.blockCategory);
 
 router.get(
   "/userManage",
-  auth.ifLoggedAdmin,
+  auth.isAdminLoggedIn,
   userManageController.loadUserManage
 );
 
@@ -44,40 +44,46 @@ router.patch("/blockUser/:id", userManageController.blockUser);
 
 router.get(
   "/adminProduct",
-  auth.ifLoggedAdmin,
+  auth.isAdminLoggedIn,
   productController.loadAdminProduct
 );
 router.get(
   "/adminAddProduct",
-  auth.ifLoggedAdmin,
+  auth.isAdminLoggedIn,
   productController.loadAddProduct
 );
-
 router.post(
   "/adminAddProduct",
   upload.array("images", 4),
   productController.AddProduct
 );
 
-// routes/admin.js or similar
+router.post(
+  "/adminAddProduct",
+  upload.array("images"),
+  productController.addproduct
+);
 
-router.post("/adminAddProduct", upload.array("images"), async (req, res) => {
-  const { productName, description, price, category } = req.body;
-  const variantName = req.body["variantName[]"] || [];
-  const variantQty = req.body["variantQty[]"] || [];
-  const images = req.files.map((f) => f.filename);
+router.get(
+  "/editProduct/:id",
+  auth.isAdminLoggedIn,
+  productController.loadEditProduct
+);
+router.post(
+  "/updateProduct/:id",
+  auth.isAdminLoggedIn,
+  upload.array("images", 10),
+  productController.updateProduct
+);
 
-  // Save to DB...
-  res.redirect("/admin/adminProduct");
-});
+router.post(
+  "/updateProduct/:id",
+  upload.array("images"),
+  productController.updateProduct
+);
 
-router.get("/editProduct/:id", productController.loadEditProduct);
 router.patch("/toggleProductStatus/:id", productController.toggleProductStatus);
 
-router.get("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/admin/login");
-  });
-});
+router.get("/logout", adminController.logout);
 
 module.exports = router;

@@ -236,7 +236,6 @@
             opacity: 1;
         }
 
-        /* Loading Spinner */
         .spinner {
             display: inline-block;
             width: 14px;
@@ -257,16 +256,34 @@
             min-height: 18px; 
         }
 
-        /* Optional: Red border on invalid inputs */
         .input-wrapper input:invalid:focus {
             border-color: #e74c3c !important;
         }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .eye-toggle {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #777;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .eye-toggle:hover {
+            color: #222;
+        }
+
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .register-container {
                 padding: 30px 25px 40px;
@@ -310,6 +327,7 @@
             <form id="registerForm" method="post" novalidate>
                 <!-- Username -->
                 <div class="input-wrapper">
+                    <label>Username</label>
                     <input 
                         type="text" 
                         id="name" 
@@ -325,6 +343,7 @@
 
                 <!-- Email -->
                 <div class="input-wrapper">
+                    <label>Email</label>
                     <input 
                         type="email" 
                         id="email" 
@@ -340,6 +359,7 @@
 
                 <!-- Phone -->
                 <div class="input-wrapper">
+                    <label>Phone</label>
                     <input 
                         type="tel" 
                         id="phone" 
@@ -354,7 +374,8 @@
                 </div>
 
                 <!-- Password -->
-                <div class="input-wrapper">
+                <div class="input-wrapper password-wrapper">
+                    <label>Password</label>
                     <input 
                         type="password" 
                         id="password" 
@@ -363,13 +384,17 @@
                         value="<%= oldInput?.password || '' %>" 
                          
                     >
+
+                    <i class="fa fa-eye eye-toggle" onclick="togglePassword('password', this)"></i>
+
                     <% if (errors?.password) { %>
                         <p class="input-error"><%= errors.password %></p>
                     <% } %>
                 </div>
 
                 <!-- Confirm Password -->
-                <div class="input-wrapper">
+                <div class="input-wrapper password-wrapper">
+                    <label>Confirm Password</label>
                     <input 
                         type="password" 
                         id="confirmPassword" 
@@ -378,6 +403,9 @@
                         value="<%= oldInput?.confirm_password || '' %>" 
                          
                     >
+
+                    <i class="fa fa-eye eye-toggle" onclick="togglePassword('confirmPassword', this)"></i>
+
                     <% if (errors?.confirmPassword) { %>
                         <p class="input-error"><%= errors.confirmPassword %></p>
                     <% } %>
@@ -439,6 +467,20 @@
                 alert("Password must be of atleast 6 characters");
             };
         });
+        
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
         
         function handleGoogleSignIn() {
             // Simulate Google OAuth

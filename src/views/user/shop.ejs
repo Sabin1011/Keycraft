@@ -13,22 +13,29 @@
         color: #222;
     }
 
+    /* Page Header */
     .page-header {
-        color: #fff;
-        padding: 40px 0;
+        padding: 60px 0 40px;
         text-align: center;
-        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-            url('/images/header-bg.jpg') center/cover no-repeat;
+        background: #222 url('/images/header-bg.jpg') center/cover no-repeat;
+        color: #fff;
     }
 
     .page-header h1 {
         font-size: 36px;
         font-weight: 900;
+        margin-bottom: 8px;
+    }
+
+    .page-header p {
+        font-size: 16px;
+        font-weight: 500;
+        color: #ddd;
     }
 
     /* Layout */
     .products-section {
-        padding: 50px 0;
+        padding: 50px 15px;
     }
 
     .products-layout {
@@ -41,76 +48,97 @@
     .filters-sidebar {
         background: #fff;
         padding: 25px;
-        border-radius: 10px;
-        border: 1px solid #ddd;
+        border-radius: 15px;
+        border: 1px solid #eee;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     }
 
     .filter-title {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 700;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #333;
     }
 
     /* Search & Price */
     #searchInput {
-        padding: 8px 12px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        width: 180px;
+        padding: 10px 15px;
+        border-radius: 25px;
+        border: 1px solid #ddd;
+        width: 100%;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+
+    #searchInput:focus {
+        outline: none;
+        border-color: #222;
+        box-shadow: 0 0 6px rgba(0,0,0,0.1);
     }
 
     .search-controls {
         display: flex;
-        gap: 5px;
-        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
     }
 
     .clear-btn {
-        padding: 8px 10px;
-        border: 1px solid #ccc;
-        background: white;
+        padding: 10px 15px;
+        border: 1px solid #222;
+        background: #fff;
         cursor: pointer;
-        border-radius: 5px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s;
     }
 
     .clear-btn:hover {
-        background: #ddd;
+        background: #222;
+        color: #fff;
     }
 
     .price-slider {
         width: 100%;
+        margin: 10px 0 15px;
     }
 
-    /* Category List Style */
+    /* Categories */
     .category-list {
         list-style: none;
         padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
     .category-list li {
-        margin-bottom: 8px;
+        flex: 1 1 45%;
     }
 
     .category-link {
-        display: block;
-        padding: 8px 12px;
+        display: inline-block;
+        padding: 8px 15px;
+        font-size: 13px;
+        border-radius: 25px;
         text-decoration: none;
-        color: #666;
-        font-size: 14px;
-        border-radius: 5px;
-        transition: all 0.2s;
-        border: 1px solid transparent;
         text-transform: lowercase;
+        color: #555;
+        border: 1px solid transparent;
+        transition: all 0.3s;
+        text-align: center;
     }
 
     .category-link:hover {
-        color: #222;
-        background: #f7f7f7;
+        background: #222;
+        color: #fff;
+        border-color: #222;
     }
 
     .category-link.active-cat {
-        color: #fff;
         background: #222;
+        color: #fff;
         border-color: #222;
         font-weight: 600;
     }
@@ -119,48 +147,60 @@
     .product-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 25px;
+        gap: 30px;
     }
 
     .product-card {
         background: #fff;
-        border-radius: 10px;
-        padding-bottom: 15px;
+        border-radius: 15px;
         overflow: hidden;
-        border: 1px solid #ddd;
-        transition: .3s;
+        transition: 0.3s;
+        border: 1px solid #eee;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
     }
 
     .product-card:hover {
-        box-shadow: 0 10px 30px rgba(0, 0, 0, .1);
         transform: translateY(-5px);
+        box-shadow: 0 15px 25px rgba(0,0,0,0.1);
     }
 
     .product-image img {
         width: 100%;
-        height: 230px;
+        height: 240px;
         object-fit: contain;
-        background: #f7f7f7;
+        background: #f9f9f9;
     }
 
     .product-info {
         padding: 15px;
-    }
-
-    .product-name {
-        font-size: 17px;
-        margin-bottom: 5px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     .product-category {
-        font-size: 13px;
-        color: #666;
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .product-name {
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #222;
     }
 
     .product-price {
         font-size: 18px;
         font-weight: 700;
-        margin: 10px 0;
+        margin-bottom: 12px;
+        color: #222;
     }
 
     .product-actions {
@@ -172,20 +212,40 @@
         flex: 1;
         padding: 10px;
         border: 1px solid #222;
-        background: white;
-        cursor: pointer;
-        border-radius: 5px;
+        background: #fff;
+        border-radius: 25px;
         text-transform: lowercase;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
     }
 
     .btn-small:hover {
         background: #222;
-        color: white;
+        color: #fff;
     }
 
     .btn-primary {
         background: #222;
-        color: white;
+        color: #fff;
+        border-color: #222;
+    }
+
+    /* Sort dropdown */
+    select#sortSelect {
+        padding: 8px 15px;
+        border-radius: 25px;
+        border: 1px solid #ddd;
+        font-size: 14px;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    select#sortSelect:focus {
+        outline: none;
+        border-color: #222;
+        box-shadow: 0 0 6px rgba(0,0,0,0.1);
     }
 
     /* Pagination */
@@ -198,16 +258,40 @@
 
     .pagination a {
         padding: 8px 15px;
-        background: white;
-        border: 1px solid #ccc;
+        background: #fff;
+        border: 1px solid #ddd;
         text-decoration: none;
         color: #222;
-        border-radius: 5px;
+        border-radius: 25px;
+        transition: all 0.3s;
+    }
+
+    .pagination a:hover {
+        background: #222;
+        color: #fff;
+        border-color: #222;
     }
 
     .pagination a.active {
         background: #222;
-        color: white;
+        color: #fff;
+        border-color: #222;
+    }
+
+    .product-actions a{
+        text-decoration: none;
+        display: flex;
+        justify-content: center;
+    }
+
+    @media(max-width:768px){
+        .products-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .category-list li {
+            flex: 1 1 100%;
+        }
     }
 </style>
 
@@ -220,6 +304,7 @@
     <div class="container">
         <div class="products-layout">
 
+            <!-- Sidebar -->
             <aside class="filters-sidebar">
 
                 <h3 class="filter-title">Search</h3>
@@ -245,7 +330,6 @@
                     <% }) %>
                 </ul>
 
-
                 <h3 class="filter-title" style="margin-top:25px;">Price Range</h3>
                 <input type="range" id="priceRange" min="0" max="<%= maxPriceValue %>"
                     value="<%= maxPrice %>" class="price-slider" />
@@ -255,8 +339,9 @@
                     onclick="applyFilters(true)">Clear All Filters</button>
             </aside>
 
+            <!-- Products -->
             <div>
-                <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
                     <select id="sortSelect" onchange="applyFilters()">
                         <option value="a-z" <%= activeSort === 'a-z' ? 'selected' : '' %>>Sort by: Name A-Z</option>
                         <option value="z-a" <%= activeSort === 'z-a' ? 'selected' : '' %>>Sort by: Name Z-A</option>
@@ -267,12 +352,11 @@
 
                 <div class="product-grid">
                     <% if (products.length === 0) { %>
-                    <p style="grid-column: 1 / -1; text-align: center; color: #888; font-size: 1.2em;">No products found</p>
+                    <p style="grid-column:1/-1; text-align:center; color:#888; font-size:1.1em;">No products found</p>
                     <% } %>
 
                     <% products.forEach(p => { %>
                     <div class="product-card">
-
                         <div class="product-image">
                             <% if (p.images && p.images.length > 0) { %>
                                 <img src="<%= p.images[0] %>" alt="<%= p.name %>" />
@@ -282,17 +366,12 @@
                         </div>
 
                         <div class="product-info">
-                            <div class="product-category">
-                                <%= p.category ? p.category.name : "Uncategorized" %>
-                            </div>
-
+                            <div class="product-category"><%= p.category ? p.category.name : "Uncategorized" %></div>
                             <div class="product-name"><%= p.name %></div>
                             <div class="product-price">₹<%= p.price.toFixed(2) %></div>
 
                             <div class="product-actions">
-                                <a href="/singleProduct/<%= p._id %>"
-                                    class="btn-small btn-primary">details</a>
-
+                                <a href="/singleProduct/<%= p._id %>" class="btn-small btn-primary">details</a>
                                 <button class="btn-small" disabled>add to cart</button>
                             </div>
                         </div>
@@ -318,68 +397,46 @@
     const searchInput = document.getElementById("searchInput");
     const sortSelect = document.getElementById("sortSelect");
 
-    // Initial update of max price label to show current value
     maxPriceLabel.textContent = priceSlider.value;
 
     priceSlider.oninput = function () {
         maxPriceLabel.textContent = this.value;
-        // Trigger filter on price range change
         applyFilters();
     };
 
-    /**
-     * Applies all filters (Search, Price, Sort, Category) by constructing and redirecting to a new URL.
-     * @param {boolean} reset If true, clears search and sets max price/category/sort to default.
-     */
     function applyFilters(reset = false) {
         const url = new URL(window.location.href);
-
-        // Always reset the page to 1 when filters change
         url.searchParams.set("page", 1);
 
-        // Handle Clear All Filters
         if (reset) {
             url.searchParams.delete("search");
             url.searchParams.set("maxPrice", "<%= maxPriceValue %>");
             url.searchParams.delete("category");
-            url.searchParams.set("sort", "a-z"); // Reset sort to default A-Z
+            url.searchParams.set("sort", "a-z");
             window.location.href = url.toString();
             return;
         }
 
-        // Apply current Search, Price, and Sort values
         url.searchParams.set("search", searchInput.value);
         url.searchParams.set("maxPrice", priceSlider.value);
         url.searchParams.set("sort", sortSelect.value);
 
-        // Preserve the current category filter
         const currentCategory = url.searchParams.get("category");
-        if (!currentCategory) {
-            url.searchParams.delete("category");
-        }
+        if (!currentCategory) url.searchParams.delete("category");
 
         window.location.href = url.toString();
     }
 
-    /**
-     * Handles category filtering by setting the category query parameter.
-     * Preserves other filters.
-     * @param {string} categoryId The ID of the category to filter by (empty string for 'All').
-     */
     function applyCategoryFilter(categoryId) {
         const url = new URL(window.location.href);
-        url.searchParams.set("page", 1); // Reset to page 1
+        url.searchParams.set("page", 1);
 
-        if (categoryId) {
-            url.searchParams.set("category", categoryId);
-        } else {
-            url.searchParams.delete("category");
-        }
+        if (categoryId) url.searchParams.set("category", categoryId);
+        else url.searchParams.delete("category");
 
-        // Preserve current search, price, and sort filters
         url.searchParams.set("search", searchInput.value);
         url.searchParams.set("maxPrice", priceSlider.value);
-        url.searchParams.set("sort", sortSelect.value); // Preserve sort
+        url.searchParams.set("sort", sortSelect.value);
 
         window.location.href = url.toString();
     }
