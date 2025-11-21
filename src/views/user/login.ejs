@@ -7,6 +7,7 @@
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Questrial&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
     <style>
         * {
@@ -38,7 +39,7 @@
         }
 
         .logo span {
-            color: #6c63ff;
+            color: #222;
         }
 
         h2 {
@@ -70,7 +71,7 @@
         .btn-primary {
             width: 100%;
             padding: 12px;
-            background: #6c63ff;
+            background: #222;
             border: none;
             color: white;
             border-radius: 8px;
@@ -133,7 +134,7 @@
         }
 
         .footer-text a {
-            color: #6c63ff;
+            color: #222;
             text-decoration: none;
             font-weight: bold;
         }
@@ -147,6 +148,25 @@
             color: #d00;
             font-size: 15px;
         }
+        .password-wrapper {
+            position: relative;
+        }
+
+        .eye-toggle {
+            position: absolute;
+            top: 70%;
+            right: 15px;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #777;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .eye-toggle:hover {
+            color: #222;
+        }
+
     </style>
 </head>
 
@@ -178,17 +198,27 @@
                     <% } %>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-wrapper">
                 <label>Password</label>
                 <input 
                     type="password"
+                    id="password"
                     name="password"
                     placeholder="Enter your password"
                     >
+
+                    <i class="fa fa-eye eye-toggle" onclick="togglePassword('password', this)"></i>
+
                     <% if (passwordError) { %>
                         <p style="color:red; font-size:14px; margin-top:4px;"><%= passwordError %></p>
                     <% } %>
+                    
             </div>
+            <div style="text-align: right; margin-top: 6px;">
+                        <a href="/forgot-password" style="font-size: 14px; color: #f30606b5; text-decoration:none; font-weight:bold;">
+                            Forgot Password?
+                        </a>
+                    </div>
 
             <button type="submit" class="btn-primary">Login</button>
         </form>
@@ -207,20 +237,22 @@
     </div>
 
 <script>
-    // frontend validation
-    document.getElementById("loginForm").addEventListener("submit", function(e) {
-        const email = document.querySelector("input[name='email']").value.trim();
-        const password = document.querySelector("input[name='password']").value.trim();
 
-        if (!email || !password) {
-            alert("Please fill all fields");
-        };
+    function togglePassword(inputId, icon) {
+        const input = document.getElementById(inputId);
 
-        // minimum password length check
-        if(password.length<6){
-            alert("Password must be of atleast 6 characters");
-        };
-    });
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    }
+
+
 </script>
 
 </body>

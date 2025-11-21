@@ -49,10 +49,10 @@ var productSchema = new Schema(
             default: 0,
         },
     },
-    { timestamps: true } // Fixed typo: was "timeStamp", should be "timestamps"
+    { timestamps: true } 
 );
 
-// Calculate total stock before saving
+
 productSchema.pre('save', function(next) {
   if (this.variants && this.variants.length > 0) {
     this.totalStock = this.variants.reduce((sum, variant) => sum + variant.quantity, 0);

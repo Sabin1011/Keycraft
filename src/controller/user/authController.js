@@ -1,10 +1,9 @@
 const User = require("../../models/userSchema");
 const sendEmail = require("../../utils/sendEmail");
 const bcrypt = require("bcrypt");
+const passport = require("passport");
 
 // REGISTER
-// ----------------
-// ----------------
 
 const loadRegister = async (req, res) => {
   try {
@@ -30,23 +29,19 @@ const register = async (req, res) => {
       errors.agree = "You must agree to the privacy policy and terms.";
     }
 
-    // 1. Username
     if (!username || username.trim().length < 3) {
       errors.username = "Enter a valid name (min 3 characters)";
     }
 
-    // 2. Email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) {
       errors.email = "Enter a valid email address";
     }
 
-    // 3. Phone number
     if (!phone || !/^\d{10}$/.test(phone)) {
       errors.phone = "Phone number must be exactly 10 digits";
     }
 
-    // 4. Password strength
     const passwordRegex =
       /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!password) {
@@ -56,20 +51,17 @@ const register = async (req, res) => {
         "Password must be 8+ chars with 1 uppercase, 1 number, 1 special (@$!%*?&)";
     }
 
-    // 5. Confirm password
     if (!confirm_password) {
       errors.confirmPassword = "Please confirm your password";
     } else if (password !== confirm_password) {
       errors.confirmPassword = "Passwords do not match";
     }
 
-    // 6. Checkbox agreement
     if (!agree) {
       errors.agree =
         "You must agree to the privacy policy and terms of service";
     }
 
-    // 7. Check if email already exists (only if no other errors)
     if (Object.keys(errors).length === 0) {
       const existingUser = await User.findOne({
         email: email.toLowerCase(),
@@ -80,21 +72,14 @@ const register = async (req, res) => {
       }
     }
 
-    // If any error → send back to form with errors + old input
     if (Object.keys(errors).length > 0) {
       return res.render("register", {
         generalError: null,
         errors,
         oldInput: req.body,
-        // oldInput: {
-        //     username: username?.trim() || '',
-        //     email: email || '',
-        //     phone: phone || ''
-        // }
       });
     }
 
-    // All validation passed → proceed
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const regUser = {
@@ -104,10 +89,8 @@ const register = async (req, res) => {
       password: hashedPassword,
     };
 
-    // Store in session for OTP verification
     const otp = generateOTP();
 
-    // Send email
     await sendEmail({
       to: email,
       subject: "Your New OTP",
@@ -135,8 +118,6 @@ const register = async (req, res) => {
 };
 
 // OTP
-// --------------------
-// --------------------
 
 function generateOTP() {
   const otp = Math.floor(1000 + Math.random() * 9000);
@@ -198,12 +179,10 @@ const resendOtp = async (req, res) => {
       return res.render("register");
     }
 
-    // generate new otp
     const newOtp = generateOTP();
 
     req.session.sendedOtp = newOtp;
 
-    // Send email
     await sendEmail({
       to: user.email,
       subject: "Your New OTP",
@@ -217,8 +196,6 @@ const resendOtp = async (req, res) => {
 };
 
 // LOGIN
-// ----------------
-// ----------------
 
 const loadLogin = async (req, res) => {
   try {
@@ -241,7 +218,6 @@ const login = async (req, res) => {
     let emailError = "";
     let passwordError = "";
 
-    // backend validation
     if (!email || !password) {
       return res.render("login", {
         message: "All fields are required",
@@ -251,7 +227,6 @@ const login = async (req, res) => {
       });
     }
 
-    // custom email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.render("login", {
@@ -262,7 +237,6 @@ const login = async (req, res) => {
       });
     }
 
-    // custom password validation
     if (password.leght < 6) {
       return res.render("login", {
         passwordError: "Password must be at least 6 characters",
@@ -272,7 +246,6 @@ const login = async (req, res) => {
       });
     }
 
-    // find user
     const user = await User.findOne({ email, status: true });
 
     if (!user) {
@@ -284,7 +257,6 @@ const login = async (req, res) => {
       });
     }
 
-    // checks password (hashed)
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -296,7 +268,6 @@ const login = async (req, res) => {
       });
     }
 
-    // check if user is blocked / inactive
     if (user.isBlocked) {
       return res.render("login", {
         email,
@@ -306,13 +277,11 @@ const login = async (req, res) => {
       });
     }
 
-    // check if user is admin or not
     if (user.isAdmin === true) {
       req.sesison.adminId = user._id;
       return res.render("login");
     }
 
-    // create session
     req.session.userId = user._id;
 
     return res.redirect("/home");
@@ -326,9 +295,74 @@ const login = async (req, res) => {
 
 const loadForgotPassword = async (req, res) => {
   try {
-    res.render("forgotPassword");
+    res.render("forgotPassword", { error: null });
   } catch (error) {
     console.log("error loading forgot password page", error);
+  }
+};
+
+const emailVerification = async (req, res) => {
+  try {
+    const email = req.body.email?.trim();
+
+    if (!email) {
+      return res.render("forgotPassword", {
+        error: "Please enter your email address.",
+      });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.render("forgotPassword", {
+        error: "No account found with this email.",
+      });
+    }
+
+    const otp = generateOTP();
+
+    req.session.forgotOtp = otp;
+    req.session.forgotEmail = email;
+    req.session.otpExpiry = Date.now() + 5 * 60 * 1000;
+
+    await sendEmail({
+      to: req.session.forgotEmail,
+      subject: "Password Reset OTP - KeyCraft",
+      text: `Your OTP for password reset is: ${otp}\nIt expires in 5 minutes.`,
+    });
+
+    console.log("Forgot Password OTP Sent:", otp, "to", email);
+
+    return res.redirect("/forgot-password/otp");
+  } catch (error) {
+    console.log("Error in forgot password OTP send:", error);
+    return res.render("forgotPassword", {
+      error: "Failed to send OTP. Try again later.",
+    });
+  }
+};
+
+const loadforgototp = async (req, res) => {
+  try {
+    if (!req.session.forgotEmail || !req.session.forgotOtp) {
+      req.flash("error", "Session expired. Please try again.");
+      return res.redirect("/forgotPassword");
+    }
+
+    if (req.session.otpExpiry && Date.now() > req.session.otpExpiry) {
+      delete req.session.forgotOtp;
+      delete req.session.forgotEmail;
+      delete req.session.otpExpiry;
+      req.flash("error", "OTP expired. Please request a new one.");
+      return res.redirect("/forgot-password");
+    }
+
+    res.render("forgotpasswordotp", {
+      email: req.session.forgotEmail,
+      error: req.flash("error")[0] || null,
+    });
+  } catch (error) {
+    console.log("Error loading forgot OTP page:", error);
+    res.redirect("/forgot-password");
   }
 };
 
@@ -342,6 +376,93 @@ const loadEnterNewPassword = async (req, res) => {
   }
 };
 
+const verifyForgotOtp = async (req, res) => {
+  try {
+    console.log("reached verifyforgototp");
+    const { otp } = req.body;
+    const email = req.session.forgotEmail;
+
+    if (!email || !req.session.forgotOtp) {
+      req.flash("error", "Invalid session. Try again.");
+      return res.redirect("/forgot-password");
+    }
+
+    if (Date.now() > req.session.otpExpiry) {
+      req.flash("error", "OTP has expired.");
+      return res.redirect("/forgot-password");
+    }
+
+    if (otp !== req.session.forgotOtp) {
+      req.flash("error", "Invalid OTP. Please try again.");
+      return res.redirect("/forgot-password/verify-otp");
+    }
+
+    delete req.session.forgotOtp;
+    delete req.session.otpExpiry;
+
+    req.session.canResetPassword = true;
+
+    res.render("forgotNewPassword", { email });
+  } catch (error) {
+    console.log(error);
+    req.flash("error", "Something went wrong.");
+    res.redirect("/forgot-password");
+  }
+};
+
+const forgotPasswordOtpPage = (req, res) => {
+  try {
+    return res.render("forgotPasswordOtp", {
+      email: req.session.forgotEmail,
+      error: "",
+    });
+  } catch (error) {}
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, password, confirmPassword } = req.body;
+
+    if (!email || !password || !confirmPassword) {
+      return res.status(400).render("resetPassword", {
+        error: "All fields are required.",
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).render("resetPassword", {
+        error: "Passwords do not match.",
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).render("resetPassword", {
+        error: "Password must be at least 8 characters.",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).render("resetPassword", {
+        error: "User not found.",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.redirect("/login");
+  } catch (error) {
+    console.error("RESET PASSWORD ERROR:", error);
+    return res.status(500).render("resetPassword", {
+      error: "Something went wrong. Please try again.",
+    });
+  }
+};
+
 module.exports = {
   loadRegister,
   register,
@@ -352,4 +473,9 @@ module.exports = {
   loadForgotPassword,
   loadEnterNewPassword,
   resendOtp,
+  emailVerification,
+  loadforgototp,
+  verifyForgotOtp,
+  forgotPasswordOtpPage,
+  resetPassword,
 };

@@ -40,11 +40,13 @@
       <div class="mb-3">
         <label class="form-label">Product Name <span class="required">*</span></label>
         <input type="text" class="form-control" name="productName" required placeholder="Enter product name">
+        <div class="error text-danger" id="productNameError"><%= errors && errors.productName ? errors.productName : '' %></div>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Description <span class="required">*</span></label>
         <textarea class="form-control" name="description" required placeholder="Enter product description"></textarea>
+        <div class="error text-danger" id="descriptionError"><%= errors && errors.description ? errors.description : '' %></div>
       </div>
 
       <div class="mb-3">
@@ -52,15 +54,15 @@
         <div id="variantContainer">
           <div class="variant-row">
             <input type="text" name="variantName[]" value="Red Switch" class="form-control" readonly>
-            <input type="number" name="variantQty[]" class="form-control" min="0" placeholder="Quantity">
+            <input type="number" name="variantQty[]" class="form-control" placeholder="Quantity">
           </div>
           <div class="variant-row">
             <input type="text" name="variantName[]" value="Green Switch" class="form-control" readonly>
-            <input type="number" name="variantQty[]" class="form-control" min="0" placeholder="Quantity">
+            <input type="number" name="variantQty[]" class="form-control" placeholder="Quantity">
           </div>
           <div class="variant-row">
             <input type="text" name="variantName[]" value="Brown Switch" class="form-control" readonly>
-            <input type="number" name="variantQty[]" class="form-control" min="0" placeholder="Quantity">
+            <input type="number" name="variantQty[]" class="form-control" placeholder="Quantity">
           </div>
         </div>
         <button type="button" class="add-variant-btn mt-2" onclick="addVariant()">+ Add Variant</button>
@@ -68,23 +70,24 @@
 
       <div class="mb-3">
         <label class="form-label">Price (₹) <span class="required">*</span></label>
-        <input type="number" name="price" class="form-control" required placeholder="Enter price" min="0" step="0.01">
+        <input type="number" name="price" class="form-control" placeholder="Enter price">
+        <div class="error text-danger" id="priceError"><%= errors && errors.price ? errors.price : '' %></div>   
       </div>
 
       <div class="mb-3">
-  <label class="form-label">Select Category <span class="required">*</span></label>
-  <select class="form-select" name="category" required>
-    <option value="">-- Choose category --</option>
-    <% if (locals.categories && categories.length) { %>
-      <% categories.forEach(c=> { %>
-        <option value="<%=c._id%>"><%=c.name%></option>
-      <% }) %>
-    <% } else { %>
-      <option value="wired">Wired</option>
-      <option value="wireless">Wireless</option>
-      <% } %>
-  </select>
-</div>
+      <label class="form-label">Select Category <span class="required">*</span></label>
+      <select class="form-select" name="category" required>
+        <option value="">-- Choose category --</option>
+        <% if (locals.categories && categories.length) { %>
+          <% categories.forEach(c=> { %>
+            <option value="<%=c._id%>"><%=c.name%></option>
+          <% }) %>
+        <% } else { %>
+          <option value="wired">Wired</option>
+          <option value="wireless">Wireless</option>
+          <% } %>
+      </select>
+    </div>
 
       <div class="mb-3">
         <label class="form-label">Product Images</label>
@@ -92,7 +95,7 @@
           <p>Click or drag & drop to upload images</p>
           <small class="text-muted">JPG, PNG, WEBP (Max 5 MB each)</small>
         </div>
-        <input type="file" id="imageInput" multiple accept="image/*" style="display:none;"> 
+        <input type="file" id="imageInput" multiple accept="image/*" style="display:none;" > 
         <div class="preview-container"></div>
       </div>
 
@@ -125,7 +128,7 @@
 </div>
 
 <script>
-// Mock functions to prevent errors if they are defined in another file
+
 function addVariant() {
     const container = document.getElementById('variantContainer');
     const newVariant = document.createElement('div');
@@ -139,9 +142,8 @@ function addVariant() {
 }
 function cancelForm() {
     console.log('Form cancelled');
-    window.history.back(); // Example action
+    window.history.back(); 
 }
-// End Mock functions
 
 document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('imageInput');
@@ -154,19 +156,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let cropper;
     let currentFileIndex = null;
-    // This array will hold the File objects (original or cropped) for submission
+  
     let productFiles = [];
 
-    // Helper to re-render the previews
+    
     const renderPreviews = () => {
         previewContainer.innerHTML = '';
         productFiles.forEach((file, index) => {
-            // Use FileReader to get a Data URL for the preview image
+            
             const reader = new FileReader();
             reader.onload = (e) => {
                 const previewItem = document.createElement('div');
                 previewItem.className = 'preview-item';
-                // Add data-index to associate the DOM element with the file in the array
+                
                 previewItem.dataset.index = index; 
                 previewItem.innerHTML = `
                     <img src="${e.target.result}" alt="preview">
@@ -177,26 +179,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 previewContainer.appendChild(previewItem);
             };
-            // Read the actual File object
+            
             reader.readAsDataURL(file.file); 
         });
     };
 
-    // Upload handler: Adds new files to the productFiles array
+  
     imageInput.addEventListener('change', (event) => {
         const newFiles = Array.from(event.target.files);
         
         newFiles.forEach((file) => {
-            // Store the file and its name/type for later use
+            
             productFiles.push({ file: file, originalName: file.name, type: file.type });
         });
         
-        // Clear the input value so the same file can be selected again
+       
         imageInput.value = ''; 
         renderPreviews();
     });
 
-    // Action button click (Crop/Remove)
+    
     previewContainer.addEventListener('click', (e) => {
         const target = e.target;
         const index = parseInt(target.dataset.index);
@@ -205,18 +207,18 @@ document.addEventListener('DOMContentLoaded', () => {
             currentFileIndex = index;
             const fileToCrop = productFiles[index].file;
 
-            // Use FileReader to load the file into the modal's image tag
+            
             const reader = new FileReader();
             reader.onload = (e) => {
                 cropImage.src = e.target.result;
                 cropModal.show();
                 
-                // Wait for modal to be shown before initializing Cropper
+                
                 cropModalElement.addEventListener('shown.bs.modal', () => {
                     if (cropper) cropper.destroy();
                     cropper = new Cropper(cropImage, {
-                        aspectRatio: 1, // Square crop for typical product images
-                        viewMode: 1, // Restrict the crop box to not exceed the canvas
+                        aspectRatio: 1, 
+                        viewMode: 1,
                         autoCropArea: 0.9,
                         responsive: true,
                         background: false,
@@ -226,92 +228,92 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.readAsDataURL(fileToCrop);
 
         } else if (target.classList.contains('remove-image')) {
-            // Remove the file from the array and re-render
+            
             productFiles.splice(index, 1);
             renderPreviews();
         }
     });
 
-    // Crop and save
+
     cropBtn.addEventListener('click', () => {
         if (cropper && currentFileIndex !== null) {
             const originalFile = productFiles[currentFileIndex];
 
             const canvas = cropper.getCroppedCanvas({
-                width: 800, // Good size for main product images
+                width: 800, 
                 height: 800,
             });
 
-            // Convert the canvas data to a Blob (file-like object)
+            
             canvas.toBlob((blob) => {
                 if (blob) {
-                    // Create a new File object from the blob, using the original name and type
+                  
                     const croppedFile = new File([blob], originalFile.originalName, { 
                         type: originalFile.type,
                         lastModified: Date.now()
                     });
 
-                    // Replace the old file with the new cropped file in the array
+                   
                     productFiles[currentFileIndex].file = croppedFile;
                     
-                    // Clean up and update UI
+                   
                     cropModal.hide();
-                    if(cropper) cropper.destroy(); // Check before destroy
+                    if(cropper) cropper.destroy(); 
                     cropper = null;
                     currentFileIndex = null;
-                    renderPreviews(); // Re-render previews to show the cropped image
+                    renderPreviews(); 
                 } else {
                     console.error('Failed to convert canvas to blob.');
                 }
-            }, originalFile.type, 0.9); // Use original file type and high quality (0.9)
+            }, originalFile.type, 0.9); 
         }
     });
 
-    // Form Submission Handler: Creates a custom FormData object
-    addProductForm.addEventListener('submit', function(e) {
-        e.preventDefault(); 
+    
+//     addProductForm.addEventListener('submit', function(e) {
+//         e.preventDefault(); 
 
-        // Create a new FormData object to manually append files
-        const customFormData = new FormData(this);
+      
+//         const customFormData = new FormData(this);
 
-        // Remove the original files input's entry if it somehow made it (it shouldn't)
-        customFormData.delete('images'); 
         
-        // Append all files from our managed array
-        productFiles.forEach((item) => {
-            // 'images' is the expected name for your server-side file handler (e.g., Multer)
-            customFormData.append('images', item.file, item.originalName); 
-        });
-
-        // --- Send the Form Data (AJAX/Fetch) ---
+//         customFormData.delete('images'); 
         
-        fetch(this.action, {
-            method: this.method,
-            body: customFormData
-        })
-        .then(async response => { 
-            // Read the JSON body whether the response is ok or not
-            const data = await response.json().catch(() => ({ message: 'Server did not return JSON.' }));
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Network response was not ok');
-            }
-            return data;
-        })
-        .then(data => {
-            // SUCCESS
-            console.log('Submission data:', data);
-            alert(data.message || 'Product added successfully!');
-
-            window.location.href = '/admin/adminProduct'; 
-        })
-        .catch(error => {
+       
+//         productFiles.forEach((item) => {
             
-            console.error('There was an error submitting the form:', error);
+//             customFormData.append('images', item.file, item.originalName); 
+//         });
+
+       
+        
+//         fetch(this.action, {
+//             method: this.method,
+//             body: customFormData
+//         })
+//         .then(async response => { 
+            
+//             const data = await response.json().catch(() => ({ message: 'Server did not return JSON.' }));
+
+//             if (!response.ok) {
+//                 throw new Error(data.message || 'Network response was not ok');
+//             }
+//             return data;
+//         })
+//         .then(data => {
+//             // SUCCESS
+//             console.log('Submission data:', data);
+//             alert(data.message || 'Product added successfully!');
+
+//             window.location.href = '/admin/adminProduct'; 
+//         })
+//         .catch(error => {
+            
+//             console.error('There was an error submitting the form:', error);
            
-            alert(`Failed to add product: ${error.message}`);
-        });
-    });
+//             alert(`Failed to add product: ${error.message}`);
+//         });
+//     });
 });
 </script>
 

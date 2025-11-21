@@ -1,19 +1,14 @@
 const User = require("../../models/userSchema");
 
-
-
-
-// Load User Management Page with Search and Pagination
 const loadUserManage = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = 2; // 10 users per page
+    const limit = 2;
     const skip = (page - 1) * limit;
     const search = req.query.search ? req.query.search.trim() : "";
 
-    // Build search query
-    let searchQuery = { isAdmin: false }; // Only get non-admin users
-    
+    let searchQuery = { isAdmin: false };
+
     if (search && search !== "") {
       searchQuery = {
         isAdmin: false,
@@ -25,12 +20,10 @@ const loadUserManage = async (req, res) => {
       };
     }
 
-    // Get total count for pagination
     const totalUsers = await User.countDocuments(searchQuery);
 
-    // Fetch users with pagination
     const users = await User.find(searchQuery)
-      .sort({ createdAt: -1 }) // Newest first
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
@@ -44,10 +37,8 @@ const loadUserManage = async (req, res) => {
       error: req.session.error || null,
     });
 
-    // Clear session messages after rendering
     delete req.session.success;
     delete req.session.error;
-
   } catch (error) {
     console.error("Error loading user manage page:", error);
     res.status(500).render("userManage", {
@@ -61,12 +52,10 @@ const loadUserManage = async (req, res) => {
   }
 };
 
-// Block/Unblock User (Toggle Status)
 const blockUser = async (req, res) => {
-  try { 
+  try {
     const userId = req.params.id;
 
-    // Find user by ID
     const user = await User.findById(userId);
 
     if (!user) {
@@ -76,7 +65,6 @@ const blockUser = async (req, res) => {
       });
     }
 
-    // Don't allow blocking admins
     if (user.isAdmin) {
       return res.status(403).json({
         success: false,
@@ -93,7 +81,6 @@ const blockUser = async (req, res) => {
       message: `User ${user.status ? "unblocked" : "blocked"} successfully`,
       newStatus: user.status,
     });
-
   } catch (error) {
     console.error("Error toggling user status:", error);
     return res.status(500).json({
@@ -103,11 +90,7 @@ const blockUser = async (req, res) => {
   }
 };
 
-
-
-
 module.exports = {
-    loadUserManage,
-    blockUser,
-
-}
+  loadUserManage,
+  blockUser,
+};

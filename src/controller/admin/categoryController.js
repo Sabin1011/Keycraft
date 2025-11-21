@@ -1,8 +1,7 @@
 const Category = require("../../models/categorySchema");
 
-// =======================
 // LOAD CATEGORY PAGE
-// =======================
+
 const loadCategory = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -15,12 +14,13 @@ const loadCategory = async (req, res) => {
       searchQuery = {
         $or: [
           { name: { $regex: search, $options: "i" } },
-          { description: { $regex: search, $options: "i" } }
-        ]
+          { description: { $regex: search, $options: "i" } },
+        ],
       };
     }
 
     const totalCategories = await Category.countDocuments(searchQuery);
+
 
     const categories = await Category.find(searchQuery)
       .sort({ createdAt: -1 })
@@ -34,12 +34,11 @@ const loadCategory = async (req, res) => {
       limit,
       search,
       success: req.session.success,
-      error: req.session.error
+      error: req.session.error,
     });
 
     delete req.session.success;
     delete req.session.error;
-
   } catch (error) {
     console.error("Error loading categories page:", error);
     res.status(500).render("category", {
@@ -48,54 +47,72 @@ const loadCategory = async (req, res) => {
       totalCategories: 0,
       limit: 10,
       search: "",
-      error: "Failed to load categories"
+      error: "Failed to load categories",
     });
   }
 };
 
-// =======================
 // LOAD ADD CATEGORY PAGE
-// =======================
+
 const loadAddCategory = async (req, res) => {
   try {
-    res.render("addCategory");
+    res.render("addCategory",{
+      errors: {},    
+      name: '',         
+      description: ''
+    });
   } catch (error) {
     console.log("Error loading add category page:", error);
   }
 };
 
-// =======================
 // ADD CATEGORY
-// =======================
+
 const addCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
+    const errors ={};
 
-    const exist = await Category.findOne({
-      name: { $regex: new RegExp(`^${name}$`, "i") }
+    if (!name || name.trim() === "") {
+      errors.name = "Category name is required.";
+    } else if (name.trim().length < 2 || name.trim().length > 50) {
+      errors.name = "Category name must be between 2 and 50 characters.";
+    }
+
+    if (!description || description.trim() === "") {
+      errors.description = "Category description is required.";
+    } else if (description.trim().length < 10 || description.trim().length > 200) {
+      errors.description = "Description must be between 10 and 200 characters.";
+    }
+
+   const exist = await Category.findOne({
+      name: { $regex: new RegExp(`^${name.trim()}$`, "i") },
     });
 
     if (exist) {
+      errors.name = "Category already exists.";
+    }
+
+    if (Object.keys(errors).length > 0) {
       return res.render("addCategory", {
-        message: "Category already available",
+        errors,
         name,
-        description
+        description,
       });
     }
 
-    const category = new Category({ name, description });
+
+    const category = new Category({ name: name.trim(), description: description.trim() });
     await category.save();
 
     res.redirect("/admin/category");
-
   } catch (error) {
     console.log("Error adding category:", error);
   }
 };
 
-// =======================
 // LOAD EDIT CATEGORY PAGE
-// =======================
+
 const loadEditCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
@@ -106,18 +123,14 @@ const loadEditCategory = async (req, res) => {
   }
 };
 
-// =======================
 // UPDATE CATEGORY
-// =======================
+
 const updateCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
     const { name, description } = req.body;
 
-    await Category.updateOne(
-      { _id: categoryId },
-      { name, description }
-    );
+    await Category.updateOne({ _id: categoryId }, { name, description });
 
     res.redirect("/admin/category");
   } catch (error) {
@@ -125,9 +138,8 @@ const updateCategory = async (req, res) => {
   }
 };
 
-// =======================
-// BLOCK / UNBLOCK CATEGORY
-// =======================
+// BLOCK AND UNBLOCK CATEGORY
+
 const blockCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
@@ -136,7 +148,7 @@ const blockCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({
         success: false,
-        message: "Category not found"
+        message: "Category not found",
       });
     }
 
@@ -145,15 +157,16 @@ const blockCategory = async (req, res) => {
 
     res.json({
       success: true,
-      message: `Category ${category.status ? "unblocked" : "blocked"} successfully`,
-      newStatus: category.status
+      message: `Category ${
+        category.status ? "unblocked" : "blocked"
+      } successfully`,
+      newStatus: category.status,
     });
-
   } catch (error) {
     console.error("Error toggling category:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -164,5 +177,5 @@ module.exports = {
   loadAddCategory,
   addCategory,
   updateCategory,
-  blockCategory
+  blockCategory,
 };

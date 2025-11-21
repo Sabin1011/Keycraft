@@ -3,42 +3,72 @@
 <style>
     /* Hero Section */
     .hero {
-        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/vecteezy_white-keyboard-with-rainbow-colored-keys-isolated-from_48218171.png') center/cover no-repeat;
-        color: #fff;
-        padding: 100px 0;
+        background: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)), url('/images/vecteezy_white-keyboard-with-rainbow-colored-keys-isolated-from_48218171.png') center/cover no-repeat;
+        color: #2c3e50;
+        padding: 140px 0;
         text-align: center;
     }
 
     .hero h1 {
-        font-size: 48px;
+        font-size: 38px;
         font-family: 'Raleway', sans-serif;
-        font-weight: 900;
-        margin-bottom: 20px;
-        text-transform: lowercase;
+        font-weight: 300;
+        margin-bottom: 15px;
+        text-transform: capitalize;
+        color: #555;
+        line-height: 1.3;
+    }
+
+    .hero h1 strong {
+        display: block;
+        font-size: 52px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-top: 5px;
     }
 
     .hero p {
-        font-size: 18px;
-        margin-bottom: 30px;
-        color: rgba(255,255,255,0.8);
+        font-size: 16px;
+        margin-bottom: 40px;
+        color: #7f8c8d;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
     }
 
     .button {
-        background: #222;
+        background: #2c3e50;
         color: #fff;
         border: none;
-        padding: 15px 40px;
+        padding: 14px 35px;
         font-size: 13px;
-        text-transform: lowercase;
+        text-transform: uppercase;
         cursor: pointer;
         text-decoration: none;
         display: inline-block;
-        transition: background 0.3s;
+        transition: all 0.3s;
         font-family: 'Questrial', sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        margin-right: 15px;
     }
 
     .button:hover {
-        background: #000;
+        background: #34495e;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .button-secondary {
+        background: transparent;
+        color: #2c3e50;
+        border: 2px solid #2c3e50;
+    }
+
+    .button-secondary:hover {
+        background: #2c3e50;
+        color: #fff;
     }
 
     /* Search Bar */
@@ -61,17 +91,19 @@
     .search-box input {
         width: 100%;
         padding: 12px 45px 12px 20px;
-        border: 1px solid #e5e5e5;
+        border: 1px solid #dfe6e9;
         border-radius: 25px;
         font-size: 14px;
         font-family: 'Questrial', sans-serif;
         transition: all 0.3s;
+        background: #f8f9fa;
     }
 
     .search-box input:focus {
         outline: none;
-        border-color: #222;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-color: #2c3e50;
+        box-shadow: 0 2px 10px rgba(44, 62, 80, 0.1);
+        background: #fff;
     }
 
     .search-box button {
@@ -79,7 +111,7 @@
         right: 5px;
         top: 50%;
         transform: translateY(-50%);
-        background: #222;
+        background: #2c3e50;
         color: #fff;
         border: none;
         width: 35px;
@@ -93,37 +125,45 @@
     }
 
     .search-box button:hover {
-        background: #000;
+        background: #34495e;
     }
 
     /* Categories Section */
     .section {
-        padding: 70px 0;
+        padding: 80px 0;
+        background: #fff;
+    }
+
+    .section:nth-child(even) {
+        background: #f8f9fa;
     }
 
     .section-title {
         text-align: center;
-        margin-bottom: 50px;
+        margin-bottom: 60px;
     }
 
     .section-subtitle {
-        color: #999;
-        font-size: 13px;
+        color: #95a5a6;
+        font-size: 12px;
         text-transform: uppercase;
         margin-bottom: 10px;
+        letter-spacing: 2px;
+        font-weight: 600;
     }
 
     .section-title h2 {
-        font-size: 32px;
+        font-size: 36px;
         font-family: 'Raleway', sans-serif;
-        font-weight: 400;
-        text-transform: lowercase;
+        font-weight: 300;
+        text-transform: capitalize;
+        color: #2c3e50;
     }
 
     .title-underline {
-        width: 60px;
-        height: 2px;
-        background: #222;
+        width: 50px;
+        height: 3px;
+        background: #2c3e50;
         margin: 20px auto 0;
     }
 
@@ -131,27 +171,28 @@
     .category-tabs {
         display: flex;
         justify-content: center;
-        gap: 20px;
+        gap: 15px;
         margin-bottom: 50px;
         flex-wrap: wrap;
     }
 
     .category-tab {
-        padding: 12px 30px;
+        padding: 10px 25px;
         background: #fff;
-        border: 1px solid #e5e5e5;
+        border: 1px solid #dfe6e9;
         cursor: pointer;
         font-size: 13px;
-        text-transform: lowercase;
+        text-transform: capitalize;
         transition: all 0.3s;
         font-family: 'Questrial', sans-serif;
+        font-weight: 500;
     }
 
     .category-tab:hover,
     .category-tab.active {
-        background: #222;
+        background: #2c3e50;
         color: #fff;
-        border-color: #222;
+        border-color: #2c3e50;
     }
 
     /* Product Grid */
@@ -163,28 +204,30 @@
 
     .product-card {
         background: #fff;
-        border: 1px solid #e5e5e5;
+        border: 1px solid #ecf0f1;
         transition: transform 0.3s, box-shadow 0.3s;
         position: relative;
         overflow: hidden;
-        border-radius:10px;
+        border-radius: 0;
     }
 
     .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
     }
 
     .product-label {
         position: absolute;
-        top: 15px;
-        left: 15px;
-        background: #222;
+        top: 20px;
+        left: 20px;
+        background: #2c3e50;
         color: #fff;
-        padding: 5px 12px;
-        font-size: 11px;
+        padding: 6px 14px;
+        font-size: 10px;
         text-transform: uppercase;
         z-index: 1;
+        font-weight: 600;
+        letter-spacing: 0.5px;
     }
 
     .product-label.red {
@@ -193,9 +236,9 @@
 
     .product-image {
         width: 100%;
-        height: 250px;
+        height: 280px;
         object-fit: cover;
-        background: #f5f5f5;
+        background: #f8f9fa;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -210,34 +253,38 @@
     }
 
     .product-info {
-        padding: 20px;
+        padding: 25px;
     }
 
     .product-category {
-        color: #666;
-        font-size: 12px;
+        color: #95a5a6;
+        font-size: 11px;
         text-transform: uppercase;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
+        letter-spacing: 1px;
+        font-weight: 600;
     }
 
     .product-name {
-        font-size: 18px;
+        font-size: 19px;
         font-weight: 400;
-        margin-bottom: 10px;
-        color: #222;
+        margin-bottom: 12px;
+        color: #2c3e50;
+        font-family: 'Raleway', sans-serif;
     }
 
     .product-specs {
         font-size: 13px;
-        color: #666;
-        margin-bottom: 15px;
+        color: #7f8c8d;
+        margin-bottom: 18px;
+        line-height: 1.5;
     }
 
     .product-price {
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 600;
-        color: #222;
-        margin-bottom: 15px;
+        color: #2c3e50;
+        margin-bottom: 18px;
     }
 
     .product-actions {
@@ -247,67 +294,81 @@
 
     .btn-small {
         flex: 1;
-        padding: 10px;
+        padding: 11px;
         background: #fff;
-        border: 1px solid #e5e5e5;
+        border: 1px solid #dfe6e9;
         cursor: pointer;
         font-size: 12px;
-        text-transform: lowercase;
+        text-transform: uppercase;
         transition: all 0.3s;
         font-family: 'Questrial', sans-serif;
-        border-radius: 5px;
+        border-radius: 0;
+        font-weight: 600;
+        letter-spacing: 0.5px;
     }
 
     .btn-small:hover {
-        background: #222;
+        background: #2c3e50;
         color: #fff;
-        border-color: #222;
+        border-color: #2c3e50;
     }
 
     .btn-primary {
-        background: #222;
+        background: #2c3e50;
         color: #fff;
-        border-color: #222;
-        border-radius: 5px;
+        border-color: #2c3e50;
+        border-radius: 0;
     }
 
     .btn-primary:hover {
-        background: #000;
+        background: #34495e;
     }
 
     /* Brands Section */
     .brands-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 30px;
+        gap: 25px;
         text-align: center;
     }
 
     .brand-item {
-        border-radius: 5%;
-        padding: 40px 20px;
+        padding: 50px 20px;
         background: #fff;
-        border: 1px solid #e5e5e5;
+        border: 1px solid #ecf0f1;
         transition: all 0.3s;
         cursor: pointer;
-        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/keyboard.png') center/cover no-repeat;
+        background: linear-gradient(rgba(248, 249, 250, 0.95), rgba(248, 249, 250, 0.95)), url('/images/keyboard.png') center/cover no-repeat;
     }
 
     .brand-item:hover {
-        border-color: #222;
+        border-color: #2c3e50;
         transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
 
     .brand-name {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 600;
-        color: #b7a8a8;
+        color: #2c3e50;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .product-actions a{
+        text-decoration: none;
+        display: flex;
+        justify-content: center;
     }
 
     /* Responsive */
     @media (max-width: 768px) {
         .hero h1 {
-            font-size: 32px;
+            font-size: 28px;
+        }
+
+        .hero h1 strong {
+            font-size: 38px;
         }
 
         .product-grid {
@@ -318,27 +379,32 @@
         .search-box {
             max-width: 100%;
         }
+
+        .button {
+            margin-right: 0;
+            margin-bottom: 10px;
+            display: block;
+            width: 100%;
+        }
     }
 </style>
 
 <!-- Hero Section -->
 <section class="hero">
     <div class="container">
-        <h1>premium mechanical keyboards</h1>
-        <p>Discover the perfect typing experience with our curated collection</p>
-        <a href="/shop" class="button">explore collection</a>
+        <h1>Are you ready<br><strong>To get Premium Keyboards?</strong></h1>
+        <p>Discover the perfect typing experience with our curated collection of premium mechanical keyboards</p>
+        <a href="/shop" class="button">LEARN MORE</a>
+        <a href="/shop" class="button button-secondary">EXPLORE NOW</a>
     </div>
 </section>
 
-
-
-<!-- Featured Keyboards -->
 <!-- Featured Keyboards -->
 <section class="section">
   <div class="container">
     <div class="section-title">
-      <div class="section-subtitle">new arrivals</div>
-      <h2>latest keyboards</h2>
+      <div class="section-subtitle">Get all the goodies</div>
+      <h2>Latest Keyboards</h2>
       <div class="title-underline"></div>
     </div>
 
@@ -386,13 +452,12 @@
   </div>
 </section>
 
-
 <!-- Brands Section -->
 <section class="section">
     <div class="container">
         <div class="section-title">
-            <div class="section-subtitle">popular brands</div>
-            <h2>shop by brand</h2>
+            <div class="section-subtitle">Popular brands</div>
+            <h2>Shop by Brand</h2>
             <div class="title-underline"></div>
         </div>
 
