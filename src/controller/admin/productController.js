@@ -1,5 +1,6 @@
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
+const cloudinary = require("../../config/cloudinary");
 const fs = require("fs");
 
 // LOAD PRODUCT PAGE
@@ -66,20 +67,11 @@ const loadAddProduct = async (req, res) => {
       variantQty: [],
       categories
     });
+
+
   } catch (error) {
     console.log("Error loading add product page:", error);
   }
-};
-
-// ADD PRODUCT
-
-const addproduct = async (req, res) => {
-  const { productName, description, price, category } = req.body;
-  const variantName = req.body["variantName[]"] || [];
-  const variantQty = req.body["variantQty[]"] || [];
-  const images = req.files.map((f) => f.filename);
-
-  res.redirect("/admin/adminProduct");
 };
 
 const AddProduct = async (req, res) => {
@@ -136,6 +128,21 @@ const AddProduct = async (req, res) => {
       });
     }
 
+
+    let cloudinaryImages = [];
+
+    if(req.files && req.files.length>0){
+      for(const file of req.files){
+        const uploadResult = await cloudinary.uploader.upload(file.path,{
+          folder:"products",
+        });
+
+        cloudinaryImages.push(uploadResult.secure_url);
+
+          fs.unlinkSync(file.path);
+      }
+    }
+
     const variants = [];
     if (variantName && variantQty) {
       const names = Array.isArray(variantName) ? variantName : [variantName];
@@ -160,12 +167,13 @@ const AddProduct = async (req, res) => {
       price: parseFloat(price),
       description,
       category,
-      images: imagePaths,
+      images: cloudinaryImages,
       variants,
     });
 
     await product.save();
 
+    console.log("FILES:", req.files);
     return res.status(200).json({
       success: true,
       message: "Product added successfully!",
@@ -177,7 +185,7 @@ const AddProduct = async (req, res) => {
       message: "Internal server error while adding product.",
     });
   }
-};
+};  
 
 const loadEditProduct = async (req, res) => {
   try {
@@ -207,6 +215,7 @@ const loadEditProduct = async (req, res) => {
   }
 };
 
+
 const updateProduct = async (req, res) => {
   try {
     console.log("this is update product controller");
@@ -219,8 +228,15 @@ const updateProduct = async (req, res) => {
       category,
       variantName,
       variantQty,
-      existingImages = [],
     } = req.body;
+
+    // Handle existing images - can be string or array
+    let existingImages = [];
+    if (req.body['existingImages[]']) {
+      existingImages = Array.isArray(req.body['existingImages[]']) 
+        ? req.body['existingImages[]'] 
+        : [req.body['existingImages[]']];
+    }
 
     const product = await Product.findById(productId);
     if (!product) {
@@ -230,6 +246,7 @@ const updateProduct = async (req, res) => {
       });
     }
 
+    // Build variants array
     const variants = [];
     if (Array.isArray(variantName) && Array.isArray(variantQty)) {
       for (let i = 0; i < variantName.length; i++) {
@@ -244,14 +261,10 @@ const updateProduct = async (req, res) => {
 
     const totalStock = variants.reduce((s, v) => s + v.quantity, 0);
 
-    let finalImages = [];
+    // Start with existing images that weren't removed
+    let finalImages = [...existingImages];
 
-    if (Array.isArray(existingImages)) {
-      finalImages = existingImages;
-    } else if (existingImages) {
-      finalImages.push(existingImages);
-    }
-
+    // Add newly uploaded/cropped images
     if (req.files && req.files.length > 0) {
       const uploaded = req.files.map(
         (file) => `/uploads/products/${file.filename}`
@@ -259,6 +272,7 @@ const updateProduct = async (req, res) => {
       finalImages = [...finalImages, ...uploaded];
     }
 
+    // Update product
     product.name = productName;
     product.description = description;
     product.price = price;
@@ -268,12 +282,9 @@ const updateProduct = async (req, res) => {
     product.images = finalImages;
 
     await product.save();
-
-    const products = await Product.find().populate("category");
-    const categories = await Category.find();
-    const totalProducts = await Product.countDocuments();
-
+    
     return res.redirect("/admin/adminProduct");
+    
   } catch (err) {
     console.error("Error updating product:", err);
     return res.status(500).json({
@@ -317,5 +328,5 @@ module.exports = {
   AddProduct,
   toggleProductStatus,
   updateProduct,
-  addproduct,
+  // addproduct,
 };

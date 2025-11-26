@@ -95,7 +95,7 @@
           <p>Click or drag & drop to upload images</p>
           <small class="text-muted">JPG, PNG, WEBP (Max 5 MB each)</small>
         </div>
-        <input type="file" id="imageInput" multiple accept="image/*" style="display:none;" > 
+        <input type="file" id="imageInput" name="images" multiple accept="image/*" style="display:none;" > 
         <div class="preview-container"></div>
       </div>
 
@@ -270,50 +270,50 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     
-//     addProductForm.addEventListener('submit', function(e) {
-//         e.preventDefault(); 
+    addProductForm.addEventListener('submit', function(e) {
+        e.preventDefault(); 
 
       
-//         const customFormData = new FormData(this);
+        const customFormData = new FormData(this);
 
         
-//         customFormData.delete('images'); 
+        customFormData.delete('images'); 
         
        
-//         productFiles.forEach((item) => {
+        productFiles.forEach((item) => {
             
-//             customFormData.append('images', item.file, item.originalName); 
-//         });
+            customFormData.append('images', item.file, item.originalName); 
+        });
 
        
         
-//         fetch(this.action, {
-//             method: this.method,
-//             body: customFormData
-//         })
-//         .then(async response => { 
+        fetch(this.action, {
+            method: this.method,
+            body: customFormData
+        })
+        .then(async response => { 
             
-//             const data = await response.json().catch(() => ({ message: 'Server did not return JSON.' }));
+            const data = await response.json().catch(() => ({ message: 'Server did not return JSON.' }));
 
-//             if (!response.ok) {
-//                 throw new Error(data.message || 'Network response was not ok');
-//             }
-//             return data;
-//         })
-//         .then(data => {
-//             // SUCCESS
-//             console.log('Submission data:', data);
-//             alert(data.message || 'Product added successfully!');
+            if (!response.ok) {
+                throw new Error(data.message || 'Network response was not ok');
+            }
+            return data;
+        })
+        .then(data => {
+            // SUCCESS
+            console.log('Submission data:', data);
+            alert(data.message || 'Product added successfully!');
 
-//             window.location.href = '/admin/adminProduct'; 
-//         })
-//         .catch(error => {
+            window.location.href = '/admin/adminProduct'; 
+        })
+        .catch(error => {
             
-//             console.error('There was an error submitting the form:', error);
+            console.error('There was an error submitting the form:', error);
            
-//             alert(`Failed to add product: ${error.message}`);
-//         });
-//     });
+            alert(`Failed to add product: ${error.message}`);
+        });
+    });
 });
 </script>
 

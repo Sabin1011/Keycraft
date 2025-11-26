@@ -5,6 +5,7 @@ const categoryController = require("../controller/admin/categoryController");
 const userManageController = require("../controller/admin/userManageController");
 const productController = require("../controller/admin/productController");
 const upload = require("../middleware/multer");
+const cloudinary = require("../config/cloudinary")
 
 const Product = require("../models/productSchema");
 const category = require("../models/categorySchema");
@@ -52,16 +53,11 @@ router.get(
   auth.isAdminLoggedIn,
   productController.loadAddProduct
 );
+
 router.post(
   "/adminAddProduct",
   upload.array("images", 4),
   productController.AddProduct
-);
-
-router.post(
-  "/adminAddProduct",
-  upload.array("images"),
-  productController.addproduct
 );
 
 router.get(
