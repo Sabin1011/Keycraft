@@ -80,7 +80,7 @@ const loadShop = async (req, res) => {
     }
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 4;
+    const limit = 6;
 
     const search = req.query.search || "";
     const maxPrice = req.query.maxPrice || 999999;

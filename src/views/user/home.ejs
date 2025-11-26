@@ -333,12 +333,12 @@
     }
 
     .brand-item {
-        padding: 50px 20px;
+        padding: 35px 20px;
         background: #fff;
         border: 1px solid #ecf0f1;
         transition: all 0.3s;
         cursor: pointer;
-        background: linear-gradient(rgba(248, 249, 250, 0.95), rgba(248, 249, 250, 0.95)), url('/images/keyboard.png') center/cover no-repeat;
+        border-radius: 6px;
     }
 
     .brand-item:hover {
@@ -347,6 +347,13 @@
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
 
+    .brand-item img {
+        max-width: 100%;
+        max-height: 60px;
+        object-fit: contain;
+    }
+
+    
     .brand-name {
         font-size: 16px;
         font-weight: 600;
@@ -456,35 +463,26 @@
 <section class="section">
     <div class="container">
         <div class="section-title">
-            <div class="section-subtitle">Popular brands</div>
-            <h2>Shop by Brand</h2>
+            <div class="section-subtitle"><h2>Popular brands</h2></div>
+            
             <div class="title-underline"></div>
         </div>
 
         <div class="brands-grid">
-            <div class="brand-item">
-                <div class="brand-name">keychron</div>
+            <div class="brand-item" >
+                <img src="/assets/keychron.png" alt="Keychron logo" />
             </div>
             <div class="brand-item">
-                <div class="brand-name">ducky</div>
+                <img src="/assets/Logitech-Logo.png" alt="Keychron logo" />
             </div>
             <div class="brand-item">
-                <div class="brand-name">varmilo</div>
+                <img src="/assets/Razer.png"  alt="Keychron logo" />
             </div>
             <div class="brand-item">
-                <div class="brand-name">leopold</div>
+                <img src="/assets/Corsair.png"  alt="Keychron logo" />
             </div>
             <div class="brand-item">
-                <div class="brand-name">gmmk</div>
-            </div>
-            <div class="brand-item">
-                <div class="brand-name">akko</div>
-            </div>
-            <div class="brand-item">
-                <div class="brand-name">nuphy</div>
-            </div>
-            <div class="brand-item">
-                <div class="brand-name">royal kludge</div>
+                <img src="/assets/reddragon.png"  alt="Keychron logo" />
             </div>
         </div>
     </div>

@@ -327,7 +327,7 @@
           <div class="page-title-right">
             <ol class="breadcrumb m-0">
               <li class="breadcrumb-item"><a href="#">Ecommerce/</a></li>
-              <li class="breadcrumb-item"><a href="/admin/products">Products/</a></li>
+              <li class="breadcrumb-item"><a href="/admin/adminProduct">Products/</a></li>
               <li class="breadcrumb-item active">Edit Product</li>
             </ol>
           </div>
@@ -487,89 +487,270 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
   <script>
-  const productId = '<%= product._id %>';   
+  // Add this complete script section to replace your existing script in the EJS file
 
+const productId = '<%= product._id %>';
 
-  const existingInputs = Array.from(document.querySelectorAll('.existing-image-input'));
-  const existingImages = existingInputs.map(i => i.value);
+const existingInputs = Array.from(document.querySelectorAll('.existing-image-input'));
+const existingImages = existingInputs.map(i => i.value);
 
+let uploadedImages = [];
+let variantCounter = 0;
+let cropper = null;
+let currentCropImageId = null;
 
-  let uploadedImages = [];  
-  let variantCounter = 0;
-  let cropper = null;
-  let currentCropImageId = null;
-
-  window.addEventListener('DOMContentLoaded', () => {
-    existingImages.forEach(imgUrl => {
-      uploadedImages.push({
-        id: Date.now() + Math.random(), 
-        url: imgUrl, 
-        file: null,
-        existing: true
-      });
+window.addEventListener('DOMContentLoaded', () => {
+  existingImages.forEach(imgUrl => {
+    uploadedImages.push({
+      id: Date.now() + Math.random(),
+      url: imgUrl,
+      file: null,
+      existing: true
     });
-
-    renderImagePreviews();
-
   });
+  renderImagePreviews();
+});
 
-  function renderImagePreviews() {
-    const container = document.getElementById('previewContainer');
-    if (!container) return;
-    container.innerHTML = uploadedImages.map(img => `
-      <div class="preview-item" data-id="${img.id}">
-        <img src="${img.existing ? img.url : img.url}" alt="Preview" class="preview-image">
-        <div class="image-actions">
-          <button type="button" class="crop-image" onclick="openCropModal('${img.id}')" title="Crop Image">Crop</button>
-          <button type="button" class="remove-image" onclick="removeImage('${img.id}')" title="Remove Image">Remove</button>
-        </div>
+function renderImagePreviews() {
+  const container = document.getElementById('previewContainer');
+  if (!container) return;
+  container.innerHTML = uploadedImages.map(img => `
+    <div class="preview-item" data-id="${img.id}">
+      <img src="${img.url}" alt="Preview" class="preview-image">
+      <div class="image-actions">
+        <button type="button" class="crop-image" onclick="openCropModal('${img.id}')" title="Crop Image">
+          <i class="fas fa-crop"></i>
+        </button>
+        <button type="button" class="remove-image" onclick="removeImage('${img.id}')" title="Remove Image">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
-    `).join('');
-  }
+    </div>
+  `).join('');
+}
 
-  function removeImage(id) {
+function removeImage(id) {
+  uploadedImages = uploadedImages.filter(img => img.id != id);
+  renderImagePreviews();
+}
 
-    uploadedImages = uploadedImages.filter(img => img.id !== id);
-
-    const existingContainer = document.getElementById('existingImagesContainer');
-    if (existingContainer) {
-
-      existingContainer.innerHTML = '';
-      uploadedImages.filter(img => img.existing).forEach(img => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.className = 'existing-image-input';
-        input.value = img.url;
-        existingContainer.appendChild(input);
-      });
+function handleImageUpload(event) {
+  const files = Array.from(event.target.files || []);
+  files.forEach(file => {
+    if (file.size > 5 * 1024 * 1024) {
+      Swal.fire('Error', 'Image size should not exceed 5MB', 'error');
+      return;
     }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      uploadedImages.push({
+        id: Date.now() + Math.random(),
+        url: e.target.result,
+        file: file,
+        existing: false
+      });
+      renderImagePreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
+}
 
-    renderImagePreviews();
-  }
 
+function openCropModal(imageId) {
+  const image = uploadedImages.find(img => img.id == imageId);
+  if (!image) return;
+  
+  currentCropImageId = imageId;
+  const modal = document.getElementById('cropModal');
+  const cropImage = document.getElementById('cropImage');
+  
+  cropImage.src = image.url;
+  modal.style.display = 'block';
 
-  function handleImageUpload(event) {
-    const files = Array.from(event.target.files || []);
-    files.forEach(file => {
-      if (file.size > 5 * 1024 * 1024) {
-        Swal.fire('Error', 'Image size should not exceed 5MB', 'error');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        uploadedImages.push({
-          id: Date.now() + Math.random(),
-          url: e.target.result, 
-          file: file,
-          existing: false
-        });
-        renderImagePreviews();
-      };
-      reader.readAsDataURL(file);
+  cropImage.onload = function() {
+    if (cropper) {
+      cropper.destroy();
+    }
+    cropper = new Cropper(cropImage, {
+      aspectRatio: NaN, 
+      viewMode: 1,
+      autoCropArea: 1,
+      responsive: true,
+      restore: false,
+      guides: true,
+      center: true,
+      highlight: false,
+      cropBoxMovable: true,
+      cropBoxResizable: true,
+      toggleDragModeOnDblclick: false,
     });
-    event.target.value = '';
-  }
+  };
+}
 
+function closeCropModal() {
+  const modal = document.getElementById('cropModal');
+  modal.style.display = 'none';
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+  currentCropImageId = null;
+}
+
+function applyCrop() {
+  if (!cropper || !currentCropImageId) return;
+  
+  // Get cropped canvas
+  const canvas = cropper.getCroppedCanvas({
+    maxWidth: 2000,
+    maxHeight: 2000,
+    imageSmoothingEnabled: true,
+    imageSmoothingQuality: 'high',
+  });
+  
+ 
+  canvas.toBlob((blob) => {
+    if (!blob) {
+      Swal.fire('Error', 'Failed to crop image', 'error');
+      return;
+    }
+    
+
+    const file = new File([blob], `cropped_${Date.now()}.jpg`, { type: 'image/jpeg' });
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+ 
+      const imageIndex = uploadedImages.findIndex(img => img.id == currentCropImageId);
+      if (imageIndex !== -1) {
+        uploadedImages[imageIndex] = {
+          id: currentCropImageId,
+          url: e.target.result,
+          file: file,
+          existing: false,
+          cropped: true
+        };
+        renderImagePreviews();
+      }
+      
+      closeCropModal();
+      Swal.fire({
+        icon: 'success',
+        title: 'Image cropped successfully',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    };
+    reader.readAsDataURL(blob);
+  }, 'image/jpeg', 0.95);
+}
+
+
+const uploadContainer = document.getElementById('imageUploadContainer');
+if (uploadContainer) {
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    uploadContainer.addEventListener(eventName, preventDefaults, false);
+  });
+  
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  
+  ['dragenter', 'dragover'].forEach(eventName => {
+    uploadContainer.addEventListener(eventName, () => {
+      uploadContainer.classList.add('dragover');
+    }, false);
+  });
+  
+  ['dragleave', 'drop'].forEach(eventName => {
+    uploadContainer.addEventListener(eventName, () => {
+      uploadContainer.classList.remove('dragover');
+    }, false);
+  });
+  
+  uploadContainer.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    document.getElementById('imageInput').files = files;
+    handleImageUpload({ target: { files: files } });
+  }, false);
+}
+
+function addVariant() {
+  const container = document.getElementById('stockVariantsContainer');
+  const newVariant = document.createElement('div');
+  newVariant.className = 'stock-variant-item';
+  newVariant.innerHTML = `
+    <input type="text" name="variantName[]" class="form-control variant-label" 
+           placeholder="Variant name" style="flex: 0 0 150px;">
+    <input type="number" name="variantQty[]" class="form-control variant-input" 
+           placeholder="Enter quantity" min="0" value="0">
+    <button type="button" class="remove-variant-btn" onclick="removeVariantItem(this)">
+      Remove
+    </button>
+  `;
+  container.appendChild(newVariant);
+}
+
+function removeVariantItem(button) {
+  button.closest('.stock-variant-item').remove();
+}
+
+function cancelForm() {
+  window.location.href = '/admin/adminProduct';
+}
+
+
+document.getElementById('editProductForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(this);
+  
+  formData.delete('images');
+  
+
+  uploadedImages.forEach((img, index) => {
+    if (img.file) {
+      formData.append('images', img.file);
+    }
+  });
+  
+  formData.delete('existingImages');
+  uploadedImages.filter(img => img.existing && !img.cropped).forEach(img => {
+    formData.append('existingImages[]', img.url);
+  });
+  console.log('Total images:', uploadedImages.length);
+  console.log('Existing unchanged:', uploadedImages.filter(img => img.existing && !img.cropped).length);
+  console.log('New/Cropped:', uploadedImages.filter(img => img.file).length);
+  
+  try {
+    const response = await fetch(this.action, {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (response.ok) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Product updated successfully',
+        showConfirmButton: false,
+        timer: 1500
+      }).then(() => {
+        window.location.href = '/admin/adminProduct';
+      });
+    } else {
+      throw new Error('Update failed');
+    }
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error updating product',
+      text: error.message
+    });
+  }
+});
 </script>
  
 </body>
