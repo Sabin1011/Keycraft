@@ -40,6 +40,8 @@ const isLogout = async (req, res, next) => {
         return res.redirect("/login");
       }
 
+      req.user = user;
+
       return next();
     } else {
       res.redirect("/login");
