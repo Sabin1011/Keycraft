@@ -2,6 +2,9 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const mongoose = require("mongoose");
+const path = require("path");
+const fs = require("fs");
+const sendEmail = require("../../utils/sendEmail");
 
 const bcrypt = require("bcrypt");
 
@@ -193,8 +196,10 @@ const userLogout = async (req, res) => {
 };
 
 module.exports = {
+
   loadHome,
   loadShop,
   loadSingleProduct,
   userLogout,
+
 };

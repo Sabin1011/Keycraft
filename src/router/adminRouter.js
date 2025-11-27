@@ -4,7 +4,7 @@ const adminController = require("../controller/admin/adminController");
 const categoryController = require("../controller/admin/categoryController");
 const userManageController = require("../controller/admin/userManageController");
 const productController = require("../controller/admin/productController");
-const upload = require("../middleware/multer");
+const {upload} = require("../middleware/multer");
 const cloudinary = require("../config/cloudinary")
 
 const Product = require("../models/productSchema");

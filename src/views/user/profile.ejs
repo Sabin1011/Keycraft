@@ -1,0 +1,649 @@
+<%- include('../partials/user/header') %>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Questrial", sans-serif;
+    background: #fafafa;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  .breadcrumb {
+    padding: 15px 0;
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .breadcrumb a {
+    color: #666;
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.3s;
+  }
+
+  .breadcrumb a:hover {
+    color: #222;
+  }
+
+  .breadcrumb span {
+    color: #999;
+    margin: 0 8px;
+  }
+
+  .profile-section {
+    padding: 40px 0;
+    min-height: calc(100vh - 200px);
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .profile-header {
+    background: linear-gradient(135deg, #401f75 0%, #000000 100%);
+    border-radius: 15px;
+    padding: 40px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-image-container {
+    position: relative;
+  }
+
+  .profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .profile-header-info {
+    flex: 1;
+    color: #fff;
+  }
+
+  .profile-name {
+    font-size: 32px;
+    font-weight: 700;
+    text-transform: lowercase;
+    margin-bottom: 8px;
+  }
+
+  .profile-email {
+    font-size: 16px;
+    opacity: 0.9;
+    margin-bottom: 20px;
+  }
+
+  .profile-quick-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .profile-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 25px;
+  }
+
+  .info-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
+    padding: 35px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s;
+    height: fit-content;
+  }
+
+  .info-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f5f5f5;
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: lowercase;
+    color: #222;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title i {
+    color: #89be87;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    font-size: 13px;
+    text-transform: lowercase;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-family: "Questrial", sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    display: inline-block;
+  }
+
+  .btn-primary {
+    background: #fff;
+    color: #494545;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-primary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #fff;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: #f8f9fa;
+    color: #222;
+    border: 2px solid #e5e5e5;
+  }
+
+  .btn-secondary:hover {
+    background: #222;
+    color: #fff;
+    border-color: #222;
+    transform: translateY(-2px);
+  }
+
+  .btn-small {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .info-label {
+    font-size: 11px;
+    color: #999;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .info-value {
+    font-size: 16px;
+    color: #222;
+    font-weight: 500;
+  }
+
+  .address-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .address-item {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .address-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: #c90000;
+    transform: scaleY(0);
+    transition: transform 0.3s;
+  }
+
+  .address-item:hover {
+    border-color: #ea8566;
+    background: #fff;
+  }
+
+  .address-item:hover::before {
+    transform: scaleY(1);
+  }
+
+  .address-type {
+    font-size: 11px;
+    color: #999;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .address-text {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.8;
+  }
+
+  .security-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .security-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+  }
+
+  .security-item:hover {
+    background: #fff;
+    border-color: #e5e5e5;
+  }
+
+  .security-info h4 {
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: lowercase;
+    margin-bottom: 5px;
+    color: #222;
+  }
+
+  .security-info p {
+    font-size: 13px;
+    color: #666;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: #999;
+  }
+
+  .empty-state i {
+    font-size: 56px;
+    color: #e5e5e5;
+    margin-bottom: 15px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+  }
+
+  .info-card.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .default-address {
+    border-color: #401f75 !important;
+    background: #eef0ff !important;
+  }
+
+  .default-address::before {
+    transform: scaleY(1) !important;
+    background: #401f75 !important;
+  }
+
+  .default-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #401f75;
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+  .address-btn {
+    width: 100px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    gap: 5px;
+    border-radius: 5px;
+    border: 1px solid;
+    cursor: pointer;
+  }
+
+  @media (max-width: 1200px) {
+    .profile-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .container {
+      padding: 0 25px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .profile-header {
+      flex-direction: column;
+      text-align: center;
+      padding: 30px 20px;
+    }
+
+    .profile-name {
+      font-size: 24px;
+    }
+
+    .profile-quick-actions {
+      justify-content: center;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .security-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .container {
+      padding: 0 15px;
+    }
+  }
+</style>
+
+<section class="breadcrumb">
+  <div class="container">
+    <a href="/home">home</a>
+    <span>/</span>
+    <span style="color: #222">my profile</span>
+  </div>
+</section>
+
+<section class="profile-section">
+  <div class="container">
+    <% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success">
+      <i class="fa fa-check-circle"></i> <%= success %>
+    </div>
+    <% } %> <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger">
+      <i class="fa fa-exclamation-circle"></i> <%= error %>
+    </div>
+    <% } %>
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="profile-image-container">
+        <img
+          src="<%= user.profileImage ? user.profileImage : '/assets/profile-icon-9.png' %>"
+          alt="<%= user.username %>"
+          class="profile-image"
+          onerror="this.onerror=null; this.src='/assets/profile-icon-9.png';"
+        />
+      </div>
+      <div class="profile-header-info">
+        <div class="profile-name"><%= user.username.toLowerCase() %></div>
+        <div class="profile-email"><%= user.email %></div>
+        <div class="profile-quick-actions">
+          <a href="/profile/edit" class="btn btn-primary">
+            <i class="fa fa-edit"></i> edit profile
+          </a>
+          <button
+            class="btn btn-primary"
+            onclick="window.location.href='/orders'"
+          >
+            <i class="fa fa-shopping-bag"></i> my orders
+          </button>
+          <button
+            class="btn btn-primary"
+            onclick="window.location.href='/wishlist'"
+          >
+            <i class="fa fa-heart-o"></i> wishlist
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="profile-layout">
+      <!-- Personal Information -->
+      <div class="info-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fa fa-user"></i> personal information
+          </h2>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Full Name</div>
+            <div class="info-value"><%= user.username %></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Email Address</div>
+            <div class="info-value"><%= user.email %></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Phone Number</div>
+            <div class="info-value"><%= user.phone || 'Not provided' %></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Member Since</div>
+            <div class="info-value">
+              <%= new Date(user.createdAt).toLocaleDateString() %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div class="info-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fa fa-shield"></i> security settings
+          </h2>
+        </div>
+        <div class="security-options">
+          <div class="security-item">
+            <div class="security-info">
+              <h4>password</h4>
+              <p>change your account password</p>
+            </div>
+            <a
+              href="/profile/change-password"
+              class="btn btn-secondary btn-small"
+            >
+              reset password
+            </a>
+          </div>
+          <div class="security-item">
+            <div class="security-info">
+              <h4>forgot password</h4>
+              <p>request a password reset link via email</p>
+            </div>
+            <a href="/forgot-password" class="btn btn-secondary btn-small">
+              send reset link
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card full-width">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fa fa-map-marker"></i> saved addresses
+          </h2>
+          <a href="/profile/address/add" class="btn btn-secondary btn-small">
+            <i class="fa fa-plus"></i> add new
+          </a>
+        </div>
+
+        <% if (user.addresses && user.addresses.length > 0) { %> <% const
+        defaultAddress = user.addresses.find(a => a.isDefault); const
+        otherAddresses = user.addresses.filter(a => !a.isDefault); %>
+
+        <!-- DEFAULT ADDRESS SECTION -->
+        <% if (defaultAddress) { %>
+        <h3 style="margin-bottom: 15px; font-size: 16px; color: #222">
+          Default Address
+        </h3>
+
+        <div class="address-item default-address">
+          <div class="default-badge">Default</div>
+
+          <div class="address-type">
+            <i class="fa fa-star" style="color: #ffa500"></i> <%=
+            defaultAddress.type %>
+          </div>
+
+          <div class="address-text">
+            <%= defaultAddress.street %><br />
+            <%= defaultAddress.city %>, <%= defaultAddress.state %> <%=
+            defaultAddress.zipCode %><br />
+            <% if (defaultAddress.country) { %><%= defaultAddress.country %><% }
+            %>
+          </div>
+        </div>
+
+        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee" />
+        <% } %>
+
+        <!-- OTHER ADDRESSES -->
+        <h3 style="margin-bottom: 15px; font-size: 16px; color: #222">
+          Other Addresses
+        </h3>
+
+        <% if (otherAddresses.length > 0) { %>
+        <div class="address-list">
+          <% otherAddresses.forEach(address => { %>
+          <div class="address-item">
+            <div class="address-type"><%= address.type %></div>
+
+            <div class="address-text">
+              <%= address.street %><br />
+              <%= address.city %>, <%= address.state %> <%= address.zipCode
+              %><br />
+              <% if (address.country) { %><%= address.country %><% } %>
+            </div>
+
+            <div style="margin-top: 15px; display: flex; gap: 10px">
+              <form
+                action="/profile/address/<%= address._id %>/set-default"
+                method="POST"
+              >
+                <button
+                  class="btn btn-secondary btn-small"
+                  style="margin-top: 10px"
+                >
+                  <i class="fa fa-star-o"></i> Set as Default
+                </button>
+              </form>
+
+              <!-- Edit -->
+              <a
+                href="/profile/address/<%= address._id %>/edit"
+                class="btn btn-secondary btn-small address-btn"
+                style="background: #d9e8ff; border-color: #88aaff"
+              >
+                <i class="fa fa-edit"></i> Edit
+              </a>
+
+              <!-- Delete -->
+              <form
+                action="/profile/address/<%= address._id %>/delete"
+                method="POST"
+                class="delete-address-form"
+              >
+                <button
+                  class="btn btn-secondary btn-small address-btn"
+                  style="background: #ffe3e3; border-color: #ff9d9d"
+                >
+                  <i class="fa fa-trash"></i> Delete
+                </button>
+              </form>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <% } else { %>
+        <p style="color: #888">No other addresses saved.</p>
+        <% } %> <% } else { %>
+        <div class="empty-state">
+          <i class="fa fa-map-marker"></i>
+          <p>no saved addresses yet</p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll(".delete-address-form").forEach((form) => {
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const result = await Swal.fire({
+        title: "Delete this address?",
+        text: "You won't be able to recover it!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel",
+      });
+
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Deleting...",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        form.submit();
+      }
+    });
+  });
+</script>
+> <%- include('../partials/user/footer') %>

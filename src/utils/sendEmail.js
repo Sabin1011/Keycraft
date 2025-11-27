@@ -1,10 +1,9 @@
 const nodemailer = require("nodemailer");
-require("dotenv").config();   // make sure environment vars load
+require("dotenv").config(); 
 
-const sendEmail = async ({ to, subject, text }) => {
+const sendEmail = async ({ to, subject, text, html  }) => {
     try {
-        // EMAIL + APP PASSWORD must be in .env
-        // EMAIL_USER + EMAIL_PASS are common names, but yours uses EMAIL + PASSWORD
+ 
         if (!process.env.EMAIL || !process.env.EMAIL_PASS) {
             console.log("Email credentials missing in .env");
             return false;
@@ -13,19 +12,19 @@ const sendEmail = async ({ to, subject, text }) => {
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
-                user: process.env.EMAIL,      // Gmail address
-                pass: process.env.EMAIL_PASS    // App password (NOT Gmail login password)
+                user: process.env.EMAIL,      
+                pass: process.env.EMAIL_PASS    
             }
         });
 
-        // Optional: Verify connection
         await transporter.verify();
 
         await transporter.sendMail({
             from: process.env.EMAIL,
             to,
             subject,
-            text
+            text,
+            html 
         });
 
         console.log("Email sent successfully");
