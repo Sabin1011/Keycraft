@@ -8,6 +8,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Questrial|Raleway:700,900" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     
     <style>
         * {
@@ -28,10 +31,9 @@
             padding: 0 20px;
         }
 
-        /* Single Header Section */
         header {
-            background: #fff;
-            border-bottom: 1px solid #e5e5e5;
+            background: #ffffffd3;
+            border-bottom: 1px solid #e5e5e551;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
@@ -218,6 +220,9 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
         }
+        .profile-btn{
+            padding-left: 50px;
+        }
 
         /* Responsive */
         @media (max-width: 992px) {
@@ -272,14 +277,13 @@
     </style>
 </head>
 <body>
-    <!-- Single Header Section -->
+ 
     <header>
         <div class="header-wrapper">
             <div class="container">
-                <!-- Logo -->
+        
                 <a href="/home" class="logo">key<span>craft</span></a>
 
-                <!-- Navigation -->
                 <nav>
                     <ul>
                         <li><a href="/home">home</a></li>
@@ -289,27 +293,32 @@
                     </ul>
                 </nav>
 
-                <!-- Header Actions -->
+     
                 <div class="header-actions">
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <!-- Cart Button (Logged In) -->
+              
                         <a href="/cart" class="cart-btn">
                             <i class="fas fa    -shopping-cart"></i>
                             cart
                             <span class="cart-badge"><%= typeof cartCount !== 'undefined' ? cartCount : '0' %></span>
                         </a>
 
-                        <!-- Logout Button -->
+
                         <a href="/logout" class="logout-btn">
                             <i class="fas fa-sign-out-alt"></i>
                             logout
                         </a>
+
+                          <a href="/profile" class="profile-btn">
+                            <i class='bx bx-user' style="font-size: 23px;"></i>
+                        </a>
+                        
                     <% } else { %>
-                        <!-- Login Button (Not Logged In) -->
+           
                         <a href="/login" class="login-btn">login</a>
 
-                        <!-- Register Button -->
                         <a href="/register" class="register-btn">register</a>
+                        
                     <% } %>
                 </div>
             </div>

@@ -25,4 +25,27 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-module.exports = upload;
+
+// profile image storage:
+
+const profileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "../../public/uploads/profiles"));
+  },
+  filename: (req, file, cb) => {
+    const unique = "profile-" + Date.now();
+    cb(null, unique + path.extname(file.originalname));
+  },
+});
+
+const profileUpload = multer({
+  storage: profileStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+
+
+module.exports = {
+  upload,
+  profileUpload,
+};
