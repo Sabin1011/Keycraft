@@ -4,6 +4,7 @@ const userController = require("../controller/user/userController");
 const authController = require("../controller/user/authController");
 const editProfileController = require("../controller/user/editProfileController")
 const userProfileController = require("../controller/user/userProfileController")
+const wishlistController = require('../controller/user/wishlistController')
 const auth = require("../middleware/auth");
 const multer = require('multer');
 const { profileUpload } = require("../middleware/multer");
@@ -57,6 +58,12 @@ router.post("/profile/edit-profile/verify-otp", auth.isLogout, editProfileContro
 router.get('/profile/address/:id/edit', auth.isLogout, userProfileController.loadEditAddress);
 router.post('/profile/address/:id/edit', auth.isLogout, userProfileController.editAddressPost);
 router.post('/profile/address/:id/delete', auth.isLogout, userProfileController.deleteAddress);
+
+
+router.get("/wishlist", auth.isLogout,wishlistController.loadWishlist )
+router.post('/wishlist/add/:id', auth.isLogout, wishlistController.addToWishlist);
+router.post("/wishlist/remove/:id", auth.isLogout, wishlistController.removeFromWishlist);
+
 
 router.get("/logout", userController.userLogout);
 
