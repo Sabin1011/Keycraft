@@ -1,6 +1,7 @@
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
+const Wishlist = require("../../models/wishlistModel")
 const mongoose = require("mongoose");
 const path = require("path");
 const fs = require("fs");
@@ -64,7 +65,6 @@ const loadSingleProduct = async (req, res) => {
 
     console.log("Loaded product:", product);
 
-    // Pass the related products to the EJS template
     res.render("productDetails", { product, relatedProducts });
   } catch (error) {
     console.error("Error loading single product:", error);
@@ -74,12 +74,23 @@ const loadSingleProduct = async (req, res) => {
 
 const loadShop = async (req, res) => {
   try {
-    const userId = req.session.userId;
+    const userId = req.session.userId || req.session.user_id; 
     let user = null;
 
     if (userId) {
       user = await User.findById(userId).lean();
-      ``;
+    }
+
+
+    let wishlistProductIds = [];
+
+  
+    if (userId) {
+      const wishlist = await Wishlist.findOne({ userId: userId });
+
+      if (wishlist && wishlist.products) {
+        wishlistProductIds = wishlist.products.map(p => p.productId.toString());
+      }
     }
 
     const page = parseInt(req.query.page) || 1;
@@ -132,7 +143,6 @@ const loadShop = async (req, res) => {
         match: { status: true },
         select: "name",
       })
-
       .sort(sortCriteria)
       .skip((page - 1) * limit)
       .limit(limit)
@@ -144,7 +154,7 @@ const loadShop = async (req, res) => {
 
     const categories = await Category.find({ status: true }).lean();
 
-    // 4. Get the maximum price for the slider
+ 
     const maxProductPrice = await Product.findOne({ status: true })
       .sort({ price: -1 })
       .select("price")
@@ -161,6 +171,7 @@ const loadShop = async (req, res) => {
       activeCategory: categoryId,
       activeSort: sortOption,
       maxPriceValue: maxProductPrice ? maxProductPrice.price : 0,
+      wishlistProductIds, 
     });
   } catch (err) {
     console.log("Error loading shop:", err);
@@ -195,11 +206,13 @@ const userLogout = async (req, res) => {
   });
 };
 
+
 module.exports = {
 
   loadHome,
   loadShop,
   loadSingleProduct,
   userLogout,
+
 
 };

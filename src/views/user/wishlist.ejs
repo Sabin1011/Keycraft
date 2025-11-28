@@ -1,0 +1,242 @@
+<%- include('../partials/user/header') %>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Questrial", sans-serif;
+    background: #f3f3f9;
+    color: #222;
+  }
+
+  /* Page Header */
+  .page-header {
+    padding: 60px 20px;
+    text-align: center;
+    background: linear-gradient(135deg, #250049, #590179);
+    color: white;
+    margin-bottom: 50px;
+    border-radius: 0 0 30px 30px;
+  }
+  .page-header h1 {
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  /* Main container */
+  .container {
+    max-width: 1350px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* Wishlist Grid */
+  .wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 35px;
+  }
+
+  /* Product card redesign */
+  .product-card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    transition: 0.35s ease;
+    border: 1px solid #e9e9e9;
+  }
+  .product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  }
+
+  .product-image {
+    height: 240px;
+    overflow: hidden;
+    background: #f8f8f8;
+  }
+  .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.4s ease;
+  }
+  .product-card:hover img {
+    transform: scale(1.07);
+  }
+
+  .product-info {
+    padding: 25px 20px;
+    text-align: center;
+  }
+
+  .product-name {
+    font-size: 19px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #222;
+    text-transform: lowercase;
+  }
+
+  .product-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: #23013b;
+    margin-bottom: 18px;
+  }
+
+  /* Action Buttons */
+  .product-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 11px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: 0.3s ease;
+    text-transform: lowercase;
+  }
+
+  .btn-view {
+    background: #320163;
+    color: white;
+  }
+  .btn-view:hover {
+    background: #190131;
+  }
+
+  .btn-cart {
+    background: #4c4c4c;
+    color: white;
+  }
+  .btn-cart:hover {
+    background: #007444;
+  }
+
+  .btn-remove {
+    background: #4c4c4c;
+    color: white;
+  }
+  .btn-remove:hover {
+    background: #a80029;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 90px 20px;
+    color: #777;
+  }
+  .empty-state i {
+    font-size: 85px;
+    color: #dcdcdc;
+    margin-bottom: 25px;
+  }
+
+  /* Add all to cart button */
+  .add-all-container {
+    margin-top: 40px;
+    text-align: center;
+  }
+  .btn-add-all {
+    padding: 15px 40px;
+    font-size: 18px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #015835, #000000);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    letter-spacing: 1px;
+    transition: 0.3s ease;
+  }
+  .btn-add-all:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  }
+
+  @media (max-width: 768px) {
+    .page-header h1 { font-size: 30px; }
+    .wishlist-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+
+<!-- Header -->
+<section class="page-header">
+  <h1>my wishlist</h1>
+</section>
+
+
+<div class="container">
+
+  <% if (!products || products.length === 0) { %>
+    <div class="empty-state">
+      <i class="fa fa-heart-o"></i>
+      <h3>Your wishlist is empty</h3>
+      <p>Add products you love and access them anytime.</p>
+      <a href="/shop" class="btn-view" style="padding:14px 32px;">continue shopping</a>
+    </div>
+
+  <% } else { %>
+
+    <div class="wishlist-grid">
+      <% products.forEach(product => { %>
+        <div class="product-card">
+
+          <div class="product-image">
+            <% if (product.images && product.images.length > 0) { %>
+              <img src="<%= product.images[0] %>" alt="<%= product.name %>">
+            <% } else { %>
+              <img src="/images/default-product.png" alt="No Image">
+            <% } %>
+          </div>
+
+          <div class="product-info">
+            <div class="product-name"><%= product.name %></div>
+            <div class="product-price">₹<%= (product.salePrice || product.price).toFixed(2) %></div>
+
+            <div class="product-actions">
+
+              <a href="/singleProduct/<%= product._id %>" class="btn btn-view">
+                view
+              </a>
+
+              <form action="/cart/add/<%= product._id %>" method="POST" style="display:inline;">
+                <button class="btn btn-cart" type="submit">add to cart</button>
+              </form>
+
+              <form action="/wishlist/remove/<%= product._id %>" method="POST" style="display:inline;">
+                <button class="btn btn-remove" type="submit">remove</button>
+              </form>
+
+            </div>
+          </div>
+
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- Add All to Cart Button -->
+    <div class="add-all-container">
+      <form action="/wishlist/add-all-to-cart" method="POST">
+        <button class="btn-add-all" type="submit">
+          add all to cart
+        </button>
+      </form>
+    </div>
+
+  <% } %>
+
+</div>
+
+<%- include('../partials/user/footer') %>
