@@ -1,7 +1,7 @@
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
-const Wishlist = require("../../models/wishlistModel")
+const Wishlist = require("../../models/wishlistModel");
 const mongoose = require("mongoose");
 const path = require("path");
 const fs = require("fs");
@@ -11,15 +11,19 @@ const bcrypt = require("bcrypt");
 
 const loadWishlist = async (req, res) => {
   try {
-    const wishlist = await Wishlist.findOne({ userId: req.session.user._id })
-      .populate('products.productId');
+    const wishlist = await Wishlist.findOne({
+      userId: req.session.user._id,
+    }).populate({
+      path: "products.productId",
+      populate: { path: "category", select: "name status" },
+    });
 
-    const products = wishlist?.products.map(item => item.productId) || [];
+    let products = wishlist?.products || [];
 
-    res.render('wishlist', { products }); 
+    res.render("wishlist", { products });
   } catch (error) {
     console.error("Error loading wishlist:", error);
-    res.render('wishlist', { products: [] });
+    res.render("wishlist", { products: [] });
   }
 };
 
@@ -44,7 +48,6 @@ const addToWishlist = async (req, res) => {
     }
 
     return res.json({ success: true, message: "Added to wishlist" });
-
   } catch (error) {
     console.error(error);
     return res.json({ success: false, message: "Failed to add" });
@@ -56,48 +59,39 @@ const removeFromWishlist = async (req, res) => {
     const userId = req.session.user._id;
     const productId = req.params.id;
 
-    await Wishlist.updateOne(
+    const result = await Wishlist.updateOne(
       { userId },
       { $pull: { products: { productId } } }
     );
 
-    req.session.successMessage = "Removed from wishlist";
+    if (result.modifiedCount === 0) {
+      return res.json({ success: false, message: "Product not in wishlist" });
+    }
 
- 
-    return res.redirect("/wishlist");
-
+    return res.json({ success: true, message: "Removed from wishlist" });
   } catch (error) {
     console.error("Error removing from wishlist:", error);
-
-    req.session.errorMessage = "Failed to remove";
-    return res.redirect("/wishlist");
+    return res.json({ success: false, message: "Failed to remove" });
   }
 };
-
-
 
 const clearWishlist = async (req, res) => {
   try {
     const userId = req.session.user._id;
 
-    await Wishlist.findOneAndUpdate(
-      { userId },
-      { $set: { products: [] } }
-    );
+    await Wishlist.findOneAndUpdate({ userId }, { $set: { products: [] } });
 
     req.session.successMessage = "Wishlist cleared";
-    res.redirect('/wishlist');
-
+    res.redirect("/wishlist");
   } catch (error) {
     console.error("Error clearing wishlist:", error);
     req.session.errorMessage = "Could not clear wishlist";
-    res.redirect('/wishlist');
+    res.redirect("/wishlist");
   }
 };
 module.exports = {
   loadWishlist,
   addToWishlist,
   removeFromWishlist,
-  clearWishlist
-}
-
+  clearWishlist,
+};

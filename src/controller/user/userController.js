@@ -15,9 +15,15 @@ const loadHome = async (req, res) => {
   try {
     const userId = req.session.userId;
     let user = null;
+    let wishlistProductIds = [];
 
     if (userId) {
       user = await User.findById(userId);
+
+      const wishlist = await Wishlist.findOne({ userId});
+      if(wishlist){
+        wishlistProductIds = wishlist.products.map(p => p.productId.toString())
+      }
     }
 
     const products = await Product.find({ status: true }).populate({
@@ -28,9 +34,7 @@ const loadHome = async (req, res) => {
 
     const filteredProducts = products.filter((p) => p.category !== null);
 
-    console.log(products);
-
-    res.render("home", { user, products: filteredProducts });
+    res.render("home", { user, products: filteredProducts, wishlistProductIds });
   } catch (error) {
     console.log("error loading home page", error);
   }
@@ -65,7 +69,16 @@ const loadSingleProduct = async (req, res) => {
 
     console.log("Loaded product:", product);
 
-    res.render("productDetails", { product, relatedProducts });
+
+    const wishlist = await Wishlist.findOne({userId: req.session.user._id});
+    let wishlistProductIds = [];
+
+    if(wishlist && wishlist.products){
+      wishlistProductIds = wishlist.products.map(p => p.productId.toString());
+    }
+
+
+    res.render("productDetails", { product, relatedProducts , wishlistProductIds});
   } catch (error) {
     console.error("Error loading single product:", error);
     res.status(500).render("error", { message: "Internal Server Error" });

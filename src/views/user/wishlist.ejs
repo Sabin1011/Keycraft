@@ -4,176 +4,237 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: "Questrial", sans-serif;
-    background: #f3f3f9;
-    color: #222;
+    background: #fafafa;
+    color: #1a1a1a;
   }
 
   /* Page Header */
   .page-header {
-    padding: 60px 20px;
+    padding: 80px 20px 60px;
     text-align: center;
-    background: linear-gradient(135deg, #250049, #590179);
-    color: white;
-    margin-bottom: 50px;
-    border-radius: 0 0 30px 30px;
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+    margin-bottom: 60px;
   }
   .page-header h1 {
-    font-size: 38px;
-    font-weight: 700;
-    letter-spacing: 1px;
+    font-size: 32px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: #1a1a1a;
+    text-transform: uppercase;
+  }
+  .page-header::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 2px;
+    background: #1a1a1a;
+    margin: 20px auto 0;
   }
 
   /* Main container */
   .container {
-    max-width: 1350px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px 80px;
+    padding: 0 40px 100px;
   }
 
   /* Wishlist Grid */
   .wishlist-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 35px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 40px;
   }
 
   /* Product card redesign */
   .product-card {
     background: #fff;
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-    transition: 0.35s ease;
-    border: 1px solid #e9e9e9;
+    border: 1px solid #e5e5e5;
+    transition: all 0.3s ease;
+    position: relative;
   }
   .product-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    border-color: #1a1a1a;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   }
 
   .product-image {
-    height: 240px;
+    height: 320px;
     overflow: hidden;
     background: #f8f8f8;
+    position: relative;
   }
   .product-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: 0.4s ease;
+    transition: 0.6s ease;
   }
   .product-card:hover img {
-    transform: scale(1.07);
+    transform: scale(1.05);
   }
 
   .product-info {
-    padding: 25px 20px;
-    text-align: center;
+    padding: 30px 25px;
   }
 
   .product-name {
-    font-size: 19px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #222;
-    text-transform: lowercase;
+    font-size: 16px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+    letter-spacing: 0.5px;
+    text-transform: capitalize;
+    min-height: 40px;
   }
 
   .product-price {
-    font-size: 20px;
-    font-weight: 700;
-    color: #23013b;
-    margin-bottom: 18px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 25px;
+    letter-spacing: 0.5px;
   }
 
   /* Action Buttons */
   .product-actions {
     display: flex;
-    justify-content: center;
-    gap: 12px;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .btn {
-    padding: 11px 20px;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
+    padding: 12px 24px;
+    border: 1px solid #1a1a1a;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
-    display: inline-block;
-    transition: 0.3s ease;
-    text-transform: lowercase;
+    display: block;
+    text-align: center;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: transparent;
   }
 
   .btn-view {
-    background: #320163;
-    color: white;
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
   }
   .btn-view:hover {
-    background: #190131;
+    background: #333;
+    border-color: #333;
   }
 
   .btn-cart {
-    background: #4c4c4c;
-    color: white;
+    background: transparent;
+    color: #1a1a1a;
+    border-color: #1a1a1a;
   }
   .btn-cart:hover {
-    background: #007444;
+    background: #1a1a1a;
+    color: #fff;
   }
 
   .btn-remove {
-    background: #4c4c4c;
-    color: white;
+    background: transparent;
+    color: #666;
+    border-color: #d0d0d0;
+    font-size: 10px;
+    padding: 10px;
   }
   .btn-remove:hover {
-    background: #a80029;
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+  }
+
+  .btn:disabled {
+    background: #f5f5f5;
+    color: #999;
+    border-color: #e0e0e0;
+    cursor: not-allowed;
   }
 
   /* Empty State */
   .empty-state {
     text-align: center;
-    padding: 90px 20px;
-    color: #777;
+    padding: 120px 20px;
+    color: #666;
   }
   .empty-state i {
-    font-size: 85px;
-    color: #dcdcdc;
-    margin-bottom: 25px;
+    font-size: 60px;
+    color: #d0d0d0;
+    margin-bottom: 30px;
+  }
+  .empty-state h3 {
+    font-size: 24px;
+    font-weight: 300;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+    letter-spacing: 1px;
+  }
+  .empty-state p {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 30px;
+  }
+  .empty-state .btn-view {
+    display: inline-block;
+    padding: 14px 40px;
+    font-size: 12px;
   }
 
   /* Add all to cart button */
   .add-all-container {
-    margin-top: 40px;
+    margin-top: 60px;
     text-align: center;
+    padding-top: 60px;
+    border-top: 1px solid #e5e5e5;
   }
   .btn-add-all {
-    padding: 15px 40px;
-    font-size: 18px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #015835, #000000);
-    color: white;
-    border: none;
+    padding: 16px 50px;
+    font-size: 12px;
+    background: #1a1a1a;
+    color: #fff;
+    border: 1px solid #1a1a1a;
     cursor: pointer;
-    font-weight: 700;
-    letter-spacing: 1px;
-    transition: 0.3s ease;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
   }
   .btn-add-all:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    background: #333;
+    border-color: #333;
   }
 
   @media (max-width: 768px) {
-    .page-header h1 { font-size: 30px; }
-    .wishlist-grid { grid-template-columns: 1fr; }
+    .container {
+      padding: 0 20px 80px;
+    }
+    .page-header {
+      padding: 60px 20px 40px;
+    }
+    .page-header h1 { 
+      font-size: 24px; 
+    }
+    .wishlist-grid { 
+      grid-template-columns: 1fr; 
+      gap: 30px;
+    }
+    .product-image {
+      height: 280px;
+    }
   }
 </style>
 
 
 <!-- Header -->
 <section class="page-header">
-  <h1>my wishlist</h1>
+  <h1>Wishlist</h1>
 </section>
 
 
@@ -184,7 +245,7 @@
       <i class="fa fa-heart-o"></i>
       <h3>Your wishlist is empty</h3>
       <p>Add products you love and access them anytime.</p>
-      <a href="/shop" class="btn-view" style="padding:14px 32px;">continue shopping</a>
+      <a href="/shop" class="btn btn-view">Continue Shopping</a>
     </div>
 
   <% } else { %>
@@ -194,30 +255,60 @@
         <div class="product-card">
 
           <div class="product-image">
-            <% if (product.images && product.images.length > 0) { %>
-              <img src="<%= product.images[0] %>" alt="<%= product.name %>">
-            <% } else { %>
-              <img src="/images/default-product.png" alt="No Image">
-            <% } %>
+              <% if (product.productId && product.productId.images && product.productId.images.length > 0) { %>
+                  <img src="<%= product.productId.images[0] %>" alt="<%= product.productId.name %>">
+              <% } else { %>
+                  <img src="/images/default-product.png" alt="Unavailable Product">
+              <% } %>
           </div>
 
+
           <div class="product-info">
-            <div class="product-name"><%= product.name %></div>
-            <div class="product-price">₹<%= (product.salePrice || product.price).toFixed(2) %></div>
+            <div class="product-name"><%= product.productId?.name %></div>
+
+            <div class="product-price">
+                ₹<%= ((product.productId.salePrice || product.productId.price) || 0).toFixed(2) %>
+            </div>
+
 
             <div class="product-actions">
 
               <a href="/singleProduct/<%= product._id %>" class="btn btn-view">
-                view
+                View Details
               </a>
 
-              <form action="/cart/add/<%= product._id %>" method="POST" style="display:inline;">
-                <button class="btn btn-cart" type="submit">add to cart</button>
+              <form action="/cart/add/<%= product.productId?._id %>" method="POST" style="display:inline;">
+
+                <% 
+                  const p = product.productId;
+                  const isBlocked = !p?.status || !p?.category?.status;
+                  const isOutOfStock = p?.totalStock <= 0;
+                %>
+
+                <% if (isBlocked) { %>
+
+                    <button class="btn btn-cart" disabled>
+                      Unavailable
+                    </button>
+
+                <% } else if (isOutOfStock) { %>
+
+                    <button class="btn btn-cart" disabled>
+                      Out of Stock
+                    </button>
+
+                <% } else { %>
+
+                    <button class="btn btn-cart" type="submit">
+                      Add to Cart
+                    </button>
+
+                <% } %>
+
               </form>
 
-              <form action="/wishlist/remove/<%= product._id %>" method="POST" style="display:inline;">
-                <button class="btn btn-remove" type="submit">remove</button>
-              </form>
+
+              <button class="btn btn-remove" onclick="removeFromWishlist('<%= product.productId._id %>', this)">Remove</button>
 
             </div>
           </div>
@@ -230,7 +321,7 @@
     <div class="add-all-container">
       <form action="/wishlist/add-all-to-cart" method="POST">
         <button class="btn-add-all" type="submit">
-          add all to cart
+          Add All to Cart
         </button>
       </form>
     </div>
@@ -238,5 +329,28 @@
   <% } %>
 
 </div>
+<script>
+  async function removeFromWishlist(productId, button) {
+    try {
+        const res = await fetch(`/wishlist/remove/${productId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            // Remove the product card from DOM
+            const card = button.closest('.product-card');
+            if (card) card.remove();
+        } else {
+            alert(data.message || "Failed to remove");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error removing product");
+    }
+}
+
+</script>
 
 <%- include('../partials/user/footer') %>
