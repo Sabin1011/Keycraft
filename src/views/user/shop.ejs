@@ -396,7 +396,7 @@
 
                     <% products.forEach(p => { %>
                     <div class="product-card">
-                        <!-- Wishlist Button - Set initial state based on wishlistProductIds -->
+                        
                         <button 
                             onclick="toggleWishlist(event, this, '<%= p._id %>')" 
                             class="wishlist-btn" 
@@ -420,10 +420,33 @@
 
                             <div class="product-actions">
                                 <a href="/singleProduct/<%= p._id %>" class="btn-small btn-primary">details</a>
-                                <button class="btn-small" disabled>add to cart</button>
+
+                                <% if (p.totalStock <= 0) { %>
+                                    <!-- OUT OF STOCK -->
+                                    <button class="btn-small" disabled style="background:#ccc; cursor:not-allowed; opacity:0.7;">
+                                        out of stock
+                                    </button>
+                                <% } else { %>
+                                    <!-- IN STOCK -->
+                                    <form action="/cart/add/<%= p._id %>" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn-small btn-primary">
+                                            add to cart
+                                        </button>
+                                    </form>
+                                <% } %>
+                            </div>
+
+                            <% if (p.totalStock <= 0) { %>
+                                <div style="position:absolute; top:15px; left:15px; background:#e74c3c; color:white; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; z-index:10;">
+                                    Out of Stock
+                                </div>
+                            <% } else if (p.totalStock <= 5) { %>
+                                <div style="position:absolute; top:15px; left:15px; background:#e67e22; color:white; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; z-index:10;">
+                                    Only <%= p.totalStock %> left!
+                                </div>
+                            <% } %>
                             </div>
                         </div>
-                    </div>
                     <% }) %>
                 </div>
 

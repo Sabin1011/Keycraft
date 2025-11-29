@@ -4,7 +4,8 @@ const userController = require("../controller/user/userController");
 const authController = require("../controller/user/authController");
 const editProfileController = require("../controller/user/editProfileController")
 const userProfileController = require("../controller/user/userProfileController")
-const wishlistController = require('../controller/user/wishlistController')
+const wishlistController = require('../controller/user/wishlistController');
+const cartController = require('../controller/user/cartController')
 const auth = require("../middleware/auth");
 const multer = require('multer');
 const { profileUpload } = require("../middleware/multer");
@@ -64,6 +65,11 @@ router.get("/wishlist", auth.isLogout,wishlistController.loadWishlist )
 router.post('/wishlist/add/:id', auth.isLogout, wishlistController.addToWishlist);
 router.post("/wishlist/remove/:id", auth.isLogout, wishlistController.removeFromWishlist);
 
+router.get("/cart", auth.isLogout, cartController.loadCart);
+router.post("/cart/add/:id", auth.isLogout, cartController.addToCart);
+router.post("/cart/increase/:id", auth.isLogout, cartController.increaseQuantity);
+router.post("/cart/decrease/:id", auth.isLogout, cartController.decreaseQuantity);
+router.post("/cart/remove/:id", auth.isLogout, cartController.removeFromCart);
 
 router.get("/logout", userController.userLogout);
 

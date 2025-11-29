@@ -11,6 +11,8 @@ const passport = require("passport");
 require("./src/config/passport");
 const noCache = require("nocache");
 
+const cartCountMiddleware = require("./src/middleware/cartCount")
+
 // Routes
 const userRoutes = require("./src/router/userRouter");
 const adminRoutes = require("./src/router/adminRouter");
@@ -31,6 +33,8 @@ app.use(
         cookie: { maxAge: 24 * 60 * 60 * 1000 }
     })
 );
+
+app.use(cartCountMiddleware);
 
 app.set("view engine", "ejs");
 app.set("views", [
