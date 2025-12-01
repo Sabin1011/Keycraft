@@ -4,6 +4,7 @@ const adminController = require("../controller/admin/adminController");
 const categoryController = require("../controller/admin/categoryController");
 const userManageController = require("../controller/admin/userManageController");
 const productController = require("../controller/admin/productController");
+const adminOrderController = require("../controller/admin/adminOrderController")
 const {upload} = require("../middleware/multer");
 const cloudinary = require("../config/cloudinary")
 
@@ -79,6 +80,10 @@ router.post(
 );
 
 router.patch("/toggleProductStatus/:id", productController.toggleProductStatus);
+
+
+router.get("/orders", auth.isAdminLoggedIn,adminOrderController.loadOrders);
+router.post("/orders/update-status/:id", auth.isAdminLoggedIn, adminOrderController.updateStatus);
 
 router.get("/logout", adminController.logout);
 

@@ -486,7 +486,9 @@
               <div class="product-actions">
                 <a href="/singleProduct/<%= product._id %>" class="btn-small">details</a>
                 <% if (product.totalStock > 0) { %>
-                  <button class="btn-small btn-primary">add to cart</button>
+                    <form action="/cart/add/<%= product._id %>" method="POST" style="width:100%;">
+                        <button type="submit" class="btn-small btn-primary" style="width:100%;">add to cart</button>
+                    </form>
                 <% } else { %>
                   <button class="btn-small" disabled style="opacity:0.6;">unavailable</button>
                 <% } %>

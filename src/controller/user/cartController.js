@@ -185,7 +185,7 @@ const addToCart = async (req, res)=>{
         req.session.message = 'Product added to cart successfully';
         req.session.messageType = 'success';
 
-        await Wishlist.updateOne({userId},{$pull:{products:{productId}}}) ;
+        await Wishlist.updateOne({userId},{$pull:{products:{productId: productId}}}) ;
 
         return res.redirect("/cart");
 

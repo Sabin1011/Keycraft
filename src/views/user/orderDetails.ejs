@@ -1,0 +1,144 @@
+<%- include('../partials/user/header') %>
+
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Questrial", sans-serif;
+    background: #fafafa;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  .details-section {
+    padding: 50px 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .order-card {
+    background: #fff;
+    padding: 35px 40px;
+    border-radius: 12px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    max-width: 800px;
+    width: 100%;
+  }
+
+  .order-card h3 {
+    color: #401f75;
+    margin-bottom: 15px;
+  }
+
+  .order-card h4 {
+    color: #401f75;
+    font-weight: 500;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .order-card p {
+    margin-bottom: 20px;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  .order-card ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 20px;
+  }
+
+  .order-card ul li {
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .btn {
+    padding: 12px 25px;
+    border: none;
+    font-size: 14px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    margin-top: 10px;
+    display: inline-block;
+    font-weight: 600;
+  }
+
+  .btn-primary {
+    background: #401f75;
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #321960;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: #e5e5e5;
+    color: #333;
+  }
+
+  .btn-secondary:hover {
+    background: #ccc;
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .details-section {
+      padding: 30px 15px;
+    }
+
+    .order-card {
+      padding: 25px 20px;
+    }
+  }
+</style>
+
+
+<section class="details-section">
+  <div class="container">
+    <div class="order-card">
+      <h3>Order ID: <%= order._id %></h3>
+      <h4>Total: ₹<%= order.totalAmount.toFixed(2) %></h4>
+      <h4>Payment Method: <%= order.paymentMethod ? order.paymentMethod.toUpperCase() : "N/A" %></h4>
+
+
+      <h4>Delivery Address:</h4>
+      <p>
+        <%= order.address.street %>, <%= order.address.city %>, 
+        <%= order.address.state %> - <%= order.address.zipCode %>, 
+        <%= order.address.country %>
+      </p>
+
+      <h4>Items:</h4>
+      <ul>
+        <% order.items.forEach(item => { %>
+          <li>
+            <span><%= item.product.name %> (x<%= item.quantity %>)</span>
+            <span>₹<%= (item.price * item.quantity).toFixed(2) %></span>
+          </li>
+        <% }) %>
+      </ul>
+
+      <a href="/my-orders" class="btn btn-secondary">Back to My Orders</a>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/user/footer') %>
