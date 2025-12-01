@@ -429,7 +429,7 @@
           </a>
           <button
             class="btn btn-primary"
-            onclick="window.location.href='/orders'"
+            onclick="window.location.href='/my-orders'"
           >
             <i class="fa fa-shopping-bag"></i> my orders
           </button>
@@ -506,112 +506,141 @@
         </div>
       </div>
 
-      <div class="info-card full-width">
-        <div class="card-header">
-          <h2 class="card-title">
-            <i class="fa fa-map-marker"></i> saved addresses
-          </h2>
-          <a href="/profile/address/add" class="btn btn-secondary btn-small">
-            <i class="fa fa-plus"></i> add new
-          </a>
-        </div>
+      <!-- Replace the address section in your profile page with this -->
 
-        <% if (user.addresses && user.addresses.length > 0) { %> <% const
-        defaultAddress = user.addresses.find(a => a.isDefault); const
-        otherAddresses = user.addresses.filter(a => !a.isDefault); %>
+<div class="info-card full-width">
+  <div class="card-header">
+    <h2 class="card-title">
+      <i class="fa fa-map-marker"></i> saved addresses
+    </h2>
+    <a href="/profile/address/add?returnUrl=/profile" class="btn btn-secondary btn-small">
+      <i class="fa fa-plus"></i> add new
+    </a>
+  </div>
 
-        <!-- DEFAULT ADDRESS SECTION -->
-        <% if (defaultAddress) { %>
-        <h3 style="margin-bottom: 15px; font-size: 16px; color: #222">
-          Default Address
-        </h3>
+  <% if (user.addresses && user.addresses.length > 0) { %> 
+  <% const defaultAddress = user.addresses.find(a => a.isDefault); 
+     const otherAddresses = user.addresses.filter(a => !a.isDefault); %>
 
-        <div class="address-item default-address">
-          <div class="default-badge">Default</div>
+  <!-- DEFAULT ADDRESS SECTION -->
+  <% if (defaultAddress) { %>
+  <h3 style="margin-bottom: 15px; font-size: 16px; color: #222">
+    Default Address
+  </h3>
 
-          <div class="address-type">
-            <i class="fa fa-star" style="color: #ffa500"></i> <%=
-            defaultAddress.type %>
-          </div>
+  <div class="address-item default-address">
+    <div class="default-badge">Default</div>
 
-          <div class="address-text">
-            <%= defaultAddress.street %><br />
-            <%= defaultAddress.city %>, <%= defaultAddress.state %> <%=
-            defaultAddress.zipCode %><br />
-            <% if (defaultAddress.country) { %><%= defaultAddress.country %><% }
-            %>
-          </div>
-        </div>
+    <div class="address-type">
+      <i class="fa fa-star" style="color: #ffa500"></i> <%= defaultAddress.type %>
+      <% if (defaultAddress.label) { %> - <%= defaultAddress.label %><% } %>
+    </div>
 
-        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee" />
-        <% } %>
+    <div class="address-text">
+      <%= defaultAddress.street %><br />
+      <%= defaultAddress.city %>, <%= defaultAddress.state %> <%= defaultAddress.zipCode %><br />
+      <% if (defaultAddress.country) { %><%= defaultAddress.country %><% } %>
+    </div>
 
-        <!-- OTHER ADDRESSES -->
-        <h3 style="margin-bottom: 15px; font-size: 16px; color: #222">
-          Other Addresses
-        </h3>
+    <div style="margin-top: 15px; display: flex; gap: 10px">
+      <!-- Edit -->
+      <a
+        href="/profile/address/<%= defaultAddress._id %>/edit?returnUrl=/profile"
+        class="btn btn-secondary btn-small address-btn"
+        style="background: #d9e8ff; border-color: #88aaff"
+      >
+        <i class="fa fa-edit"></i> Edit
+      </a>
 
-        <% if (otherAddresses.length > 0) { %>
-        <div class="address-list">
-          <% otherAddresses.forEach(address => { %>
-          <div class="address-item">
-            <div class="address-type"><%= address.type %></div>
+      <!-- Delete -->
+      <form
+        action="/profile/address/<%= defaultAddress._id %>/delete?returnUrl=/profile"
+        method="POST"
+        class="delete-address-form"
+      >
+        <button
+          class="btn btn-secondary btn-small address-btn"
+          style="background: #ffe3e3; border-color: #ff9d9d"
+        >
+          <i class="fa fa-trash"></i> Delete
+        </button>
+      </form>
+    </div>
+  </div>
 
-            <div class="address-text">
-              <%= address.street %><br />
-              <%= address.city %>, <%= address.state %> <%= address.zipCode
-              %><br />
-              <% if (address.country) { %><%= address.country %><% } %>
-            </div>
+  <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee" />
+  <% } %>
 
-            <div style="margin-top: 15px; display: flex; gap: 10px">
-              <form
-                action="/profile/address/<%= address._id %>/set-default"
-                method="POST"
-              >
-                <button
-                  class="btn btn-secondary btn-small"
-                  style="margin-top: 10px"
-                >
-                  <i class="fa fa-star-o"></i> Set as Default
-                </button>
-              </form>
+  <!-- OTHER ADDRESSES -->
+  <h3 style="margin-bottom: 15px; font-size: 16px; color: #222">
+    Other Addresses
+  </h3>
 
-              <!-- Edit -->
-              <a
-                href="/profile/address/<%= address._id %>/edit"
-                class="btn btn-secondary btn-small address-btn"
-                style="background: #d9e8ff; border-color: #88aaff"
-              >
-                <i class="fa fa-edit"></i> Edit
-              </a>
-
-              <!-- Delete -->
-              <form
-                action="/profile/address/<%= address._id %>/delete"
-                method="POST"
-                class="delete-address-form"
-              >
-                <button
-                  class="btn btn-secondary btn-small address-btn"
-                  style="background: #ffe3e3; border-color: #ff9d9d"
-                >
-                  <i class="fa fa-trash"></i> Delete
-                </button>
-              </form>
-            </div>
-          </div>
-          <% }) %>
-        </div>
-        <% } else { %>
-        <p style="color: #888">No other addresses saved.</p>
-        <% } %> <% } else { %>
-        <div class="empty-state">
-          <i class="fa fa-map-marker"></i>
-          <p>no saved addresses yet</p>
-        </div>
-        <% } %>
+  <% if (otherAddresses.length > 0) { %>
+  <div class="address-list">
+    <% otherAddresses.forEach(address => { %>
+    <div class="address-item">
+      <div class="address-type">
+        <%= address.type %>
+        <% if (address.label) { %> - <%= address.label %><% } %>
       </div>
+
+      <div class="address-text">
+        <%= address.street %><br />
+        <%= address.city %>, <%= address.state %> <%= address.zipCode %><br />
+        <% if (address.country) { %><%= address.country %><% } %>
+      </div>
+
+      <div style="margin-top: 15px; display: flex; gap: 10px">
+        <form
+          action="/profile/address/<%= address._id %>/set-default?returnUrl=/profile"
+          method="POST"
+        >
+          <button
+            class="btn btn-secondary btn-small"
+            style="margin-top: 10px"
+          >
+            <i class="fa fa-star-o"></i> Set as Default
+          </button>
+        </form>
+
+        <!-- Edit -->
+        <a
+          href="/profile/address/<%= address._id %>/edit?returnUrl=/profile"
+          class="btn btn-secondary btn-small address-btn"
+          style="background: #d9e8ff; border-color: #88aaff"
+        >
+          <i class="fa fa-edit"></i> Edit
+        </a>
+
+        <!-- Delete -->
+        <form
+          action="/profile/address/<%= address._id %>/delete?returnUrl=/profile"
+          method="POST"
+          class="delete-address-form"
+        >
+          <button
+            class="btn btn-secondary btn-small address-btn"
+            style="background: #ffe3e3; border-color: #ff9d9d"
+          >
+            <i class="fa fa-trash"></i> Delete
+          </button>
+        </form>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+  <% } else { %>
+  <p style="color: #888">No other addresses saved.</p>
+  <% } %> 
+
+  <% } else { %>
+  <div class="empty-state">
+    <i class="fa fa-map-marker"></i>
+    <p>no saved addresses yet</p>
+  </div>
+  <% } %>
+</div>
     </div>
   </div>
 </section>

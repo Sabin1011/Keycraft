@@ -24,7 +24,7 @@ const adminLogoutCheck = (req, res, next) => {
   }
 };
 
-const isLogout = async (req, res, next) => {
+const isLoggedIn = async (req, res, next) => {
   try {
     if (req.session.userId) {
       const userId = req.session.userId;
@@ -61,4 +61,4 @@ const isAdminLoggedIn = (req, res, next) => {
   }
 };
 
-module.exports = { isAdminLoggedIn, isLogged, isLogout, adminLogoutCheck };
+module.exports = { isAdminLoggedIn, isLogged, isLoggedIn, adminLogoutCheck };

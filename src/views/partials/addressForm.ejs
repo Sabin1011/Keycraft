@@ -1,0 +1,178 @@
+
+<div class="form-layout">
+  <div class="form-card">
+    <div class="card-header">
+      <h2 class="card-title">
+        <i class="fa fa-tag"></i> address type
+      </h2>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label required">select type</label>
+      <select name="type" class="form-select" required>
+        <option value="">choose address type</option>
+        <option value="home" <%= address && address.type === 'home' ? 'selected' : '' %>>home</option>
+        <option value="work" <%= address && address.type === 'work' ? 'selected' : '' %>>work</option>
+        <option value="other" <%= address && address.type === 'other' ? 'selected' : '' %>>other</option>
+      </select>
+      <div class="helper-text">categorize this address for easy reference</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">label (optional)</label>
+      <input 
+        type="text" 
+        name="label" 
+        class="form-input" 
+        value="<%= address && address.label ? address.label : '' %>"
+        placeholder="e.g., mom's house, office, vacation home">
+      <div class="helper-text">give this address a memorable name</div>
+    </div>
+
+    <div class="info-box">
+      <i class="fa fa-info-circle"></i>
+      <div class="info-box-content">
+        <h4>quick tip</h4>
+        <p>you can save multiple addresses and choose which one to use during checkout</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <div class="card-header">
+      <h2 class="card-title">
+        <i class="fa fa-map-marker"></i> location details
+      </h2>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label required">country</label>
+      <select name="country" class="form-select" required>
+        <option value="">select country</option>
+        <option value="United States" <%= address && address.country === 'United States' ? 'selected' : '' %>>United States</option>
+        <option value="Canada" <%= address && address.country === 'Canada' ? 'selected' : '' %>>Canada</option>
+        <option value="United Kingdom" <%= address && address.country === 'United Kingdom' ? 'selected' : '' %>>United Kingdom</option>
+        <option value="Australia" <%= address && address.country === 'Australia' ? 'selected' : '' %>>Australia</option>
+        <option value="India" <%= address && address.country === 'India' ? 'selected' : '' %>>India</option>
+        <option value="Germany" <%= address && address.country === 'Germany' ? 'selected' : '' %>>Germany</option>
+        <option value="France" <%= address && address.country === 'France' ? 'selected' : '' %>>France</option>
+        <option value="Other" <%= address && address.country === 'Other' ? 'selected' : '' %>>Other</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label required">state / province</label>
+      <input 
+        type="text" 
+        name="state" 
+        class="form-input" 
+        value="<%= address && address.state ? address.state : '' %>"
+        placeholder="e.g., california, ontario, bavaria"
+        required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label required">city</label>
+      <input 
+        type="text" 
+        name="city" 
+        class="form-input" 
+        value="<%= address && address.city ? address.city : '' %>"
+        placeholder="e.g., san francisco, toronto, munich"
+        required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label required">zip / postal code</label>
+      <input 
+        type="text" 
+        name="zipCode" 
+        class="form-input" 
+        value="<%= address && address.zipCode ? address.zipCode : '' %>"
+        placeholder="e.g., 94102, m5h 2n2, 80331"
+        required>
+    </div>
+  </div>
+
+  <!-- Full Width: Street Address -->
+  <div class="form-card full-width">
+    <div class="card-header">
+      <h2 class="card-title">
+        <i class="fa fa-home"></i> street address
+      </h2>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label required">full street address</label>
+      <textarea 
+        name="street" 
+        class="form-textarea" 
+        placeholder="123 main street, apartment 4b&#10;building name, floor number&#10;any additional delivery instructions"
+        required><%= address && address.street ? address.street : '' %></textarea>
+      <div class="helper-text">include apartment, suite, unit, building, floor, or any special delivery instructions</div>
+    </div>
+
+    <div class="address-preview">
+      <div class="preview-title">address preview</div>
+      <div class="preview-content preview-empty">
+        <% if (address && address.street) { %>
+          <%= address.street %><br>
+          <% if (address.city || address.state || address.zipCode) { %>
+            <%= [address.city, address.state, address.zipCode].filter(Boolean).join(', ') %><br>
+          <% } %>
+          <% if (address.country) { %><%= address.country %><% } %>
+        <% } else { %>
+          your address will appear here as you type
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card full-width">
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        <i class="fa fa-check"></i> <%= mode === 'edit' ? 'update address' : 'save address' %>
+      </button>
+      <a href="<%= returnUrl || '/profile' %>" class="btn btn-secondary">
+        <i class="fa fa-times"></i> cancel
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  const streetInput = document.querySelector('[name="street"]');
+  const cityInput = document.querySelector('[name="city"]');
+  const stateInput = document.querySelector('[name="state"]');
+  const zipInput = document.querySelector('[name="zipCode"]');
+  const countryInput = document.querySelector('[name="country"]');
+  const previewContent = document.querySelector('.preview-content');
+
+  function updatePreview() {
+    const street = streetInput.value.trim();
+    const city = cityInput.value.trim();
+    const state = stateInput.value.trim();
+    const zip = zipInput.value.trim();
+    const country = countryInput.value;
+
+    if (!street && !city && !state && !zip && !country) {
+      previewContent.innerHTML = '<span class="preview-empty">your address will appear here as you type</span>';
+      return;
+    }
+
+    let preview = '';
+    if (street) preview += street.replace(/\n/g, '<br>') + '<br>';
+    if (city || state || zip) {
+      const cityStateZip = [city, state, zip].filter(Boolean).join(', ');
+      if (cityStateZip) preview += cityStateZip + '<br>';
+    }
+    if (country) preview += country;
+
+    previewContent.innerHTML = preview || '<span class="preview-empty">your address will appear here as you type</span>';
+  }
+
+  [streetInput, cityInput, stateInput, zipInput, countryInput].forEach(input => {
+    input.addEventListener('input', updatePreview);
+  });
+</script>

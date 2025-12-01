@@ -1,0 +1,103 @@
+<%- include('../partials/user/header') %>
+
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Questrial", sans-serif;
+    background: #fafafa;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  .success-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    padding: 20px;
+  }
+
+  .success-card {
+    background: #fff;
+    padding: 40px 50px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+    max-width: 500px;
+    width: 100%;
+  }
+
+  .success-card h2 {
+    color: #401f75;
+    font-size: 28px;
+    margin-bottom: 15px;
+  }
+
+  .success-card p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 30px;
+  }
+
+  .btn {
+    padding: 12px 25px;
+    border: none;
+    font-size: 14px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    margin: 5px;
+    display: inline-block;
+    font-weight: 600;
+  }
+
+  .btn-primary {
+    background: #401f75;
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #321960;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: #e5e5e5;
+    color: #333;
+  }
+
+  .btn-secondary:hover {
+    background: #ccc;
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .success-card {
+      padding: 25px 20px;
+    }
+
+    .success-card h2 {
+      font-size: 24px;
+    }
+  }
+</style>
+
+<section class="success-section">
+  <div class="success-card">
+    <h2>Order Placed Successfully!</h2>
+    <p>Your order ID is <strong><%= order._id %></strong></p>
+    
+    <a href="/order/<%= order._id %>" class="btn btn-primary">View Order Details</a>
+    <a href="/home" class="btn btn-secondary">Continue Shopping</a>
+  </div>
+</section>
+
+<%- include('../partials/user/footer') %>

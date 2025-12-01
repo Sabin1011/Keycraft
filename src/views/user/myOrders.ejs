@@ -1,0 +1,67 @@
+<%- include('../partials/user/header') %>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Questrial", sans-serif; background: #fafafa; color: #222; min-height: 100vh; }
+
+  .orders-section { padding: 50px 20px; display: flex; justify-content: center; }
+  .orders-container { max-width: 900px; width: 100%; }
+
+  .orders-card {
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .orders-card:hover { box-shadow: 0 5px 20px rgba(0,0,0,0.1); transform: translateY(-2px); }
+
+  .order-info { display: flex; flex-direction: column; }
+  .order-id { font-weight: 600; color: #401f75; margin-bottom: 5px; }
+  .order-date { font-size: 14px; color: #555; }
+  .order-total { font-weight: 500; color: #333; }
+  .btn-details {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #401f75;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  .btn-details:hover { background: #321960; transform: translateY(-2px); }
+
+  @media(max-width:768px) {
+    .orders-card { flex-direction: column; align-items: flex-start; }
+    .btn-details { margin-top: 10px; }
+  }
+</style>
+
+<section class="orders-section">
+  <div class="orders-container">
+    <h2 style="margin-bottom:20px; color:#401f75;">My Orders</h2>
+
+    <% if (orders.length === 0) { %>
+      <p>You haven't placed any orders yet.</p>
+    <% } %>
+
+    <% orders.forEach(order => { %>
+      <div class="orders-card" onclick="location.href='/order/<%= order._id %>'">
+        <div class="order-info">
+          <div class="order-id">Order ID: <%= order._id %></div>
+          <div class="order-date">Placed on: <%= order.createdAt.toDateString() %></div>
+        </div>
+        <div class="order-total">Total: ₹<%= order.totalAmount.toFixed(2) %></div>
+        <a href="/order/<%= order._id %>" class="btn-details">View Details</a>
+      </div>
+    <% }) %>
+  </div>
+</section>
+
+<%- include('../partials/user/footer') %>

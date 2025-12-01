@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const fs = require("fs");
 const sendEmail = require("../../utils/sendEmail");
+const Cart = require("../../models/cartModel")
 
 const bcrypt = require("bcrypt");
 
@@ -35,72 +36,72 @@ const loadprofile = async (req, res) => {
   } catch (error) {}
 };
 
-const loadAddAddress = async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const user = User.findById(userId).lean();
+// const loadAddAddress = async (req, res) => {
+//   try {
+//     const userId = req.session.userId;
+//     const user = User.findById(userId).lean();
 
-    res.render("addAddress", { user });
-  } catch (error) {}
-};
+//     res.render("addAddress", { user });
+//   } catch (error) {}
+// };
 
-const saveAddress = async (req, res) => {
-  try {
-    const userId = req.session.userId;
+// const saveAddress = async (req, res) => {
+//   try {
+//     const userId = req.session.userId;
 
-    if (!userId) {
-      return res.redirect("/login");
-    }
+//     if (!userId) {
+//       return res.redirect("/login");
+//     }
 
-    const { type, label, country, state, city, zipCode, street } = req.body;
+//     const { type, label, country, state, city, zipCode, street } = req.body;
 
-    const address = {
-      type,
-      label,
-      country,
-      state,
-      city,
-      zipCode,
-      street,
-    };
+//     const address = {
+//       type,
+//       label,
+//       country,
+//       state,
+//       city,
+//       zipCode,
+//       street,
+//     };
 
-    await User.findByIdAndUpdate(
-      userId,
-      { $push: { addresses: address } },
-      { new: true }
-    );
-    return res.redirect("/profile");
-  } catch (error) {}
-};
+//     await User.findByIdAndUpdate(
+//       userId,
+//       { $push: { addresses: address } },
+//       { new: true }
+//     );
+//     return res.redirect("/profile");
+//   } catch (error) {}
+// };  
 
-const setDefaultAddress = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const addressId = req.params.addressId;
+// const setDefaultAddress = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const addressId = req.params.addressId;
 
-    const user = await User.findById(userId);
+//     const user = await User.findById(userId);
 
-    user.addresses.forEach((addr) => {
-      addr.isDefault = false;
-    });
+//     user.addresses.forEach((addr) => {
+//       addr.isDefault = false;
+//     });
 
-    const target = user.addresses.id(addressId);
+//     const target = user.addresses.id(addressId);
 
-    if (!target) {
-      console.log("Address not found");
-      return res.redirect("/profile");
-    }
-    target.isDefault = true;
+//     if (!target) {
+//       console.log("Address not found");
+//       return res.redirect("/profile");
+//     }
+//     target.isDefault = true;
 
-    console.log(target);
-    await user.save();
+//     console.log(target);
+//     await user.save();
 
-    res.redirect("/profile");
-  } catch (error) {
-    console.error(error);
-    res.redirect("/profile");
-  }
-};
+//     res.redirect("/profile");
+//   } catch (error) {
+//     console.error(error);
+//     res.redirect("/profile");
+//   }
+// };
 
 const loadChangePassword = async (req, res) => {
   try {
@@ -216,64 +217,256 @@ const changePassword = async (req, res) => {
 };
 
 
-const deleteAddress = async(req, res)=>{
+// const deleteAddress = async(req, res)=>{
+//   try {
+//     const addressId = req.params.id;
+//     const userId = req.session.user._id || req.user._id;
+
+//     const user = await User.findById(userId);
+
+//     if(!user) {
+//         req.session.errorMessage = 'User not found';
+//         return res.redirect('/profile');
+//     }
+
+//     const addressIndex = user.addresses.findIndex(addr => addr._id.toString() === addressId);
+
+//     if(addressIndex === -1){
+//         req.session.errorMessage = 'Address not found';
+//         return res.redirect('/profile');
+//     }
+
+//     const  deletedAddress = user.addresses[addressIndex];
+//     user.addresses.splice(addressIndex, 1);
+
+//     if(deletedAddress.isDefault && user.addresses.length> 0){
+//         user.addresses[0].isDefault = true;
+//     }
+//     await user.save();
+
+//     req.session.successMessage = 'Address deleted successfully';
+//     res.redirect('/profile');
+//   } catch (error) {
+//     console.error('Error deleting address:', error);
+//     req.session.errorMessage = 'Failed to delete address';
+//     res.redirect('/profile');
+//   }
+// }
+
+
+// const loadEditAddress = async (req, res) => {
+//   try {
+//     const addressId = req.params.id;
+//     const user = await User.findById(req.session.user._id || req.user._id);
+
+//     if (!user) return res.redirect('/login');
+
+//     const address = user.addresses.id(addressId);
+//     if (!address) {
+//       req.session.errorMessage = 'Address not found';
+//       return res.redirect('/profile');
+//     }
+
+//     res.render('editAddress', {
+//       address,
+//       user,
+//       error: req.session.errorMessage,
+//       success: req.session.successMessage
+//     });
+
+//     // Clear messages
+//     delete req.session.errorMessage;
+//     delete req.session.successMessage;
+
+//   } catch (error) {
+//     console.error('Error loading edit address:', error);
+//     req.session.errorMessage = 'Something went wrong';
+//     res.redirect('/profile');
+//   }
+// };
+
+// const editAddressPost = async (req, res) => {
+//   try {
+//     const addressId = req.params.id;
+//     const userId = req.session.user._id || req.user._id;
+
+//     const { type, street, city, state, zipCode, country } = req.body;
+
+//     // Validation
+//     if (!type || type.trim().length < 2) {
+//       req.session.errorMessage = 'Address type must be at least 2 characters';
+//       return res.redirect(`/profile/address/${addressId}/edit`);
+//     }
+//     if (!street || street.trim().length < 5) {
+//       req.session.errorMessage = 'Street address is too short';
+//       return res.redirect(`/profile/address/${addressId}/edit`);
+//     }
+//     if (!city || city.trim().length < 2) {
+//       req.session.errorMessage = 'Please enter a valid city';
+//       return res.redirect(`/profile/address/${addressId}/edit`);
+//     }
+//     if (!state || state.trim().length < 2) {
+//       req.session.errorMessage = 'Please enter a valid state';
+//       return res.redirect(`/profile/address/${addressId}/edit`);
+//     }
+//     if (!zipCode || !/^\d{5,6}$/.test(zipCode.trim())) {
+//       req.session.errorMessage = 'Please enter a valid ZIP code (5-6 digits)';
+//       return res.redirect(`/profile/address/${addressId}/edit`);
+//     }
+//     if (!country || country.trim().length < 2) {
+//       req.session.errorMessage = 'Please enter a valid country';
+//       return res.redirect(`/profile/address/${addressId}/edit`);
+//     }
+
+//     const user = await User.findById(userId);
+//     const address = user.addresses.id(addressId);
+
+//     if (!address) {
+//       req.session.errorMessage = 'Address not found';
+//       return res.redirect('/profile');
+//     }
+
+//     // Update fields
+//     address.type = type.trim();
+//     address.street = street.trim();
+//     address.city = city.trim();
+//     address.state = state.trim();
+//     address.zipCode = zipCode.trim();
+//     address.country = country.trim();
+
+//     await user.save();
+
+//     req.session.successMessage = 'Address updated successfully';
+//     res.redirect('/profile');
+
+//   } catch (error) {
+//     console.error('Error updating address:', error);
+//     req.session.errorMessage = 'Failed to update address';
+//     res.redirect(`/profile/address/${req.params.id}/edit`);
+//   }
+// };
+
+// ============================================
+// PROFILE ADDRESS CONTROLLERS
+// ============================================
+
+const loadAddAddress = async (req, res) => {
   try {
-    const addressId = req.params.id;
-    const userId = req.session.user._id || req.user._id;
+    const userId = req.session.userId;
+    const user = await User.findById(userId).lean();
+    
+    const returnUrl = req.query.returnUrl || '/profile';
 
-    const user = await User.findById(userId);
+    res.render("addAddress", { 
+      user,
+      address: null,
+      mode: 'add',
+      returnUrl,
+      error: req.session.errorMessage,
+      success: req.session.successMessage
+    });
 
-    if(!user) {
-        req.session.errorMessage = 'User not found';
-        return res.redirect('/profile');
-    }
-
-    const addressIndex = user.addresses.findIndex(addr => addr._id.toString() === addressId);
-
-    if(addressIndex === -1){
-        req.session.errorMessage = 'Address not found';
-        return res.redirect('/profile');
-    }
-
-    const  deletedAddress = user.addresses[addressIndex];
-    user.addresses.splice(addressIndex, 1);
-
-    if(deletedAddress.isDefault && user.addresses.length> 0){
-        user.addresses[0].isDefault = true;
-    }
-    await user.save();
-
-    req.session.successMessage = 'Address deleted successfully';
-    res.redirect('/profile');
+    delete req.session.errorMessage;
+    delete req.session.successMessage;
   } catch (error) {
-    console.error('Error deleting address:', error);
-    req.session.errorMessage = 'Failed to delete address';
+    console.error('Error loading add address:', error);
     res.redirect('/profile');
   }
-}
+};
 
+const saveAddress = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    if (!userId) {
+      return res.redirect("/login");
+    }
+
+    const { type, label, country, state, city, zipCode, street } = req.body;
+    const returnUrl = req.body.returnUrl || '/profile';
+
+
+    if (!type || type.trim().length < 2) {
+      req.session.errorMessage = 'Address type must be at least 2 characters';
+      return res.redirect(`/profile/address/add?returnUrl=${encodeURIComponent(returnUrl)}`);
+    }
+    if (!street || street.trim().length < 5) {
+      req.session.errorMessage = 'Street address is too short';
+      return res.redirect(`/profile/address/add?returnUrl=${encodeURIComponent(returnUrl)}`);
+    }
+    if (!city || city.trim().length < 2) {
+      req.session.errorMessage = 'Please enter a valid city';
+      return res.redirect(`/profile/address/add?returnUrl=${encodeURIComponent(returnUrl)}`);
+    }
+    if (!state || state.trim().length < 2) {
+      req.session.errorMessage = 'Please enter a valid state';
+      return res.redirect(`/profile/address/add?returnUrl=${encodeURIComponent(returnUrl)}`);
+    }
+    if (!zipCode || !/^\d{5,6}$/.test(zipCode.trim())) {
+      req.session.errorMessage = 'Please enter a valid ZIP code (5-6 digits)';
+      return res.redirect(`/profile/address/add?returnUrl=${encodeURIComponent(returnUrl)}`);
+    }
+    if (!country || country.trim().length < 2) {
+      req.session.errorMessage = 'Please enter a valid country';
+      return res.redirect(`/profile/address/add?returnUrl=${encodeURIComponent(returnUrl)}`);
+    }
+
+    const address = {
+      type: type.trim(),
+      label: label ? label.trim() : '',
+      country: country.trim(),
+      state: state.trim(),
+      city: city.trim(),
+      zipCode: zipCode.trim(),
+      street: street.trim(),
+      isDefault: false
+    };
+
+    const user = await User.findById(userId);
+    
+    if (!user.addresses || user.addresses.length === 0) {
+      address.isDefault = true;
+    }
+
+    await User.findByIdAndUpdate(
+      userId,
+      { $push: { addresses: address } },
+      { new: true }
+    );
+
+    req.session.successMessage = 'Address added successfully';
+    return res.redirect(returnUrl);
+  } catch (error) {
+    console.error('Error saving address:', error);
+    req.session.errorMessage = 'Failed to save address';
+    const returnUrl = req.body.returnUrl || '/profile';
+    return res.redirect(`/profile/address/add?returnUrl=${encodeURIComponent(returnUrl)}`);
+  }
+};
 
 const loadEditAddress = async (req, res) => {
   try {
-    const addressId = req.params.id;
+    const addressId = req.params.id;  
     const user = await User.findById(req.session.user._id || req.user._id);
+    const returnUrl = req.query.returnUrl || '/profile';
 
     if (!user) return res.redirect('/login');
 
     const address = user.addresses.id(addressId);
     if (!address) {
       req.session.errorMessage = 'Address not found';
-      return res.redirect('/profile');
+      return res.redirect(returnUrl);
     }
 
     res.render('editAddress', {
       address,
       user,
+      mode: 'edit',
+      returnUrl,
       error: req.session.errorMessage,
       success: req.session.successMessage
     });
 
-    // Clear messages
     delete req.session.errorMessage;
     delete req.session.successMessage;
 
@@ -288,33 +481,33 @@ const editAddressPost = async (req, res) => {
   try {
     const addressId = req.params.id;
     const userId = req.session.user._id || req.user._id;
+    const returnUrl = req.body.returnUrl || '/profile';
 
-    const { type, street, city, state, zipCode, country } = req.body;
+    const { type, street, city, state, zipCode, country, label } = req.body;
 
-    // Validation
     if (!type || type.trim().length < 2) {
       req.session.errorMessage = 'Address type must be at least 2 characters';
-      return res.redirect(`/profile/address/${addressId}/edit`);
+      return res.redirect(`/profile/address/${addressId}/edit?returnUrl=${encodeURIComponent(returnUrl)}`);
     }
     if (!street || street.trim().length < 5) {
       req.session.errorMessage = 'Street address is too short';
-      return res.redirect(`/profile/address/${addressId}/edit`);
+      return res.redirect(`/profile/address/${addressId}/edit?returnUrl=${encodeURIComponent(returnUrl)}`);
     }
     if (!city || city.trim().length < 2) {
       req.session.errorMessage = 'Please enter a valid city';
-      return res.redirect(`/profile/address/${addressId}/edit`);
+      return res.redirect(`/profile/address/${addressId}/edit?returnUrl=${encodeURIComponent(returnUrl)}`);
     }
     if (!state || state.trim().length < 2) {
       req.session.errorMessage = 'Please enter a valid state';
-      return res.redirect(`/profile/address/${addressId}/edit`);
+      return res.redirect(`/profile/address/${addressId}/edit?returnUrl=${encodeURIComponent(returnUrl)}`);
     }
     if (!zipCode || !/^\d{5,6}$/.test(zipCode.trim())) {
       req.session.errorMessage = 'Please enter a valid ZIP code (5-6 digits)';
-      return res.redirect(`/profile/address/${addressId}/edit`);
+      return res.redirect(`/profile/address/${addressId}/edit?returnUrl=${encodeURIComponent(returnUrl)}`);
     }
     if (!country || country.trim().length < 2) {
       req.session.errorMessage = 'Please enter a valid country';
-      return res.redirect(`/profile/address/${addressId}/edit`);
+      return res.redirect(`/profile/address/${addressId}/edit?returnUrl=${encodeURIComponent(returnUrl)}`);
     }
 
     const user = await User.findById(userId);
@@ -322,28 +515,119 @@ const editAddressPost = async (req, res) => {
 
     if (!address) {
       req.session.errorMessage = 'Address not found';
-      return res.redirect('/profile');
+      return res.redirect(returnUrl);
     }
 
-    // Update fields
     address.type = type.trim();
     address.street = street.trim();
     address.city = city.trim();
     address.state = state.trim();
     address.zipCode = zipCode.trim();
     address.country = country.trim();
+    address.label = label ? label.trim() : '';
 
     await user.save();
 
     req.session.successMessage = 'Address updated successfully';
-    res.redirect('/profile');
+    res.redirect(returnUrl);
 
   } catch (error) {
     console.error('Error updating address:', error);
     req.session.errorMessage = 'Failed to update address';
-    res.redirect(`/profile/address/${req.params.id}/edit`);
+    const returnUrl = req.body.returnUrl || '/profile';
+    res.redirect(`/profile/address/${req.params.id}/edit?returnUrl=${encodeURIComponent(returnUrl)}`);
   }
 };
+
+const deleteAddress = async(req, res)=>{
+  try {
+    const addressId = req.params.id;
+    const userId = req.session.user._id || req.user._id;
+    const returnUrl = req.query.returnUrl || '/profile';
+
+    const user = await User.findById(userId);
+
+    if(!user) {
+        req.session.errorMessage = 'User not found';
+        return res.redirect(returnUrl);
+    }
+
+    const addressIndex = user.addresses.findIndex(addr => addr._id.toString() === addressId);
+
+    if(addressIndex === -1){
+        req.session.errorMessage = 'Address not found';
+        return res.redirect(returnUrl);
+    }
+
+    const deletedAddress = user.addresses[addressIndex];
+    user.addresses.splice(addressIndex, 1);
+
+    if(deletedAddress.isDefault && user.addresses.length > 0){
+        user.addresses[0].isDefault = true;
+    }
+    await user.save();
+
+    req.session.successMessage = 'Address deleted successfully';
+    res.redirect(returnUrl);
+  } catch (error) {
+    console.error('Error deleting address:', error);
+    req.session.errorMessage = 'Failed to delete address';
+    const returnUrl = req.query.returnUrl || '/profile';
+    res.redirect(returnUrl);
+  }
+}
+
+const setDefaultAddress = async (req, res) => {
+  try {
+    const addressId = req.params.id;
+    const userId = req.session.user._id || req.user._id;
+    const returnUrl = req.body.returnUrl || '/profile';
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      req.session.errorMessage = 'User not found';
+      return res.redirect(returnUrl);
+    }
+
+    // Remove default from all addresses
+    user.addresses.forEach(addr => {
+      addr.isDefault = false;
+    });
+
+    const address = user.addresses.id(addressId);
+    if (address) {
+      address.isDefault = true;
+      await user.save();
+      req.session.successMessage = 'Default address updated';
+    } else {
+      req.session.errorMessage = 'Address not found';
+    }
+
+    res.redirect(returnUrl);
+  } catch (error) {
+    console.error('Error setting default address:', error);
+    req.session.errorMessage = 'Failed to update default address';
+    const returnUrl = req.body.returnUrl || '/profile';
+    res.redirect(returnUrl);
+  }
+};
+
+
+
+const selectAddress = async (req, res) => {
+  try {
+    const { addressId } = req.body;
+    req.session.selectedAddressId = addressId;
+    res.redirect('/checkout');
+  } catch (error) {
+    console.error('Error selecting address:', error);
+    req.session.errorMessage = 'Failed to select address';
+    res.redirect('/checkout');
+  }
+};
+
+
 
 module.exports = {
   loadprofile,
@@ -354,6 +638,7 @@ module.exports = {
   changePassword,
   deleteAddress,
   loadEditAddress,
-  editAddressPost
+  editAddressPost,
+  selectAddress
 
 };
