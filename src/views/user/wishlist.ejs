@@ -252,6 +252,14 @@
 
     <div class="wishlist-grid">
       <% products.forEach(product => { %>
+                <%
+
+        const prod = product.productId;
+        const selectedVariant = prod?.variants?.find(
+          v=> v._id.toString() === product.variantId?.toString()
+        );
+        %>
+
         <div class="product-card">
 
           <div class="product-image">
@@ -266,20 +274,31 @@
           <div class="product-info">
             <div class="product-name"><%= product.productId?.name %></div>
 
+            <div class="product-variant">
+
+            <% if (selectedVariant) { %>
+                Variant: <strong><%= selectedVariant.name %></strong>
+            <% } else { %>
+                Variant: <strong>Default</strong>
+            <% } %>
+          </div>
+
             <div class="product-price">
                 ₹<%= ((product.productId.salePrice || product.productId.price) || 0).toFixed(2) %>
             </div>
 
-
             <div class="product-actions">
 
-              <a href="/singleProduct/<%= product._id %>" class="btn btn-view">
+              <a href="/singleProduct/<%= product.productId._id %>?variant=<%=product.variantId %>" class="btn btn-view">
                 View Details
               </a>
 
               <form action="/cart/add/<%= product.productId?._id %>" method="POST" style="display:inline;">
+                
 
-                <% 
+                <input type="hidden" name="variantId" value="<%= product.variantId %>">
+
+                <%  
                   const p = product.productId;
                   const isBlocked = !p?.status || !p?.category?.status;
                   const isOutOfStock = p?.totalStock <= 0;
@@ -314,6 +333,8 @@
           </div>
 
         </div>
+
+
       <% }) %>
     </div>
 

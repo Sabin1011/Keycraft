@@ -397,6 +397,16 @@
                                 </div>
                                 <div class="item-name"><%= item.product.name %></div>
 
+                                <% if (item.selectedVariant) { %>
+                                    <div style="font-size: 14px; color: #2c3e50; margin-bottom: 8px;">
+                                        Switch Type: <strong><%= item.selectedVariant.name %></strong>
+                                    </div>
+                                <% } else { %>
+                                    <div style="font-size: 14px; color: #2c3e50; margin-bottom: 8px;">
+                                        Switch Type: <strong>Default</strong>
+                                    </div>
+                                <% } %>
+
                                 <% if (!item.isAvailable) { %>
                                     <div style="color: red; font-size: 13px; font-weight: 600;">
                                         <%= item.outOfStockMessage %>
@@ -409,13 +419,13 @@
                             <div class="item-actions">
                                 <div class="quantity-control">
 
-                                    <form method="POST" action="/cart/decrease/<%= item.product._id %>">
+                                    <form method="POST" action="/cart/decrease/<%= item.product._id %>?variantId=<%= item.variantId %>">
                                         <button type="submit" class="quantity-btn" <%= !item.isAvailable ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>>−</button>
                                     </form>
 
                                     <span class="quantity-display"><%= item.quantity %></span>
 
-                                    <form method="POST" action="/cart/increase/<%= item.product._id %>">
+                                    <form method="POST" action="/cart/increase/<%= item.product._id %>?variantId=<%= item.variantId %>">
                                         <button type="submit" class="quantity-btn" <%= !item.isAvailable ? "disabled style='opacity:0.5;cursor:not-allowed;'" : "" %>>+</button>
                                     </form>
 
@@ -423,13 +433,13 @@
 
 
 
-                                <form method="POST" action="/cart/remove/<%= item.product._id %>">
+                                <form method="POST" action="/cart/remove/<%= item.product._id %>?variantId=<%= item.variantId %>">
                                     <button type="submit" class="remove-btn">Remove</button>
                                 </form>
                                 
                             </div>
                             <a 
-                            href="/singleProduct/<%= item.product._id %>" 
+                            href="/singleProduct/<%= item.product._id %>?variant=<%=item.variantId%>" 
                             class="view-product-btn"
                             >
                             View Product

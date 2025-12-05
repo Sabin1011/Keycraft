@@ -36,10 +36,6 @@
     border-bottom: 1px solid #ddd;
   }
 
-  tr:hover {
-    background: #f0f0f0;
-  }
-
   .status-select {
     padding: 6px;
     border-radius: 5px;
@@ -62,7 +58,6 @@
 
 <div class="container">
   <h2>Order Management</h2>
-
   <table>
     <thead>
       <tr>
@@ -73,10 +68,64 @@
         <th>Status</th>
         <th>Placed On</th>
         <th>Action</th>
+        <th>requests</th>
       </tr>
     </thead>
 
     <tbody>
+      
+      <!-- simple search functionality -->
+
+      <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+      <form action="/admin/orders" method="GET" style="display: flex; gap: 10px; width: 100%;">
+        <input 
+          type="text" 
+          name="search" 
+          placeholder="Search by Order ID..." 
+          value="<%= typeof search !== 'undefined' ? search : '' %>"
+          style="
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+          "
+        />
+
+        <button 
+          type="submit" 
+          class="btn" 
+          style="
+            background: #401f75; 
+            padding: 10px 18px;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: 500;
+          "
+        >
+          Search
+        </button>
+
+        <% if (typeof search !== "undefined" && search.trim() !== "") { %>
+          <a 
+            href="/admin/orders" 
+            class="btn"
+            style="
+              background: #e74c3c; 
+              padding: 10px 18px;
+              border-radius: 6px;
+              color: #fff;
+              font-weight: 500;
+              text-decoration: none;
+            "
+          >
+            Clear
+          </a>
+        <% } %>
+      </form>
+    </div>
+
+
       <% orders.forEach(order => { %>
         <tr>
           <td><%= order.orderId %></td>
@@ -90,13 +139,11 @@
           <td>₹ <%= order.totalAmount %></td>
 
           <td>
-            <form action="/admin/orders/update-status/<%= order._id %>" method="POST">
-              <select name="status" class="status-select">
-                <option value="Pending" <%= order.status === "Pending" ? "selected" : "" %>>Pending</option>
-                <option value="Shipped" <%= order.status === "Shipped" ? "selected" : "" %>>Shipped</option>
-                <option value="Out for Delivery" <%= order.status === "Out for Delivery" ? "selected" : "" %>>Out for Delivery</option>
-                <option value="Delivered" <%= order.status === "Delivered" ? "selected" : "" %>>Delivered</option>
-                <option value="Cancelled" <%= order.status === "Cancelled" ? "selected" : "" %>>Cancelled</option>
+            <form action="/admin/orders/update-status/<%= order.orderId %>" method="POST">
+              <select name="status" id="" class="status-select">
+                <%statusOptions.forEach(s=>{ %>
+                  <option value="<%=s %>" <%=order.status === s? "selected" : "" %> > <%=s %> </option>
+                <%});%>
               </select>
           </td>
 
@@ -104,10 +151,37 @@
             <%= order.createdAt.toLocaleDateString() %>
           </td>
 
+
           <td>
               <button type="submit" class="btn-update">Update</button>
             </form>
           </td>
+                    <td>
+            
+          <% if (order.status === "Return Requested") { %>
+
+              <div style="padding: 15px; margin: 10px 0; background: #fff3cd; border-left: 4px solid #ffca2c;">
+                <p style="margin: 0; font-weight: 600; color: #856404;">Return Requested</p>
+                <p style="margin: 3px 0; color:#6c757d; font-size:14px;">
+              Order ID: <%= order.orderId %>
+            </p>
+
+                <form method="post" action="/admin/order/<%= order.orderId %>/accept-return" style="display:inline;">
+                  <button style=" background: #28a745; color:white; border:none; padding:6px 14px; border-radius:5px; margin-right:5px;">
+                    Accept
+                  </button>
+                </form>
+
+                <form method= "post" action="/admin/order/<%= order.orderId %>/reject-return" style="display:inline;">
+                  <button style="background: #dc3545; color:white; border:none; padding:6px 14px; border-radius:5px;">
+                    Reject
+                  </button>
+                </form>
+              </div>
+
+            <% } %>
+          </td>
+
         </tr>
       <% }) %>
     </tbody>
