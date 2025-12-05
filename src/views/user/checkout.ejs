@@ -1,0 +1,530 @@
+<%- include('../partials/user/header') %>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Questrial", sans-serif;
+    background: #fafafa;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  .breadcrumb {
+    padding: 15px 0;
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .breadcrumb a {
+    color: #666;
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.3s;
+  }
+
+  .breadcrumb a:hover {
+    color: #222;
+  }
+
+  .breadcrumb span {
+    color: #999;
+    margin: 0 8px;
+  }
+
+  .checkout-section {
+    padding: 40px 0;
+    min-height: calc(100vh - 200px);
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .page-header {
+    background: linear-gradient(135deg, #401f75 0%, #000000 100%);
+    border-radius: 15px;
+    padding: 40px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    color: #fff;
+  }
+
+  .page-title {
+    font-size: 32px;
+    font-weight: 700;
+    text-transform: lowercase;
+    margin-bottom: 8px;
+  }
+
+  .checkout-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+  }
+
+  .checkout-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
+    padding: 35px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    height: fit-content;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f5f5f5;
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: lowercase;
+    color: #222;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title i {
+    color: #401f75;
+  }
+
+  .address-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .address-item {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+    position: relative;
+    cursor: pointer;
+    display: block;
+  }
+
+  .address-item:hover {
+    border-color: #401f75;
+    background: #fff;
+  }
+
+  .address-item.selected {
+    border-color: #401f75;
+    background: #eef0ff;
+  }
+
+  .address-item.selected::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: #401f75;
+  }
+
+  .address-radio {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .address-radio input[type="radio"] {
+    margin-top: 3px;
+    width: 20px;
+    height: 20px;
+    accent-color: #401f75;
+  }
+
+  .address-content {
+    flex: 1;
+  }
+
+  .address-type {
+    font-size: 11px;
+    color: #999;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .address-text {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.8;
+  }
+
+  .address-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    font-size: 13px;
+    text-transform: lowercase;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-family: "Questrial", sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .btn-small {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .btn-primary {
+    background: #401f75;
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #321960;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: #f8f9fa;
+    color: #222;
+    border: 2px solid #e5e5e5;
+  }
+
+  .btn-secondary:hover {
+    background: #222;
+    color: #fff;
+    border-color: #222;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: #999;
+  }
+
+  .empty-state i {
+    font-size: 56px;
+    color: #e5e5e5;
+    margin-bottom: 15px;
+  }
+
+  .order-summary {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .summary-row:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 18px;
+    padding-top: 15px;
+  }
+
+  @media (max-width: 1200px) {
+    .checkout-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 15px;
+    }
+
+    .page-header {
+      padding: 30px 20px;
+    }
+
+    .checkout-card {
+      padding: 25px 20px;
+    }
+  }
+</style>
+
+<section class="breadcrumb">
+  <div class="container">
+    <a href="/home">home</a>
+    <span>/</span>
+    <a href="/cart">cart</a>
+    <span>/</span>
+    <span style="color: #222">checkout</span>
+  </div>
+</section>
+
+<section class="checkout-section">
+  <div class="container">
+    <% if (success) { %>
+    <div style="padding: 15px 20px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 10px; margin-bottom: 25px;">
+      <i class="fa fa-check-circle"></i> <%= success %>
+    </div>
+    <% } %>
+    <% if (error) { %>
+    <div style="padding: 15px 20px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 10px; margin-bottom: 25px;">
+      <i class="fa fa-exclamation-circle"></i> <%= error %>
+    </div>
+    <% } %>
+
+    <div class="page-header">
+      <div class="page-title">checkout</div>
+      <div style="font-size: 16px; opacity: 0.9;">review your order and complete purchase</div>
+    </div>
+
+    <div class="checkout-layout">
+      <div>
+        <div class="checkout-card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="fa fa-map-marker"></i> delivery address
+            </h2>
+            <a href="/profile/address/add?returnUrl=/checkout" class="btn btn-secondary btn-small">
+              <i class="fa fa-plus"></i> add new
+            </a>
+          </div>
+
+          <% if (addresses && addresses.length > 0) { %>
+            <form id="addressForm">
+              <div class="address-list">
+                <% addresses.forEach(address => { %>
+                  <label class="address-item <%= selectedAddressId === address._id.toString() ? 'selected' : '' %>">
+                    <div class="address-radio">
+                      <input 
+                        type="radio" 
+                        name="selectedAddress" 
+                        value="<%= address._id %>"
+                        <%= selectedAddressId === address._id.toString() ? 'checked' : '' %>
+                        onchange="document.getElementById('selectAddressForm_<%= address._id %>').submit()">
+                      <div class="address-content">
+                        <div class="address-type">
+                          <% if (address.isDefault) { %>
+                            <i class="fa fa-star" style="color: #ffa500;"></i>
+                          <% } %>
+                          <%= address.type %>
+                          <% if (address.label) { %> - <%= address.label %><% } %>
+                        </div>
+                        <div class="address-text">
+                          <%= address.street %><br>
+                          <%= address.city %>, <%= address.state %> <%= address.zipCode %><br>
+                          <%= address.country %>
+                        </div>
+                        <div class="address-actions">
+                          <a href="/profile/address/<%= address._id %>/edit?returnUrl=/checkout" 
+                             class="btn btn-secondary btn-small"
+                             onclick="event.stopPropagation();">
+                            <i class="fa fa-edit"></i> edit
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+
+                  <form 
+                    id="selectAddressForm_<%= address._id %>" 
+                    action="/checkout/select-address" 
+                    method="POST" 
+                    style="display: none;">
+                    <input type="hidden" name="addressId" value="<%= address._id %>">
+                  </form>
+                <% }) %>
+              </div>
+            </form>
+          <% } else { %>
+            <div class="empty-state">
+              <i class="fa fa-map-marker"></i>
+              <p>no saved addresses yet</p>
+              <a href="/profile/address/add?returnUrl=/checkout" class="btn btn-primary" style="margin-top: 15px;">
+                <i class="fa fa-plus"></i> add your first address
+              </a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <div>
+        <div class="checkout-card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="fa fa-shopping-cart"></i> order summary
+            </h2>
+          </div>
+
+          <% if (cartItems && cartItems.length > 0) { %>
+            <div style="margin-bottom: 20px; max-height: 300px; overflow-y: auto;">
+
+              <% cartItems.forEach(item => { %>
+                <div style="display: flex; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;">
+                  <% if (item.product.images && item.product.images.length > 0) { %>
+                    <img 
+                      src="<%= item.product.images[0] %>" 
+                      alt="<%= item.product.name %>"
+                      style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                  <% } %>
+                  <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 14px; margin-bottom: 5px;">
+                      <%= item.product.name %>
+                    </div>
+                    <div style="color: #666; font-size: 13px;">
+                      Qty: <%= item.quantity %> × ₹<%= item.product.price.toFixed(2) %>
+                                        <div>
+                    <% if (item.selectedVariant) { %>
+                        Variant: <strong><%= item.selectedVariant.name %></strong>
+                    <% } else { %>
+                        Variant: <strong>Default</strong>
+                    <% } %>
+                  </div>
+                    </div>
+                  </div>
+                  
+                  <div style="font-weight: 600; color: #401f75;">
+                    ₹<%= item.itemTotal.toFixed(2) %>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% } %>
+
+          <div class="order-summary">
+            <div class="summary-row">
+              <span>Subtotal (<%= cartItems.length %> items)</span>
+              <span>₹<%= cartTotal.toFixed(2) %></span>
+            </div>
+            <div class="summary-row">
+              <span>Shipping</span>
+              <span>Free</span>
+            </div>
+            <div class="summary-row">
+              <span>Total</span>
+              <span>₹<%= cartTotal.toFixed(2) %></span>
+            </div>
+          </div>
+
+            <div class="checkout-card" style="margin-top: 20px;">
+                <div class="card-header">
+                    <h2 class="card-title">
+                    <i class="fa fa-credit-card"></i> payment method
+                    </h2>
+                </div>
+
+          <form id="checkoutForm" action="/proceedToCheckout" method="POST">
+
+            <input type="hidden" name="addressId" value="<%= selectedAddressId %>">
+
+            <label class="address-item" style="cursor: pointer;">
+              <div class="address-radio">
+                <input type="radio" name="paymentMethod" value="cod" >
+                <div class="address-content">
+                  <div class="address-type">Cash on Delivery</div>
+                  <div class="address-text">Pay once the product is delivered</div>
+                </div>
+              </div>
+            </label>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
+              <i class="fa fa-lock"></i> Proceed to Payment
+            </button>
+          </form>
+
+
+
+          <% if (!selectedAddressId && addresses.length > 0) { %>
+            <p style="text-align: center; color: #999; font-size: 12px; margin-top: 10px;">
+              Please select a delivery address
+            </p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+
+
+  document.getElementById("checkoutForm").addEventListener("submit", function(e){
+    const paymentSelected = document.querySelector('input[name = "paymentMethod"]: checked');
+
+    if(!paymentSelected){
+      e.preventDefault();
+
+      swal.fire({
+        icon:"error",
+        title:"Selected Payment Method",
+        text:"Please choose a payment method to continue "
+      });
+      return false;
+    }
+  })
+
+  const addressRadios = document.querySelectorAll('input[name="selectedAddress"]');
+  const mainAddressInput = document.querySelector('input[name="addressId"]');
+
+  addressRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      mainAddressInput.value = radio.value;
+    });
+  });
+  
+  document.querySelectorAll(".delete-address-form").forEach((form) => {
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const result = await Swal.fire({
+        title: "Delete this address?",
+        text: "You won't be able to recover it!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel",
+      });
+
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Deleting...",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        form.submit();
+      }
+    });
+  });
+
+</script>
+
+<%- include('../partials/user/footer') %>

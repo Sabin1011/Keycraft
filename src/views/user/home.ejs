@@ -236,6 +236,7 @@
     }
 
     .product-image {
+        position: relative;
         width: 100%;
         height: 280px;
         object-fit: cover;
@@ -368,6 +369,38 @@
         display: flex;
         justify-content: center;
     }
+.product-image {
+    position: relative; /* Needed for absolute positioning of button */
+}
+
+.wishlist-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0);
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2;
+    transition: all 0.3s;
+}
+
+.wishlist-btn i {
+    color: #888;
+    font-size: 18px;
+}
+
+.wishlist-btn i.active {
+    color: #e74c3c;
+    transform: scale(1.2);
+}
+
+.wishlist-btn:hover {
+    background: rgba(255, 255, 255, 0);
+}
+
+
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -434,6 +467,14 @@
               <% } else { %>
                 <img src="/images/default-product.png" alt="No Image">
               <% } %>
+              <% if (user) { %>
+                    <% 
+                        const isInWishlist = wishlistProductIds.includes(product._id.toString())
+                    %>
+                    <button class="wishlist-btn" data-id="<%= product._id %>">
+                        <i class="fas fa-heart <%= isInWishlist ? 'active' : '' %>"></i>
+                    </button>
+                <% } %>
             </div>
 
             <div class="product-info">
@@ -445,11 +486,15 @@
               <div class="product-actions">
                 <a href="/singleProduct/<%= product._id %>" class="btn-small">details</a>
                 <% if (product.totalStock > 0) { %>
-                  <button class="btn-small btn-primary">add to cart</button>
+                    <form action="/cart/add/<%= product._id %>" method="POST" style="width:100%;">
+                        <input type="hidden" name="variantId" value="<%= product.variants && product.variants.length > 0 ? product.variants[0]._id : null %>">
+                        <button type="submit" class="btn-small btn-primary" style="width:100%;">add to cart</button>
+                    </form>
                 <% } else { %>
                   <button class="btn-small" disabled style="opacity:0.6;">unavailable</button>
                 <% } %>
-              </div>
+                
+              </div>    
             </div>
           </div>
         <% }) %>
@@ -488,5 +533,38 @@
         </div>
     </div>
 </section>
+
+<script>
+
+document.querySelectorAll('.wishlist-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const productId = btn.dataset.id;
+        const icon = btn.querySelector('i');
+        let url = '';
+
+        if(icon.classList.contains('active')){
+            url = '/wishlist/remove/' + productId;
+        } else {
+            url = '/wishlist/add/' + productId;
+        }
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if(data.success){
+                icon.classList.toggle('active');
+            } else {
+                alert(data.message);
+            }
+        } catch(err){
+            console.error(err);
+        }
+    });
+});
+
+</script>
 
 <%- include('../partials/user/footer') %>

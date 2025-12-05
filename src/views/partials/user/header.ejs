@@ -290,6 +290,7 @@
                         <li><a href="/shop">shop</a></li>
                         <li><a href="/about">about</a></li>
                         <li><a href="/contact">contact</a></li>
+                        <li><a href="/wishlist">wishlist</a></li>
                     </ul>
                 </nav>
 
@@ -298,9 +299,9 @@
                     <% if (typeof user !== 'undefined' && user) { %>
               
                         <a href="/cart" class="cart-btn">
-                            <i class="fas fa    -shopping-cart"></i>
+                            <i class="fas fa-shopping-cart"></i>
                             cart
-                            <span class="cart-badge"><%= typeof cartCount !== 'undefined' ? cartCount : '0' %></span>
+                            <span class="cart-badge"><%= cartCount || 0 %></span>
                         </a>
 
 

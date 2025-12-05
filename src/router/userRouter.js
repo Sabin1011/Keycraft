@@ -4,6 +4,10 @@ const userController = require("../controller/user/userController");
 const authController = require("../controller/user/authController");
 const editProfileController = require("../controller/user/editProfileController")
 const userProfileController = require("../controller/user/userProfileController")
+const wishlistController = require('../controller/user/wishlistController');
+const cartController = require('../controller/user/cartController');
+const orderController = require('../controller/user/orderController')
+const checkoutController = require('../controller/user/checkoutController')
 const auth = require("../middleware/auth");
 const multer = require('multer');
 const { profileUpload } = require("../middleware/multer");
@@ -21,13 +25,13 @@ router.get("/resend-otp", authController.resendOtp);
 router.get("/login", auth.isLogged, authController.loadLogin);
 router.post("/login", authController.login);
 
-router.get("/shop", auth.isLogout, userController.loadShop);
+router.get("/shop", auth.isLoggedIn, userController.loadShop);
 
 router.get("/home", userController.loadHome);
 
 router.get(
   "/singleProduct/:productId",
-  auth.isLogout,
+  auth.isLoggedIn,
   userController.loadSingleProduct
 );
 
@@ -43,20 +47,47 @@ router.get("/forgotNewPassword", authController.loadEnterNewPassword);
 router.get("/profile", userProfileController.loadprofile);
 router.get("/profile/address/add", userProfileController.loadAddAddress);
 router.post("/profile/address/add", userProfileController.saveAddress);
-router.post("/profile/address/:addressId/set-default", auth.isLogout, userProfileController.setDefaultAddress);
-router.get('/profile/change-password', auth.isLogout, userProfileController.loadChangePassword);
-router.post('/profile/change-password', auth.isLogout, userProfileController.changePassword);
+router.post("/profile/address/:addressId/set-default", auth.isLoggedIn, userProfileController.setDefaultAddress);
+router.get('/profile/change-password', auth.isLoggedIn, userProfileController.loadChangePassword);
+router.post('/profile/change-password', auth.isLoggedIn, userProfileController.changePassword);
 
-router.get('/profile/edit', auth.isLogout, editProfileController.loadEditProfilePage);
-router.post('/profile/edit', auth.isLogout, profileUpload.single("profileImage"), editProfileController.updateProfile);
+router.get('/profile/edit', auth.isLoggedIn, editProfileController.loadEditProfilePage);
+router.post('/profile/edit', auth.isLoggedIn, profileUpload.single("profileImage"), editProfileController.updateProfile);
 
-router.get("/profile/edit-profile/verify-otp", auth.isLogout, editProfileController.loadEmailOTPPage);
-router.post("/profile/edit-profile/verify-otp", auth.isLogout, editProfileController.verifyEmailOTP);
+router.get("/profile/edit-profile/verify-otp", auth.isLoggedIn, editProfileController.loadEmailOTPPage);
+router.post("/profile/edit-profile/verify-otp", auth.isLoggedIn, editProfileController.verifyEmailOTP);
+
+router.get('/profile/address/add', auth.isLoggedIn, userProfileController.loadAddAddress);
+router.post('/profile/address/add', auth.isLoggedIn, userProfileController.saveAddress);
+
+router.get('/profile/address/:id/edit', auth.isLoggedIn, userProfileController.loadEditAddress);
+router.post('/profile/address/:id/edit', auth.isLoggedIn, userProfileController.editAddressPost);
+router.post('/profile/address/:id/delete', auth.isLoggedIn, userProfileController.deleteAddress);
+router.post('/profile/address/:id/set-default', auth.isLoggedIn, userProfileController.setDefaultAddress);
 
 
-router.get('/profile/address/:id/edit', auth.isLogout, userProfileController.loadEditAddress);
-router.post('/profile/address/:id/edit', auth.isLogout, userProfileController.editAddressPost);
-router.post('/profile/address/:id/delete', auth.isLogout, userProfileController.deleteAddress);
+router.get("/wishlist", auth.isLoggedIn,wishlistController.loadWishlist )
+router.post('/wishlist/add/:id', auth.isLoggedIn, wishlistController.addToWishlist);
+router.post("/wishlist/remove/:id", auth.isLoggedIn, wishlistController.removeFromWishlist);
+
+router.get("/cart", auth.isLoggedIn, cartController.loadCart);
+router.post("/cart/add/:id", auth.isLoggedIn, cartController.addToCart);
+router.post("/cart/increase/:id", auth.isLoggedIn, cartController.increaseQuantity);
+router.post("/cart/decrease/:id", auth.isLoggedIn, cartController.decreaseQuantity);
+router.post("/cart/remove/:id", auth.isLoggedIn, cartController.removeFromCart);
+
+router.post('/checkout/select-address', auth.isLoggedIn, userProfileController.selectAddress);
+router.get("/checkout", auth.isLoggedIn, checkoutController.loadCheckout);
+
+router.post('/proceedToCheckout', auth.isLoggedIn, checkoutController.placeOrder);
+router.get("/order-success", auth.isLoggedIn, checkoutController.loadSuccessPage);
+
+router.get("/my-orders", auth.isLoggedIn, orderController.loadMyOrders);
+router.get("/order/:id", auth.isLoggedIn, orderController.loadOrderDetails);
+
+router.post("/order/:orderId/cancel", auth.isLoggedIn, orderController.cancelOrder);
+router.post("/order/:orderId/return", auth.isLoggedIn, orderController.returnOrder);
+
 
 router.get("/logout", userController.userLogout);
 

@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 
 const categorySchema = new Schema({
-        // yet to complete.......!
+
     name:{    
         type:String,
         required:true,
@@ -19,7 +19,6 @@ const categorySchema = new Schema({
         type:Boolean,
         default:true,
     },
-
     
 },{timestamps:true});
 
