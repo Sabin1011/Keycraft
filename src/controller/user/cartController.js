@@ -4,11 +4,15 @@ const router = express.Router();
 const Category = require("../../models/categorySchema");
 const Wishlist = require("../../models/wishlistModel")
 const Cart = require("../../models/cartModel");
+const User = require("../../models/userSchema")
 
 const loadCart = async(req, res)=>{
     try {
 
-        const userId = req.session.user?._id;
+        const userId = req.session.userId;
+        const user = await User.findById(userId)
+
+     
 
         if(!userId){
             return res.redirect("/login")
@@ -35,11 +39,16 @@ const loadCart = async(req, res)=>{
             });
             await cart.save();
         }
+        const cartCount = cart.items.reduce((sum, item)=>sum + item.quantity, 0);
 
         let invalidItemExists = false;
 
 
         for(let item of cart.items){
+
+            item.selectedVariant = item.variantId
+            ?item.product.variants.id(item.variantId)
+            : null;
 
             item.isAvailable = true;
             item.outOfStockMessage = "";
@@ -51,7 +60,7 @@ const loadCart = async(req, res)=>{
                 invalidItemExists = true;
             }
             
-            // if category is blocked.
+   
             else if(!item.product.category || item.product.category.status !== true){
                 item.isAvailable =  false;
                 item.outOfStockMessage = "Category unavailable";
@@ -78,10 +87,12 @@ const loadCart = async(req, res)=>{
         .filter(i=>i.isAvailable)
         .reduce((sum, i) => sum + i.product.price * i.quantity, 0);
 
-        await cart.save
+        await cart.save()
 
 
         return res.render("cart",{
+            cartCount,
+            user,
             cart,
             invalidItemExists,
             message: message || null,
@@ -100,9 +111,15 @@ const loadCart = async(req, res)=>{
 
 const addToCart = async (req, res)=>{
     try {
-        const userId = req.session.user._id;
+        const userId = req.session.userId;
         const productId = req.params.id;
+        console.log("user id : ",userId)
         const quantity = parseInt(req.body.quantity) || 1;
+
+        let variantId = req.body.variantId || null;
+  
+
+        const backURL = req.get("Referer") || "/shop";
 
         if(!userId){
             return res.redirect("/login");
@@ -110,6 +127,9 @@ const addToCart = async (req, res)=>{
 
         const product = await Product.findById(productId).populate('category');
 
+              if(!variantId && product.variants && product.variants.length > 0){
+            variantId = product.variants[0]._id.toString()
+        }
         if(!product){
             req.session.message = 'product not found';
             req.session.messageType = 'error';
@@ -151,11 +171,19 @@ const addToCart = async (req, res)=>{
         }
 
         const existingItemIndex = cart.items.findIndex(
-            item =>item.product.toString() === productId
+            item =>item.product.toString() === productId &&
+            (item.variantId? item.variantId.toString(): null) === (variantId? variantId.toString() : null)
         );
 
         if(existingItemIndex > -1) {
             const newQuantity = cart.items[existingItemIndex].quantity + quantity;
+                
+                const MAX_LIMIT = 6;
+                if(newQuantity > MAX_LIMIT){
+                    req.session.message = `Maximum quantity limit is ${MAX_LIMIT}`;
+                    req.session.messageType = "error";
+                    return res.redirect("/cart");
+                }
 
             if(newQuantity > product.totalStock) {
                 req.session.message = `Cannot add more . only ${product.totalStock} items available in stock`;
@@ -166,6 +194,7 @@ const addToCart = async (req, res)=>{
         }else{
             cart.items.push({
                 product: productId,
+                variantId: variantId,
                 quantity
             });
         }
@@ -180,14 +209,14 @@ const addToCart = async (req, res)=>{
         cart.totalPrice = cart.items.reduce((total, item)=>{
             return total + (item.product.price * item.quantity);
         },0);
+       
 
         await cart.save();
         req.session.message = 'Product added to cart successfully';
         req.session.messageType = 'success';
 
         await Wishlist.updateOne({userId},{$pull:{products:{productId: productId}}}) ;
-
-        return res.redirect("/cart");
+        return res.redirect(backURL);
 
     } catch (error) {
         console.log("An error occurred in addToCart: ", error);
@@ -199,8 +228,9 @@ const addToCart = async (req, res)=>{
 
 const increaseQuantity = async (req, res) => {
     try {
-        const userId = req.session.user._id;
+        const userId = req.session.userId;
         const productId = req.params.id;
+        const variantId = req.query.variantId || null;
 
         if (!userId) {
             return res.redirect("/login");
@@ -214,7 +244,12 @@ const increaseQuantity = async (req, res) => {
         }
 
         const itemIndex = cart.items.findIndex(
-            item => item.product.toString() === productId
+            item => {
+                const itemVariant = item.variantId ? item.variantId.toString() : null;
+                const targetVariant = variantId? variantId.toString() : null;
+                return item.product.toString() === productId && itemVariant === targetVariant
+           
+            }
         );
 
         if (itemIndex > -1) {
@@ -237,7 +272,6 @@ const increaseQuantity = async (req, res) => {
 
             cart.items[itemIndex].quantity = newQuantity;
 
-            // Recalculate total
             await cart.populate({
                 path: 'items.product',
                 populate: { path: 'category' }
@@ -260,8 +294,10 @@ const increaseQuantity = async (req, res) => {
 
 const decreaseQuantity = async (req, res) => {
     try {
-        const userId = req.session.user._id;
+        const userId = req.session.userId;
         const productId = req.params.id;
+        const variantId = req.query.variantId || null;
+
 
         if (!userId) {
             return res.redirect("/login");
@@ -273,19 +309,19 @@ const decreaseQuantity = async (req, res) => {
             return res.redirect("/cart");
         }
 
-        const itemIndex = cart.items.findIndex(
-            item => item.product.toString() === productId
-        );
+        const itemIndex = cart.items.findIndex(item =>{
+            const variants = item.variantId? item.variantId.toString() : null;
+            const targetVariant = variantId? variantId.toString() : null;
+            return item.product.toString() === productId && variants === targetVariant;
+        })
 
         if (itemIndex > -1) {
             cart.items[itemIndex].quantity -= 1;
 
-            // If quantity becomes 0, remove the item
             if (cart.items[itemIndex].quantity <= 0) {
                 cart.items.splice(itemIndex, 1);
             }
 
-            // Recalculate total
             await cart.populate({
                 path: 'items.product',
                 populate: { path: 'category' }
@@ -308,8 +344,10 @@ const decreaseQuantity = async (req, res) => {
 
 const removeFromCart = async (req, res) => {
     try {
-        const userId = req.session.user._id;
+        const userId = req.session.userId;
         const productId = req.params.id;
+        const variantId = req.query.variantId || null;
+
 
         if (!userId) {
             return res.redirect("/login");
@@ -321,12 +359,13 @@ const removeFromCart = async (req, res) => {
             return res.redirect("/cart");
         }
 
-        // Remove the item from cart
-        cart.items = cart.items.filter(
-            item => item.product.toString() !== productId
-        );
+        cart.items = cart.items.filter(item => {
+            const itemVariant = item.variantId ? item.variantId.toString() : null;
+            const removeVariant = variantId ? variantId.toString() : null;
 
-        // Recalculate total
+            return !(item.product.toString() === productId && itemVariant === removeVariant);
+        });
+
         await cart.populate({
             path: 'items.product',
             populate: { path: 'category' }

@@ -17,6 +17,10 @@ const orderSchema = new Schema({
         ref: "product",
         required: true
       },
+      variantId:{
+        type:mongoose.Schema.Types.ObjectId,
+        required: false,
+      },
       quantity: {
         type: Number,
         required: true
@@ -45,12 +49,17 @@ const orderSchema = new Schema({
 
   status: {
     type: String,
-    default: "Confirmed"
+    enum:["Placed","Confirmed","Shipped","Out For Delivery", "Delivered","Cancelled","Returned","Return Requested"],
+    default: "Placed"
   },
   paymentMethod: {
     type: String,
     required: true
   },
+  cancelReason: {
+  type: String,
+  default: null
+}
 
 }, { timestamps: true });
 

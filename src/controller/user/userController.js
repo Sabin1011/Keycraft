@@ -1,7 +1,8 @@
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
-const Wishlist = require("../../models/wishlistModel")
+const Wishlist = require("../../models/wishlistModel");
+const Cart = require("../../models/cartModel");
 const mongoose = require("mongoose");
 const path = require("path");
 const fs = require("fs");
@@ -14,15 +15,20 @@ const bcrypt = require("bcrypt");
 const loadHome = async (req, res) => {
   try {
     const userId = req.session.userId;
-    let user = null;
-    let wishlistProductIds = [];
 
+    let user = null;
+
+    let wishlistProductIds = [];
+    const cart = await Cart.findOne({ userId });
+    let cartCount = 0;
     if (userId) {
       user = await User.findById(userId);
-
-      const wishlist = await Wishlist.findOne({ userId});
-      if(wishlist){
-        wishlistProductIds = wishlist.products.map(p => p.productId.toString())
+      cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+      const wishlist = await Wishlist.findOne({ userId });
+      if (wishlist) {
+        wishlistProductIds = wishlist.products.map((p) =>
+          p.productId.toString()
+        );
       }
     }
 
@@ -34,7 +40,12 @@ const loadHome = async (req, res) => {
 
     const filteredProducts = products.filter((p) => p.category !== null);
 
-    res.render("home", { user, products: filteredProducts, wishlistProductIds });
+    res.render("home", {
+      user,
+      products: filteredProducts,
+      wishlistProductIds,
+      cartCount,
+    });
   } catch (error) {
     console.log("error loading home page", error);
   }
@@ -43,8 +54,11 @@ const loadHome = async (req, res) => {
 const loadSingleProduct = async (req, res) => {
   try {
     const userId = req.session.userId;
+    const user = await User.findById(userId);
     console.log(userId);
     const { productId } = req.params;
+
+    const selectedVariantId = req.query.variant || null;
 
     if (!productId) {
       return res.redirect("/");
@@ -66,44 +80,57 @@ const loadSingleProduct = async (req, res) => {
     })
       .limit(4)
       .lean();
-
-    console.log("Loaded product:", product);
-
-
-    const wishlist = await Wishlist.findOne({userId: req.session.user._id});
-    let wishlistProductIds = [];
-
-    if(wishlist && wishlist.products){
-      wishlistProductIds = wishlist.products.map(p => p.productId.toString());
+    let cartCount = 0;
+    if (userId) {
+      const cart = await Cart.findOne({ userId });
+      cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
     }
 
+    const wishlist = await Wishlist.findOne({ userId: req.session.userId });
+    let wishlistProductIds = [];
 
-    res.render("productDetails", { product, relatedProducts , wishlistProductIds});
+    if (wishlist && wishlist.products) {
+      wishlistProductIds = wishlist.products.map((p) => p.productId.toString());
+    }
+
+    res.render("productDetails", {
+      product,
+      relatedProducts,
+      wishlistProductIds,
+      cartCount,
+      user,
+      selectedVariantId,
+    });
   } catch (error) {
     console.error("Error loading single product:", error);
-    res.status(500).render("error", { message: "Internal Server Error" });
   }
 };
 
 const loadShop = async (req, res) => {
   try {
-    const userId = req.session.userId || req.session.user_id; 
+    const userId = req.session.userId || req.session.user_id;
     let user = null;
 
     if (userId) {
       user = await User.findById(userId).lean();
     }
 
-
     let wishlistProductIds = [];
 
-  
     if (userId) {
       const wishlist = await Wishlist.findOne({ userId: userId });
 
       if (wishlist && wishlist.products) {
-        wishlistProductIds = wishlist.products.map(p => p.productId.toString());
+        wishlistProductIds = wishlist.products.map((p) =>
+          p.productId.toString()
+        );
       }
+    }
+
+    let cartCount = 0;
+    if (userId) {
+      const cart = await Cart.findOne({ userId });
+      cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
     }
 
     const page = parseInt(req.query.page) || 1;
@@ -167,7 +194,6 @@ const loadShop = async (req, res) => {
 
     const categories = await Category.find({ status: true }).lean();
 
- 
     const maxProductPrice = await Product.findOne({ status: true })
       .sort({ price: -1 })
       .select("price")
@@ -184,7 +210,8 @@ const loadShop = async (req, res) => {
       activeCategory: categoryId,
       activeSort: sortOption,
       maxPriceValue: maxProductPrice ? maxProductPrice.price : 0,
-      wishlistProductIds, 
+      wishlistProductIds,
+      cartCount,
     });
   } catch (err) {
     console.log("Error loading shop:", err);
@@ -219,13 +246,9 @@ const userLogout = async (req, res) => {
   });
 };
 
-
 module.exports = {
-
   loadHome,
   loadShop,
   loadSingleProduct,
   userLogout,
-
-
 };

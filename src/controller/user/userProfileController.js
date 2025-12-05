@@ -19,6 +19,11 @@ const loadprofile = async (req, res) => {
       return res.redirect("/login");
     }
 
+          let cartCount = 0;  
+          if(userId){
+            const cart = await Cart.findOne({userId})
+            cartCount = cart.items.reduce((sum, item)=>sum + item.quantity, 0)
+          }
     const user = await User.findById(userId).lean();
 
     if (!user) {
@@ -26,6 +31,7 @@ const loadprofile = async (req, res) => {
     }
 
     res.render("profile", { 
+      cartCount,
         user,
         success: req.session.successMessage,
         error: req.session.errorMessage
@@ -447,7 +453,7 @@ const saveAddress = async (req, res) => {
 const loadEditAddress = async (req, res) => {
   try {
     const addressId = req.params.id;  
-    const user = await User.findById(req.session.user._id || req.user._id);
+    const user = await User.findById(req.session.userId || req.user._id);
     const returnUrl = req.query.returnUrl || '/profile';
 
     if (!user) return res.redirect('/login');
@@ -480,7 +486,7 @@ const loadEditAddress = async (req, res) => {
 const editAddressPost = async (req, res) => {
   try {
     const addressId = req.params.id;
-    const userId = req.session.user._id || req.user._id;
+    const userId = req.session.userId || req.user._id;
     const returnUrl = req.body.returnUrl || '/profile';
 
     const { type, street, city, state, zipCode, country, label } = req.body;
@@ -542,7 +548,7 @@ const editAddressPost = async (req, res) => {
 const deleteAddress = async(req, res)=>{
   try {
     const addressId = req.params.id;
-    const userId = req.session.user._id || req.user._id;
+    const userId = req.session.userId || req.user._id;
     const returnUrl = req.query.returnUrl || '/profile';
 
     const user = await User.findById(userId);
@@ -580,7 +586,7 @@ const deleteAddress = async(req, res)=>{
 const setDefaultAddress = async (req, res) => {
   try {
     const addressId = req.params.id;
-    const userId = req.session.user._id || req.user._id;
+    const userId = req.session.userId || req.user._id;
     const returnUrl = req.body.returnUrl || '/profile';
 
     const user = await User.findById(userId);
@@ -590,7 +596,6 @@ const setDefaultAddress = async (req, res) => {
       return res.redirect(returnUrl);
     }
 
-    // Remove default from all addresses
     user.addresses.forEach(addr => {
       addr.isDefault = false;
     });

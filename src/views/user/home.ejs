@@ -487,6 +487,7 @@
                 <a href="/singleProduct/<%= product._id %>" class="btn-small">details</a>
                 <% if (product.totalStock > 0) { %>
                     <form action="/cart/add/<%= product._id %>" method="POST" style="width:100%;">
+                        <input type="hidden" name="variantId" value="<%= product.variants && product.variants.length > 0 ? product.variants[0]._id : null %>">
                         <button type="submit" class="btn-small btn-primary" style="width:100%;">add to cart</button>
                     </form>
                 <% } else { %>

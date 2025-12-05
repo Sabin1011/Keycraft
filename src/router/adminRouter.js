@@ -81,9 +81,12 @@ router.post(
 
 router.patch("/toggleProductStatus/:id", productController.toggleProductStatus);
 
-
 router.get("/orders", auth.isAdminLoggedIn,adminOrderController.loadOrders);
-router.post("/orders/update-status/:id", auth.isAdminLoggedIn, adminOrderController.updateStatus);
+router.post("/orders/update-status/:id", adminOrderController.updateOrderStatus);
+
+
+router.post("/order/:orderId/accept-return", auth.isAdminLoggedIn, adminOrderController.acceptReturn);
+router.post("/order/:orderId/reject-return", auth.isAdminLoggedIn, adminOrderController.rejectReturn);
 
 router.get("/logout", adminController.logout);
 
