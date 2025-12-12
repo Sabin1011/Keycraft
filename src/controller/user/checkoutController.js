@@ -28,7 +28,7 @@ const loadCheckout = async (req, res) => {
       const product = item.product;
       const variant = item.variantId ? product.variants.id(item.variantId) : null;
 
-      let isAvailable = true;
+      let isAvailable = true; 
       let stockMessage = "";
 
       if (!product || product.status === false) {
@@ -58,6 +58,7 @@ const loadCheckout = async (req, res) => {
       const itemTotal = isAvailable ? product.price * item.quantity : 0;
       cartTotal += itemTotal;
 
+
       return {
         product,
         quantity: item.quantity,
@@ -65,7 +66,7 @@ const loadCheckout = async (req, res) => {
         selectedVariant: variant,
         isAvailable,
         stockMessage,
-        itemTotal
+        itemTotal        
       };
     });
 
@@ -85,6 +86,7 @@ const loadCheckout = async (req, res) => {
       selectedAddressId,
       error: req.session.errorMessage,
       success: req.session.successMessage,
+
     });
 
   } catch (error) {
@@ -94,73 +96,6 @@ const loadCheckout = async (req, res) => {
   }
 };
 
-//   try {
-//     const userId = req.session.userId;
-
-//     if (!userId) {
-//       return res.redirect("/login");
-//     }
-
-//     const user = await User.findById(userId);
-
-//     if (!user) {
-//       return res.redirect("/login");
-//     }
-
-//     const cart = await Cart.findOne({ userId }).populate("items.product");
-
-//     if (!cart || !cart.items || cart.items.length === 0) {
-//       req.session.errorMessage = "Your cart is empty";
-//       return res.redirect("/cart");
-//     }
-
-//     let cartTotal = 0;
-
-//     const cartItems =
-//       cart && cart.items
-//         ? cart.items.map((item) => {
-//             const selectedVariant = item.variantId
-//               ? item.product.variants.id(item.variantId)
-//               : null;
-
-//             const itemTotal = item.product.price * item.quantity;
-//             cartTotal += itemTotal;
-//             return {
-//               product: item.product,
-//               quantity: item.quantity,
-//               variantId: item.variantId,
-//               selectedVariant,
-//               itemTotal,
-//             };
-//           })
-//         : [];
-
-//     const defaultAddress =
-//       user.addresses && user.addresses.length > 0
-//         ? user.addresses.find((addr) => addr.isDefault)
-//         : null;
-//     const selectedAddressId =
-//       req.session.selectedAddressId ||
-//       (defaultAddress ? defaultAddress._id.toString() : null);
-
-//     res.render("checkout", {
-//       user,
-//       cartItems,
-//       cartTotal,
-//       addresses: user.addresses || [],
-//       selectedAddressId,
-//       error: req.session.errorMessage,
-//       success: req.session.successMessage,
-//     });
-
-//     delete req.session.errorMessage;
-//     delete req.session.successMessage;
-//   } catch (error) {
-//     console.error("Error loading checkout:", error);
-//     req.session.errorMessage = "Failed to load checkout";
-//     res.redirect("/cart");
-//   }
-// };
 
 const placeOrder = async (req, res) => {
   try {

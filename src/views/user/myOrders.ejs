@@ -92,6 +92,13 @@
   .btn-invoice:hover {
     background: #1e8449;
   }
+  .button-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+  
 
   @media (max-width: 768px) {
     .orders-card {
@@ -160,7 +167,8 @@
 
     <% if (orders.length === 0) { %>
     <p>You haven't placed any orders yet.</p>
-    <% } %> <% orders.forEach(order => { %>
+    <% } %> 
+    <% orders.forEach(order => { %>
     <div class="orders-card">
       <div class="order-info">
         <div class="order-id">Order ID: <%= order.orderId %></div>
@@ -173,12 +181,14 @@
         </div>
       </div>
 
-      <div>
+      <div class="button-group">
         <a href="/order/<%= order.orderId %>" class="btn btn-details"
           >View Details</a
         >
 
-        <% if(order.status !== 'canceled' && order.status !== 'returned') { %>
+        <% const disabledForStatuses = ['cancelled', "returned", "delivered"] %>
+
+        <% if(!disabledForStatuses.includes(order.status.toLowerCase())) { %>
         <form
           id="cancelForm_<%= order.orderId %>"
           action="/order/<%= order.orderId %>/cancel"
@@ -186,24 +196,26 @@
           style="display: inline"
           onsubmit="return handleCancel(event, '<%= order.orderId %>')"
         >
+        <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
           <button type="submit" class="btn btn-cancel">Cancel</button>
         </form>
           
-        <% } %> <% if(order.status === 'Delivered') { %>
-        <form
+        <% } %> 
+        <% if(order.status === 'Delivered') { %>
+        <form 
           id="returnForm_<%= order.orderId %>"
           action="/order/<%= order.orderId %>/return"
-          method="post"
-          style="display: inline"
+          method="POST"
           onsubmit="return handleReturn(event, '<%= order.orderId %>')"
-
         >
-        <input type="hidden" id="returnReason_<%= order.orderId %>" name="reason" />
-          <button type="submit" class="btn btn-return">Return</button>
+            <input type="hidden" name="reason" id="returnReason_<%= order.orderId %>">
+            <input type="hidden" name="redirectTo" value="/my-orders">
+            <button class="btn btn-return">Return</button>
         </form>
+
         <% } %>
 
-        <a href="/order/<%= order.orderId %>/invo ce" class="btn btn-invoice"
+        <a href="/order/<%= order.orderId %>/invoice" class="btn btn-invoice"
           >Invoice</a
         >
       </div>
@@ -214,42 +226,24 @@
 
 <script>
 
-  function handleReturn(event, orderId) {
-  event.preventDefault();
+function handleReturn(event, orderId) {
+    event.preventDefault();
 
-  Swal.fire({
-    title: "Return Order?",
-    text: "Please enter a reason for return",
-    input: "text",
-    inputPlaceholder: "Return reason is required",
-    showCancelButton: true,
-    confirmButtonText: "Submit Request",
-    cancelButtonText: "Cancel",
-    inputValidator: (value) => {
-      if (!value) {
-        return "Reason is required!";
-      }
-    }
-  }).then((result) => {
-    if (result.isConfirmed) {
-
-      document.getElementById("returnReason_" + orderId).value = result.value;
-
-      Swal.fire({
-        icon: "success",
-        title: "Return Requested",
-        text: "Your return request has been submitted.",
-        timer: 1400,
-        showConfirmButton: false
-      });
-
-      setTimeout(() => {
-        document.getElementById("returnForm_" + orderId).submit();
-      }, 1400);
-    }
-  });
-
-  return false;
+    Swal.fire({
+        title: "Return Order?",
+        text: "Please enter a reason for return",
+        input: "text",
+        inputPlaceholder: "Reason is required",
+        showCancelButton: true,
+        confirmButtonText: "Submit",
+        cancelButtonText: "Cancel",
+        inputValidator: (value) => !value && "Reason required!"
+    }).then(result => {
+        if (result.isConfirmed) {
+            document.getElementById("returnReason_" + orderId).value = result.value;
+            document.getElementById("returnForm_" + orderId).submit();
+        }
+    });
 }
 
   function handleCancel(event, orderId) {

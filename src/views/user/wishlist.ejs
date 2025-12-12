@@ -336,16 +336,40 @@
 
 
       <% }) %>
+
+<%
+  let hasOutOfStockOrUnavailable = false;
+
+  products.forEach(item => {
+    const p = item.productId;
+
+    if (!p?.status || !p?.category?.status || p?.totalStock <= 0) {
+      hasOutOfStockOrUnavailable = true;
+    }
+  });
+%>
+
+
     </div>
 
-    <!-- Add All to Cart Button -->
-    <div class="add-all-container">
-      <form action="/wishlist/add-all-to-cart" method="POST">
-        <button class="btn-add-all" type="submit">
-          Add All to Cart
-        </button>
-      </form>
-    </div>
+<div class="add-all-container">
+  <form action="/wishlist/add-all-to-cart" method="POST">
+    <button 
+      class="btn-add-all" 
+      type="submit"
+      <%= hasOutOfStockOrUnavailable ? "disabled style='opacity:0.6; cursor:not-allowed;'" : "" %>
+    >
+      Add All to Cart
+    </button>
+  </form>
+
+  <% if (hasOutOfStockOrUnavailable) { %>
+    <p style="color: red; margin-top: 12px; font-size: 14px;">
+      Some items in your wishlist are unavailable or out of stock.
+      Remove them to enable "Add All to Cart".
+    </p>
+  <% } %>
+</div>
 
   <% } %>
 
