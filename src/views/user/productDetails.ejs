@@ -222,23 +222,22 @@
     background: #fff;
     transform: rotate(90deg);
   }
-  
-.zoom-overlay {
-    z-index: 2;
-}
 
-.main-image img {
+  .zoom-overlay {
+    z-index: 2;
+  }
+
+  .main-image img {
     z-index: 1;
     position: relative;
-}
+  }
 
-.main-image .zoom-overlay {
+  .main-image .zoom-overlay {
     z-index: 3 !important;
     position: absolute;
     top: 0;
     left: 0;
-}
-
+  }
 
   .product-info {
     background: #fff;
@@ -696,23 +695,27 @@
           <div class="switch-options">
             <% product.variants.forEach((variant, index) => { %>
 
-            <div 
-              class="switch-option 
-              <%= selectedVariantId == variant._id.toString()
-                  ? 'active'
-                  : (!selectedVariantId && index === 0 ? 'active' : '') %>"
+            <div
+              class="switch-option <%= selectedVariantId == variant._id.toString() ? 'active' : (!selectedVariantId && index === 0 ? 'active' : '') %>"
               onclick="selectSwitch(this, '<%= variant._id %>')"
             >
               <%= variant.name %>
             </div>
-           
 
             <% }) %>
-            <input type="hidden" id="selectedVariant" name="variantId" value="<%= selectedVariantId || product.variants[0]._id %>">
+            <input
+              type="hidden"
+              id="selectedVariant"
+              name="variantId"
+              value="<%= selectedVariantId || product.variants[0]._id %>"
+            />
           </div>
         </div>
-        <input type="hidden" id="wishlistVariant" value="<%= product.variants[0]._id %>">
-
+        <input
+          type="hidden"
+          id="wishlistVariant"
+          value="<%= product.variants[0]._id %>"
+        />
 
         <div class="option-group">
           <div class="option-label">quantity</div>
@@ -741,18 +744,23 @@
         </div>
 
         <div class="product-actions">
-          
-          <form action="/cart/add/<%= product._id %>" method="POST">
-            <input type="hidden" name="quantity" value="1" />
+        <form action="/cart/add/<%= product._id %>" method="POST">
+            
+            <input type="hidden" name="variantId" id="selectedVariantInput"
+                  value="<%= selectedVariantId || product.variants[0]._id %>">
 
-            <input type="hidden" id="selectedVariantInput" name="variantId" value="<%= selectedVariantId || product.variants[0]._id %>">
+            <input type="hidden" name="quantity" id="formQuantity" value="1">
+
             <button class="btn btn-primary" type="submit">
-              <i class="fa fa-shopping-cart"></i> add to cart
+                <i class="fa fa-shopping-cart"></i> add to cart
             </button>
 
-          </form>
+        </form>
 
-          <button class="btn btn-secondary">buy now</button>
+
+          <input type="hidden" id="selectedVariantInput" name="variantId" value="<%= selectedVariantId || product.variants[0]._id %>">
+          <!-- <input type="hidden" id="quantity" value="1" min="1" max="<%= product.totalStock %>" /> -->
+          
           <button
             class="btn btn-secondary btn-icon wishlist-btn"
             data-product="<%= product._id %>"
@@ -971,90 +979,97 @@
 
 <%- include('../partials/user/footer') %>
 
-
 <script>
+  function decreaseQty() {
+    let qty = document.getElementById("quantity");
+    if (qty.value > 1) qty.value--;
+    document.getElementById("formQuantity").value = qty.value;
+}
+
+function increaseQty(maxStock) {
+    let qty = document.getElementById("quantity");
+    if (qty.value < maxStock) qty.value++;
+    document.getElementById("formQuantity").value = qty.value;
+}
   function selectSwitch(element, variantId) {
-  document.querySelectorAll(".switch-option")
-    .forEach((el) => el.classList.remove("active"));
+    document
+      .querySelectorAll(".switch-option")
+      .forEach((el) => el.classList.remove("active"));
 
-  element.classList.add("active");
+    element.classList.add("active");
 
-  document.getElementById("wishlistVariant").value = variantId;
-  document.getElementById("selectedVariantInput").value = variantId;
-}
-function changeImage(element, imageUrl){
-  const mainImage = document.getElementById("mainImage");
-  mainImage.src = imageUrl;
-  const zoomOverlay = document.getElementById("zoomOverlay");
-  zoomOverlay.style.backgroundImage = `url('${imageUrl}')`;
+    document.getElementById("wishlistVariant").value = variantId;
+    document.getElementById("selectedVariantInput").value = variantId;
+  }
+  function changeImage(element, imageUrl) {
+    const mainImage = document.getElementById("mainImage");
+    mainImage.src = imageUrl;
+    const zoomOverlay = document.getElementById("zoomOverlay");
+    zoomOverlay.style.backgroundImage = `url('${imageUrl}')`;
 
-  document.querySelectorAll(".thumbnail").forEach(thumb =>{
-    thumb.classList.remove("active");
-  });
-  element.classList.add("active")
-}
+    document.querySelectorAll(".thumbnail").forEach((thumb) => {
+      thumb.classList.remove("active");
+    });
+    element.classList.add("active");
+  }
 
+  document.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll(".wishlist-btn");
 
-document.addEventListener("DOMContentLoaded", () => {
-  const buttons = document.querySelectorAll(".wishlist-btn");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", async function () {
+        const productId = this.dataset.product;
+        const isWishlisted = this.dataset.iswish === "true";
 
-  buttons.forEach((btn) => {
-    btn.addEventListener("click", async function () {
-      const productId = this.dataset.product;
-      const isWishlisted = this.dataset.iswish === "true";
+        const variantId = document.getElementById("wishlistVariant").value;
 
-      const variantId = document.getElementById("wishlistVariant").value;
+        const url = isWishlisted
+          ? `/wishlist/remove/${productId}`
+          : `/wishlist/add/${productId}`;
 
-      const url = isWishlisted
-        ? `/wishlist/remove/${productId}`
-        : `/wishlist/add/${productId}`;
+        try {
+          let options = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          };
 
-      try {
-        let options = {
-          method: "POST",
-          headers: { "Content-Type": "application/json" }
-        };
-
-  
-        if (!isWishlisted) {
-          options.body = JSON.stringify({ variantId });
-        }
-
-        const response = await fetch(url, options);
-        const data = await response.json();
-
-        if (data.success) {
-          const icon = this.querySelector("i");
-
-          if (isWishlisted) {
-     
-            icon.classList.remove("fas");
-            icon.classList.add("far");
-            icon.style.color = "";
-            this.dataset.iswish = "false";
-          } else {
-            
-            icon.classList.remove("far");
-            icon.classList.add("fas");
-            icon.style.color = "red";
-            this.dataset.iswish = "true";
+          if (!isWishlisted) {
+            options.body = JSON.stringify({ variantId });
           }
-        } else {
-          alert(data.message || "Something went wrong");
+
+          const response = await fetch(url, options);
+          const data = await response.json();
+
+          if (data.success) {
+            const icon = this.querySelector("i");
+
+            if (isWishlisted) {
+              icon.classList.remove("fas");
+              icon.classList.add("far");
+              icon.style.color = "";
+              this.dataset.iswish = "false";
+            } else {
+              icon.classList.remove("far");
+              icon.classList.add("fas");
+              icon.style.color = "red";
+              this.dataset.iswish = "true";
+            }
+          } else {
+            alert(data.message || "Something went wrong");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Failed to update wishlist");
         }
-      } catch (err) {
-        console.error(err);
-        alert("Failed to update wishlist");
-      }
+      });
     });
   });
-});
 
-const mainImage = document.getElementById("mainImage");
-const zoomOverlay = document.getElementById("zoomOverlay");
-const mainImageContainer = document.getElementById("mainImageContainer");
+  const mainImage = document.getElementById("mainImage");
+  const zoomOverlay = document.getElementById("zoomOverlay");
+  const mainImageContainer = document.getElementById("mainImageContainer");
 
-mainImageContainer.addEventListener("mousemove", function (e) {
+  mainImageContainer.addEventListener("mousemove", function (e) {
     const rect = mainImageContainer.getBoundingClientRect();
 
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -1062,15 +1077,33 @@ mainImageContainer.addEventListener("mousemove", function (e) {
 
     zoomOverlay.style.backgroundImage = `url('${mainImage.src}')`;
     zoomOverlay.style.backgroundPosition = `${x}% ${y}%`;
-});
+  });
 
-mainImageContainer.addEventListener("mouseenter", function () {
+  mainImageContainer.addEventListener("mouseenter", function () {
     zoomOverlay.style.opacity = 1;
-});
+  });
 
-mainImageContainer.addEventListener("mouseleave", function () {
+  mainImageContainer.addEventListener("mouseleave", function () {
     zoomOverlay.style.opacity = 0;
-});
+  });
+  function switchTab(index) {
+    const tabs = document.querySelectorAll(".tab-content");
+    const buttons = document.querySelectorAll(".tab-button");
 
+    tabs.forEach((tab, i) => {
+      if (i === index) {
+        tab.classList.add("active");
+      } else {
+        tab.classList.remove("active");
+      }
+    });
 
+    buttons.forEach((btn, i) => {
+      if (i === index) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+  }
 </script>

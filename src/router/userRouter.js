@@ -45,9 +45,14 @@ router.get("/forgotNewPassword", authController.loadEnterNewPassword);
 
 
 router.get("/profile", userProfileController.loadprofile);
-router.get("/profile/address/add", userProfileController.loadAddAddress);
-router.post("/profile/address/add", userProfileController.saveAddress);
-router.post("/profile/address/:addressId/set-default", auth.isLoggedIn, userProfileController.setDefaultAddress);
+
+router.get('/profile/address/add', auth.isLoggedIn, userProfileController.loadAddAddress);
+router.post('/profile/address/add', auth.isLoggedIn, userProfileController.saveAddress);
+router.post("/profile/address/:id/set-default", auth.isLoggedIn, userProfileController.setDefaultAddress);
+router.get('/profile/address/:id/edit', auth.isLoggedIn, userProfileController.loadEditAddress);
+router.post('/profile/address/:id/edit', auth.isLoggedIn, userProfileController.editAddressPost);
+router.post('/profile/address/:id/delete', auth.isLoggedIn, userProfileController.deleteAddress);
+
 router.get('/profile/change-password', auth.isLoggedIn, userProfileController.loadChangePassword);
 router.post('/profile/change-password', auth.isLoggedIn, userProfileController.changePassword);
 
@@ -57,18 +62,12 @@ router.post('/profile/edit', auth.isLoggedIn, profileUpload.single("profileImage
 router.get("/profile/edit-profile/verify-otp", auth.isLoggedIn, editProfileController.loadEmailOTPPage);
 router.post("/profile/edit-profile/verify-otp", auth.isLoggedIn, editProfileController.verifyEmailOTP);
 
-router.get('/profile/address/add', auth.isLoggedIn, userProfileController.loadAddAddress);
-router.post('/profile/address/add', auth.isLoggedIn, userProfileController.saveAddress);
-
-router.get('/profile/address/:id/edit', auth.isLoggedIn, userProfileController.loadEditAddress);
-router.post('/profile/address/:id/edit', auth.isLoggedIn, userProfileController.editAddressPost);
-router.post('/profile/address/:id/delete', auth.isLoggedIn, userProfileController.deleteAddress);
-router.post('/profile/address/:id/set-default', auth.isLoggedIn, userProfileController.setDefaultAddress);
 
 
 router.get("/wishlist", auth.isLoggedIn,wishlistController.loadWishlist )
 router.post('/wishlist/add/:id', auth.isLoggedIn, wishlistController.addToWishlist);
 router.post("/wishlist/remove/:id", auth.isLoggedIn, wishlistController.removeFromWishlist);
+router.post("/wishlist/add-all-to-cart", wishlistController.addAllToCart);
 
 router.get("/cart", auth.isLoggedIn, cartController.loadCart);
 router.post("/cart/add/:id", auth.isLoggedIn, cartController.addToCart);
@@ -87,8 +86,14 @@ router.get("/order/:id", auth.isLoggedIn, orderController.loadOrderDetails);
 
 router.post("/order/:orderId/cancel", auth.isLoggedIn, orderController.cancelOrder);
 router.post("/order/:orderId/return", auth.isLoggedIn, orderController.returnOrder);
+router.post("/order/:orderId/cancel-item/:itemId", auth.isLoggedIn, orderController.cancelOrderItem);
+router.post("/order/:orderId/return-item/:itemId", auth.isLoggedIn, orderController.returnOrderItem);
 
 
+router.get("/order/:orderId/invoice", auth.isLoggedIn, orderController.viewInvoice);
+router.get("/order/:orderId/invoice/downlaod", auth.isLoggedIn, orderController.downloadInvoice);
 router.get("/logout", userController.userLogout);
+
+// router.get('/header-partial', userController.loadHeaderPartial);
 
 module.exports = router;

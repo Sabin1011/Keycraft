@@ -12,6 +12,7 @@ const bcrypt = require("bcrypt");
 
 // HOME
 
+
 const loadHome = async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -20,10 +21,15 @@ const loadHome = async (req, res) => {
 
     let wishlistProductIds = [];
     const cart = await Cart.findOne({ userId });
+
     let cartCount = 0;
+
     if (userId) {
       user = await User.findById(userId);
-      cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+      if(cart  && cart.items){
+        cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+      }
+      
       const wishlist = await Wishlist.findOne({ userId });
       if (wishlist) {
         wishlistProductIds = wishlist.products.map((p) =>
@@ -251,4 +257,5 @@ module.exports = {
   loadShop,
   loadSingleProduct,
   userLogout,
+
 };

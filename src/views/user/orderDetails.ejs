@@ -1,145 +1,292 @@
 <%- include('../partials/user/header') %>
 
-
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
   body {
     font-family: "Questrial", sans-serif;
-    background: #fafafa;
-    color: #222;
-    min-height: 100vh;
+    background: #f5f5f5;
+    color: #111;
   }
 
-  .details-section {
-    padding: 50px 20px;
-    display: flex;
-    justify-content: center;
-  }
-
-  .order-card {
+  .page-wrapper {
+    max-width: 950px;
+    margin: 40px auto;
     background: #fff;
-    padding: 35px 40px;
     border-radius: 12px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-    max-width: 800px;
-    width: 100%;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    padding: 30px 40px;
   }
 
-  .order-card h3 {
-    color: #401f75;
-    margin-bottom: 15px;
-  }
-
-  .order-card h4 {
-    color: #401f75;
-    font-weight: 500;
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
-
-  .order-card p {
-    margin-bottom: 20px;
-    color: #555;
-    line-height: 1.6;
-  }
-
-  .order-card ul {
-    list-style: none;
-    padding-left: 0;
-    margin-bottom: 20px;
-  }
-
-  .order-card ul li {
-    padding: 12px 15px;
-    margin-bottom: 10px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    font-weight: 500;
-    color: #333;
-  }
-
-  .btn {
-    padding: 12px 25px;
-    border: none;
-    font-size: 14px;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    margin-top: 10px;
-    display: inline-block;
+  h2,
+  h3,
+  h4 {
+    color: #111;
+    margin-bottom: 12px;
     font-weight: 600;
   }
 
-  .btn-primary {
-    background: #401f75;
-    color: #fff;
+  .section-box {
+    background: #fafafa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    border: 1px solid #e6e6e6;
   }
 
-  .btn-primary:hover {
-    background: #321960;
-    transform: translateY(-2px);
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .divider {
+    height: 1px;
+    background: #e4e4e4;
+    margin: 20px 0;
+  }
+
+  /* Item list */
+  .item-row {
+    display: flex;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .item-row img {
+    width: 85px;
+    height: 85px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .item-info {
+    flex: 1;
+  }
+
+  .item-info h4 {
+    margin-bottom: 6px;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 8px;
   }
 
   .btn-secondary {
-    background: #e5e5e5;
-    color: #333;
+    background: #ddd;
+    color: #222;
   }
 
   .btn-secondary:hover {
-    background: #ccc;
-    transform: translateY(-2px);
+    background: #c7c7c7;
   }
 
-  @media (max-width: 768px) {
-    .details-section {
-      padding: 30px 15px;
-    }
+  .btn-cancel {
+    background: #e74c3c;
+    color: #fff;
+  }
 
-    .order-card {
-      padding: 25px 20px;
-    }
+  .btn-cancel:hover {
+    background: #c0392b;
+  }
+
+  .btn-return {
+    background: #f39c12;
+    color: #fff;
+  }
+
+  .btn-return:hover {
+    background: #d68910;
+  }
+
+  .btn-success {
+    background: #27ae60;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #1e8449;
   }
 </style>
 
+<div class="page-wrapper">
+  <h2>Order Details</h2>
 
-<section class="details-section">
-  <div class="container">
-    <div class="order-card">
-      <h3>Order ID: <%= order.orderId %></h3>
-      <h4>Status:<%= order.status %></h4>
-      <h4>Total: ₹<%= order.totalAmount.toFixed(2) %></h4>
-      <h4>Payment Method: <%= order.paymentMethod ? order.paymentMethod.toUpperCase() : "N/A" %></h4>
-
-
-      <h4>Delivery Address:</h4>
-      <p>
-        <%= order.address.street %>, <%= order.address.city %>, 
-        <%= order.address.state %> - <%= order.address.zipCode %>, 
-        <%= order.address.country %>
-      </p>
-
-      <h4>Items:</h4>
-      <ul>
-        <% order.items.forEach(item => { %>
-          <li>
-            <span><%= item.product.name %> (x<%= item.quantity %>)</span>
-            <span>₹<%= (item.price * item.quantity).toFixed(2) %></span>
-          </li>
-        <% }) %>
-      </ul>
-
-      <a href="/my-orders" class="btn btn-secondary">Back to My Orders</a>
+  <div class="section-box">
+    <div class="info-row"><strong>Order ID:</strong> <%= order.orderId %></div>
+    <div class="info-row">
+      <strong>Placed On:</strong> <%= new Date(order.createdAt).toDateString()
+      %>
+    </div>
+    <div class="info-row"><strong>Status:</strong> <%= order.status %></div>
+    <div class="info-row">
+      <strong>Payment Method:</strong> <%= order.paymentMethod.toUpperCase() %>
     </div>
   </div>
-</section>
+
+  <h3>Items in Your Order</h3>
+  <div class="section-box">
+    <% order.items.forEach(item => { %>
+
+    <div class="item-row">
+      <img src="<%= item.product.images[0] %>" />
+
+      <div class="item-info">
+        <h4><%= item.product.name %></h4>
+        <p>Qty: <%= item.quantity %></p>
+        <p>Price: ₹<%= item.price.toFixed(2) %></p>
+        <% if (item.product.specifications) { %>
+        <p style="font-size: 14px; color: #444">
+          <%= item.product.specifications %>
+        </p>
+        <% } %>
+      </div>
+
+ <% const disabledForStatuses = ['cancelled', "returned", "delivered"] %>
+
+        <% if(!disabledForStatuses.includes(order.status.toLowerCase())) { %>
+<form
+  action="/order/<%= order.orderId %>/cancel-item/<%= item._id %>"
+  method="POST"
+>
+  <input type="hidden" name="redirectTo" value="<%= currentUrl %>">
+  <button class="btn btn-cancel">Cancel Item</button>
+</form>
+
+          
+        <% } %> 
+        <% if(order.status === 'Delivered') { %>
+<form
+  action="/order/<%= order.orderId %>/return-item/<%= item._id %>"
+  method="POST"
+>
+  <input type="hidden" name="redirectTo" value="<%= currentUrl %>">
+  <button class="btn btn-return">Return Item</button>
+</form>
+
+
+        <% } %>
+
+    </div>
+
+    <% }) %>
+  </div>
+
+  <h3>Payment Summary</h3>
+
+  <div class="section-box">
+    <div class="info-row">
+      <span>Subtotal:</span> <span>₹<%= order.subtotal %></span>
+    </div>
+    <div class="info-row">
+      <span>Shipping Fee:</span> <span>₹<%= order.shippingFee %></span>
+    </div>
+    <div class="info-row"><span>Tax:</span> <span>₹<%= order.tax %></span></div>
+    <% if(order.discount) { %>
+    <div class="info-row">
+      <span>Discount:</span> <span>-₹<%= order.discount %></span>
+    </div>
+    <% } %>
+
+    <div class="divider"></div>
+
+    <div class="info-row" style="font-size: 18px; font-weight: 700">
+      <span>Total Paid:</span>
+      <span>₹<%= order.totalAmount %></span>
+    </div>
+  </div>
+
+  <h3>Shipping Address</h3>
+  <div class="section-box">
+    <p>
+      <%= order.address.street %>, <%= order.address.city %>, <%=
+      order.address.state %> - <%= order.address.zipCode %><br />
+      <%= order.address.country %>
+    </p>
+  </div>
+
+  <h3>Billing Address</h3>
+  <div class="section-box">
+    <p>Same as shipping (or put billing field here if different)</p>
+  </div>
+
+  <h3>Tracking Information</h3>
+  <div class="section-box">
+    <% if(order.trackingNumber) { %>
+    <p><strong>Carrier:</strong> <%= order.carrier %></p>
+    <p><strong>Tracking Number:</strong> <%= order.trackingNumber %></p>
+    <a href="<%= order.trackingUrl %>" target="_blank" class="btn btn-success">
+      Track Package
+    </a>
+    <p><strong>Estimated Delivery:</strong> <%= order.estimatedDelivery %></p>
+    <% } else { %>
+    <p>No tracking available yet.</p>
+    <% } %>
+  </div>
+
+  <a href="/my-orders" class="btn btn-secondary">Back to My Orders</a>
+  <a href="/order/<%= order.orderId %>/invoice" class="btn btn-success"
+    >View Invoice</a
+  >
+
+</div>
+
+<script>
+  
+function handleReturn(event, orderId) {
+    event.preventDefault();
+
+    Swal.fire({
+        title: "Return Order?",
+        text: "Please enter a reason for return",
+        input: "text",
+        inputPlaceholder: "Reason is required",
+        showCancelButton: true,
+        confirmButtonText: "Submit",
+        cancelButtonText: "Cancel",
+        inputValidator: (value) => !value && "Reason required!"
+    }).then(result => {
+        if (result.isConfirmed) {
+            document.getElementById("returnReason_" + orderId).value = result.value;
+            document.getElementById("returnForm_" + orderId).submit();
+        }
+    });
+}
+
+  function handleCancel(event, orderId) {
+    event.preventDefault(); 
+
+    Swal.fire({
+      title: "Cancel Order?",
+      text: "Please enter a reason for cancellation",
+      input: "text",
+      inputPlaceholder: "Reason is required",
+      showCancelButton: true,
+      confirmButtonText: "Confirm Cancel",
+      cancelButtonText: "Close",
+      inputValidator: (value) => {
+        if (!value) {
+          return "Reason is required!";
+        }
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        document.getElementById("reason_" + orderId).value = result.value;
+
+        document.getElementById("cancelForm_" + orderId).submit();
+      }
+    });
+
+    return false; 
+  }
+</script>
 
 <%- include('../partials/user/footer') %>

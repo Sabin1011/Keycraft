@@ -1,5 +1,6 @@
 const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
+const Product = require("../../models/productSchema")
 
 const loadOrders = async (req, res) => {
   try {
@@ -74,6 +75,35 @@ const acceptReturn = async (req, res) => {
   try {
     
     const { orderId } = req.params;
+    const order = await Order.findOne({ orderId }).populate("items.product");
+
+    if (!order) {
+      console.log("Order not found:", orderId);
+      return res.redirect("/admin/orders/");
+    }
+
+     if (order.status !== "Return Requested") {
+      console.log("Order not in 'Return Requested' state:", orderId);
+      return res.redirect("/admin/orders/");
+    }
+
+    for (const item of order.items) {
+      const product = await Product.findById(item.product._id);
+      if (!product) continue;
+
+      if (item.variantId) {
+        const variant = product.variants.id(item.variantId);
+        if (variant) variant.quantity += item.quantity;
+      }
+
+      product.totalStock = product.variants.reduce(
+        (sum, v) => sum + v.quantity,
+        0
+      );
+
+      await product.save();
+    }
+
 
     await Order.findOneAndUpdate(
       { orderId },
