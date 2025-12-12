@@ -34,11 +34,128 @@
       <div class="page-subtitle">save a new delivery address to your profile</div>
     </div>
 
-    <form action="/profile/address/add" method="POST">
+    <form id="addressForm" action="/profile/address/add" method="POST">
       <input type="hidden" name="returnUrl" value="<%= returnUrl %>">
       <%- include('../partials/addressForm', { address: null, mode: 'add', returnUrl }) %>
     </form>
   </div>
 </section>
 
+<script>
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById('addressForm');
+        
+        // Find the input fields used in the form (assuming standard IDs/names matching validation keys)
+        const fields = ['type', 'street', 'city', 'state', 'zipCode', 'country'];
+        
+        // Function to clear previous errors
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            document.querySelectorAll('.form-group input').forEach(el => el.classList.remove('is-invalid'));
+        }
+
+        // Function to display new errors
+        function displayErrors(errors) {
+            clearErrors();
+            for (const key in errors) {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    input.classList.add('is-invalid');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error-message'; // You need CSS for this
+                    errorDiv.style.color = '#dc3545';
+                    errorDiv.style.fontSize = '0.85em';
+                    errorDiv.style.marginTop = '5px';
+                    errorDiv.textContent = errors[key];
+                    
+                    // Assuming the input is wrapped in a structure where we can place the error message next to it
+                    input.parentNode.appendChild(errorDiv);
+                }
+            }
+        }
+
+        if (form) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault(); // Stop the default form submission (page reload)
+                
+                const submitButton = form.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton ? submitButton.textContent : 'Submit';
+                
+                // Collect form data
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+                clearErrors(); // Clear existing errors before submission
+
+                try {
+                    // Show loading state
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                        submitButton.textContent = 'Saving...';
+                    }
+
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const responseData = await response.json();
+
+                    if (response.ok && responseData.success) {
+                        // Success: Show SWAL and redirect
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: responseData.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = responseData.redirectUrl;
+                        });
+
+                    } else if (response.status === 400 && responseData.errors) {
+                        // Validation Error (400 Bad Request)
+                        displayErrors(responseData.errors);
+                        
+                        // Show a general error message
+                         Swal.fire({
+                            icon: 'warning',
+                            title: 'Validation Failed',
+                            text: 'Please correct the highlighted errors in the form.',
+                            confirmButtonColor: '#222'
+                        });
+
+                    } else {
+                        // Other Errors (401 Unauthorized, 500 Server Error)
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: responseData.message || 'An unexpected error occurred.',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+
+                } catch (error) {
+                    console.error('AJAX Submission Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Network Error',
+                        text: 'Could not connect to the server. Please check your internet connection.',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } finally {
+                    // Restore button state
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.textContent = originalButtonText;
+                    }
+                }
+            });
+        }
+    });
+</script>
 <%- include('../partials/user/footer') %>

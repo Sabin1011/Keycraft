@@ -1,7 +1,8 @@
 const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
 const Cart = require('../../models/cartModel');
-const Product = require("../../models/productSchema")
+const Product = require("../../models/productSchema");
+const PDFDocument = require("pdfkit");
 
 const loadMyOrders = async (req, res) => {
   try {
@@ -23,7 +24,8 @@ const loadMyOrders = async (req, res) => {
     res.render("myOrders", {
       orders,
       user,
-      search
+      search,
+
     });
   } catch (error) {
     console.log("Error loading orders:", error);
@@ -51,7 +53,8 @@ const loadOrderDetails = async (req, res) => {
     res.render("orderDetails", {
       order,
       user,
-      cartCount
+      cartCount,
+        currentUrl: req.originalUrl  
     });
   } catch (error) {
     console.log("Error loading order details:", error);
@@ -104,11 +107,11 @@ const cancelOrder = async (req, res) => {
     return res.redirect("/my-orders?error=Something went wrong");
   }
 };
-
+  
 const returnOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { reason } = req.body;
+    const { reason,redirectTo } = req.body;
 
     console.log("Return request received for:", orderId);
     console.log("Reason:", reason);
@@ -129,10 +132,192 @@ const returnOrder = async (req, res) => {
 
     console.log("Updated order:", updatedOrder);
 
-    res.redirect("/my-orders");
+    res.redirect(redirectTo? redirectTo.trim() : "/my-orders");
   } catch (error) {
     console.log("Error processing return request:", error);
     res.redirect("/my-orders");
+  }
+};
+const viewInvoice = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const user = req.session.userId;
+
+
+
+    const order = await Order.findOne({ orderId })
+      .populate("items.product")
+      .populate("userId")
+
+    if (!order) {
+      return res.status(404).send("Order not found");
+    }
+
+    res.render("invoice", { order,user });
+
+  } catch (error) {
+    console.log("Invoice view error:", error);
+    res.status(500).send("Server error");
+  }
+};
+
+const downloadInvoice = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findOne({ orderId }).populate("items.product");
+
+    if (!order) {
+      return res.status(404).send("Order not found");
+    }
+
+    const doc = new PDFDocument({ margin: 50 });
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=invoice_${orderId}.pdf`
+    );
+    res.setHeader("Content-Type", "application/pdf");
+
+    doc.pipe(res);
+
+    doc.fontSize(20).text("INVOICE", { align: "center" });
+    doc.moveDown();
+
+    doc.fontSize(12).text(`Order ID: ${order.orderId}`);
+    doc.text(`Date: ${new Date(order.createdAt).toDateString()}`);
+    doc.moveDown();
+
+    doc.fontSize(14).text("Customer Details", { underline: true });
+    doc.fontSize(12).text(`Name: ${order.userName}`);
+    doc.text(`Email: ${order.userEmail}`);
+    doc.moveDown();
+
+    doc.fontSize(14).text("Shipping Address", { underline: true });
+    doc.fontSize(12).text(
+      `${order.address.street}, ${order.address.city}, ${order.address.state} - ${order.address.zipCode}, ${order.address.country}`
+    );
+    doc.moveDown();
+
+    doc.fontSize(14).text("Order Items", { underline: true });
+    doc.moveDown(0.5);
+
+    doc.font("Helvetica-Bold");
+    doc.text("Item", 50, doc.y);
+    doc.text("Price", 250, doc.y);
+    doc.text("Qty", 350, doc.y);
+    doc.text("Total", 430, doc.y);
+    doc.moveDown();
+
+    doc.font("Helvetica");
+
+    order.items.forEach((item) => {
+      doc.text(item.product.name, 50, doc.y);
+      doc.text(`₹${item.price.toFixed(2)}`, 250, doc.y);
+      doc.text(item.quantity, 350, doc.y);
+      doc.text(`₹${(item.price * item.quantity).toFixed(2)}`, 430, doc.y);
+      doc.moveDown();
+    });
+
+    doc.moveDown();
+    doc.fontSize(14).text("Summary", { underline: true });
+    doc.moveDown(0.5);
+
+    doc.fontSize(12);
+    doc.text(`Subtotal: ₹${order.subtotal}`);
+    doc.text(`Shipping: ₹${order.shippingFee}`);
+    doc.text(`Tax: ₹${order.tax}`);
+
+    if (order.discount) {
+      doc.text(`Discount: -₹${order.discount}`);
+    }
+
+    doc.moveDown();
+    doc.fontSize(16).text(`Total Paid: ₹${order.totalAmount}`, {
+      bold: true,
+    });
+
+    doc.end(); 
+  } catch (err) {
+    console.log("Invoice error:", err);
+    return res.status(500).send("Could not generate invoice");
+  }
+};
+
+const cancelOrderItem = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.params;
+    const { redirectTo } = req.body;
+
+    const order = await Order.findOne({ orderId });
+
+    if (!order) return res.redirect(redirectTo);
+
+    // Find the item within order.items array
+    const item = order.items.id(itemId);
+    if (!item) return res.redirect(redirectTo);
+
+    // Restore stock
+    const product = await Product.findById(item.product);
+    if (product) {
+      if (item.variantId) {
+        const variant = product.variants.id(item.variantId);
+        if (variant) variant.quantity += item.quantity;
+      }
+      product.totalStock = product.variants.reduce((sum, v) => sum + v.quantity, 0);
+      await product.save();
+    }
+
+    // Remove ONLY this item
+    order.items.pull(itemId);
+
+    // If no items left → cancel entire order
+    if (order.items.length === 0) {
+      order.status = "Cancelled";
+    }
+
+    // Recalculate total
+    order.totalAmount = order.items.reduce(
+      (sum, i) => sum + i.price * i.quantity,
+      0
+    );
+
+    await order.save();
+
+    return res.redirect(redirectTo);
+
+  } catch (err) {
+    console.log("Cancel item error:", err);
+    res.redirect("back");
+  }
+};
+
+const returnOrderItem = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.params;
+    const { redirectTo } = req.body;
+
+    const order = await Order.findOne({ orderId });
+
+    if (!order) return res.redirect(redirectTo);
+
+    const item = order.items.id(itemId);
+    if (!item) return res.redirect(redirectTo);
+
+    // Mark item as return requested
+    item.status = "Return Requested";
+
+    // If all items returned → update entire order
+    const allReturned = order.items.every(i => i.status === "Return Requested");
+    if (allReturned) order.status = "Return Requested";
+
+    await order.save();
+
+    return res.redirect(redirectTo);
+
+  } catch (err) {
+    console.log("Return item error:", err);
+    res.redirect("back");
   }
 };
 
@@ -140,5 +325,10 @@ module.exports = {
   loadMyOrders,
   loadOrderDetails,
   cancelOrder,
-  returnOrder
+  returnOrder,
+  viewInvoice,
+  downloadInvoice,
+  returnOrderItem,
+  cancelOrderItem 
+  
 };

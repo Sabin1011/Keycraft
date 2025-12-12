@@ -592,17 +592,17 @@
       </div>
 
       <div style="margin-top: 15px; display: flex; gap: 10px">
-        <form
-          action="/profile/address/<%= address._id %>/set-default?returnUrl=/profile"
-          method="POST"
-        >
+
           <button
-            class="btn btn-secondary btn-small"
+          type="button"
+            class="btn btn-secondary btn-small set-default-btn"
             style="margin-top: 10px"
+            data-address-id="<%= address._id %>"
+            data-return-url="<%= returnUrl %>"
           >
             <i class="fa fa-star-o"></i> Set as Default
           </button>
-        </form>
+
 
         <!-- Edit -->
         <a
@@ -646,6 +646,77 @@
 </section>
 
 <script>
+
+  src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const defaultBtns = document.querySelectorAll('.set-default-btn');
+
+        defaultBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const addressId = this.dataset.addressId;
+                const returnUrl = this.dataset.returnUrl;
+                
+                const url = `/profile/address/${addressId}/set-default`;
+                
+                // Set loading state
+                this.disabled = true;
+                this.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Setting...';
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        // We send returnUrl just in case, though the controller doesn't strictly need it for logic
+                        body: JSON.stringify({ returnUrl }) 
+                    });
+
+                    const responseData = await response.json();
+
+                    if (response.ok && responseData.success) {
+                        // Success: Show SWAL and reload the page to refresh address states
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: responseData.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            // Reload the page to reflect the new default status visually
+                            window.location.reload(); 
+                        });
+
+                    } else {
+                        // Error (404, 500, etc.)
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: responseData.message || 'Failed to set default address.',
+                            confirmButtonColor: '#dc3545'
+                        });
+                        // Re-enable button on error
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fa fa-star-o"></i> Set as Default';
+                    }
+
+                } catch (error) {
+                    console.error('AJAX Submission Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Network Error',
+                        text: 'Could not connect to the server.',
+                        confirmButtonColor: '#dc3545'
+                    });
+                    // Re-enable button on network error
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fa fa-star-o"></i> Set as Default';
+                }
+            });
+        });
+    });
+
   document.querySelectorAll(".delete-address-form").forEach((form) => {
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
