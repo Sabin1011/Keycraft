@@ -1,4 +1,5 @@
 const Coupon = require("../../models/couponSchema");
+const Orders = require("../../models/orderSchema");
 
 const loadCouponList = async (req, res) => {
   try {
@@ -30,6 +31,7 @@ const loadCouponList = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
 const loadAddCoupon = async (req, res) => {
   try {
     
@@ -247,6 +249,7 @@ const validateCoupon = async (req, res) => {
   try {
     const { couponCode, cartTotal } = req.body;
 
+    const userId = req.session.userId;
     const coupon = await Coupon.findOne({
       code: couponCode.toUpperCase(),
       isDeleted: false
@@ -267,7 +270,22 @@ const validateCoupon = async (req, res) => {
       });
     }
 
-    // Calculate discount
+    const alreadyUsed = await Orders.findOne({
+      userId,
+      couponId: coupon._id
+    });
+    if(alreadyUsed){
+      return res.json({
+        success:false,
+        message:"You have  already used this coupon"
+      })
+    }
+    if(coupon.usedCount >= coupon.totalUsageLimit){
+      return res.json({
+        success:false,
+        message: "coupon usage limit reached"
+      })
+    }
     let discountAmount = 0;
     
     if (coupon.discountType === "percentage") {
