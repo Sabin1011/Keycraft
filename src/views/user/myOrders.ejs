@@ -177,7 +177,22 @@
         </div>
         <div class="order-status">Status: <%= order.status %></div>
         <div class="order-total">
-          Total: ₹<%= order.totalAmount.toFixed(2) %>
+        <%
+          const paidAmount = order.finalAmount ??
+                            (order.totalAmount - (order.discountAmount || 0));
+        %>
+
+        Total Paid: ₹<%= paidAmount.toFixed(2) %>
+          <% if (order.discountAmount > 0) { %>
+            <span style="color:green; font-size:12px;">
+              (Saved ₹<%= order.discountAmount %>)
+            </span>
+          <% } %>
+          <% if(order.couponId) { %>
+            <p style="font-size: 14px; color: #666;">
+              Coupon Used: <strong><%= order.couponId.code %></strong>
+            </p>
+          <% } %>
         </div>
       </div>
 

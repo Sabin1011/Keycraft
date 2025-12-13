@@ -4,7 +4,8 @@ const adminController = require("../controller/admin/adminController");
 const categoryController = require("../controller/admin/categoryController");
 const userManageController = require("../controller/admin/userManageController");
 const productController = require("../controller/admin/productController");
-const adminOrderController = require("../controller/admin/adminOrderController")
+const adminOrderController = require("../controller/admin/adminOrderController");
+const couponController = require("../controller/admin/couponController");
 const {upload} = require("../middleware/multer");
 const cloudinary = require("../config/cloudinary")
 
@@ -87,6 +88,15 @@ router.post("/orders/update-status/:id", adminOrderController.updateOrderStatus)
 
 router.post("/order/:orderId/accept-return", auth.isAdminLoggedIn, adminOrderController.acceptReturn);
 router.post("/order/:orderId/reject-return", auth.isAdminLoggedIn, adminOrderController.rejectReturn);
+
+
+router.get("/couponManage",auth.isAdminLoggedIn, couponController.loadCouponList);
+router.get("/coupon/add", auth.isAdminLoggedIn, couponController.loadAddCoupon)
+router.post("/coupon/add", auth.isAdminLoggedIn,couponController.addCoupon);
+router.get("/coupon/edit/:id",auth.isAdminLoggedIn ,couponController.loadEditCoupon);
+router.patch("/coupon/edit", auth.isAdminLoggedIn, couponController.editCoupon);
+router.patch("/coupon/toggle/:id",auth.isAdminLoggedIn , couponController.toggleCouponStatus);
+
 
 router.get("/logout", adminController.logout);
 

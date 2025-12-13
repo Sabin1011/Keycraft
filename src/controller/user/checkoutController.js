@@ -3,6 +3,7 @@ const Cart = require("../../models/cartModel");
 const User = require("../../models/userSchema");
 const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
+const Coupon = require("../../models/couponSchema")
 
 const loadCheckout = async (req, res) => {
   try {
@@ -66,7 +67,8 @@ const loadCheckout = async (req, res) => {
         selectedVariant: variant,
         isAvailable,
         stockMessage,
-        itemTotal        
+        itemTotal,
+        cartTotal     
       };
     });
 
@@ -99,8 +101,11 @@ const loadCheckout = async (req, res) => {
 
 const placeOrder = async (req, res) => {
   try {
+
+    
     const userId = req.session.userId;
-    const { addressId, paymentMethod } = req.body;
+    const { addressId, paymentMethod, couponCode } = req.body;
+    console.log("coupon code:    ", couponCode)
 
     if (!addressId) {
       return res.redirect("/checkout?error=Please select an address");
@@ -138,10 +143,56 @@ const placeOrder = async (req, res) => {
       };
     });
 
+    let discountAmount = 0;
+let finalAmount = total;
+let appliedCouponId = null;
+
+
+    if (couponCode && couponCode.trim() !== "") {
+      const coupon = await Coupon.findOne({
+        code: couponCode.toUpperCase(),
+        isDeleted: false,
+      });
+
+      if (!coupon) {
+        return res.redirect("/checkout?error=Invalid coupon");
+      }
+
+      if (new Date(coupon.expiryDate) < new Date()) {
+        return res.redirect("/checkout?error=Coupon expired");
+      }
+
+      if (coupon.minPurchaseAmount && total < coupon.minPurchaseAmount) {
+        return res.redirect(
+          `/checkout?error=Minimum purchase required ₹${coupon.minPurchaseAmount}`
+        );
+      }
+
+      if (coupon.discountType === "percentage") {
+        discountAmount = (total * coupon.discountValue) / 100;
+
+        if (coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount) {
+          discountAmount = coupon.maxDiscountAmount;
+        }
+      } else {
+    
+        discountAmount = coupon.discountValue;
+      }
+
+      finalAmount = total - discountAmount;
+      appliedCouponId = coupon._id;
+
+      coupon.usedCount = (coupon.usedCount || 0) + 1;
+      await coupon.save();
+    }
+
     const newOrder = new Order({
       userId,
       items,
       totalAmount: total,
+      discountAmount,
+      finalAmount,
+      couponId: appliedCouponId,
       address: selectedAddress,
       status: "Confirmed",
       paymentMethod: req.body.paymentMethod,
