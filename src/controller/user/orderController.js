@@ -19,7 +19,10 @@ const loadMyOrders = async (req, res) => {
     }
 
   
-    const orders = await Order.find(query).sort({createdAt: -1  });
+    const orders = await Order.find({ userId })
+    .populate("couponId")
+    .sort({ createdAt: -1 });
+
 
     res.render("myOrders", {
       orders,
@@ -249,15 +252,13 @@ const cancelOrderItem = async (req, res) => {
     const { orderId, itemId } = req.params;
     const { redirectTo } = req.body;
 
-    const order = await Order.findOne({ orderId });
+    const order = await Order.findOne({ orderId }).populate("couponId");
 
     if (!order) return res.redirect(redirectTo);
 
-    // Find the item within order.items array
     const item = order.items.id(itemId);
     if (!item) return res.redirect(redirectTo);
 
-    // Restore stock
     const product = await Product.findById(item.product);
     if (product) {
       if (item.variantId) {
@@ -268,19 +269,52 @@ const cancelOrderItem = async (req, res) => {
       await product.save();
     }
 
-    // Remove ONLY this item
     order.items.pull(itemId);
-
-    // If no items left → cancel entire order
+    await order.save()
+    
     if (order.items.length === 0) {
       order.status = "Cancelled";
+       order.totalAmount = 0;
+      order.discountAmount = 0;
+      order.finalAmount = 0;
+      order.couponId = null;
+      await order.save();
+      return res.redirect(redirectTo);
     }
 
-    // Recalculate total
-    order.totalAmount = order.items.reduce(
+    const newTotal = order.items.reduce(
       (sum, i) => sum + i.price * i.quantity,
       0
     );
+
+    order.totalAmount = newTotal;
+
+    if(order.couponId) {
+      const coupon = order.couponId;
+
+      let discount = 0;
+
+      if(newTotal < coupon.minPurchaseAmount) {
+        order.couponId = null;
+        order.discountAmount =0;
+        order.finalAmount = newTotal;
+      } else {
+          if (coupon.discountType === "percentage") {
+    discount = (newTotal * coupon.discountValue) / 100;
+
+    if (coupon.maxDiscountAmount && discount > coupon.maxDiscountAmount) {
+        discount = coupon.maxDiscountAmount;
+    }
+} else{
+            discount = coupon.discountValue;
+          }
+          order.discountAmount = discount;
+        order.finalAmount = newTotal - discount;
+      }
+    }else{
+      order.discountAmount = 0;
+      order.finalAmount = newTotal;
+    }
 
     await order.save();
 
@@ -297,17 +331,15 @@ const returnOrderItem = async (req, res) => {
     const { orderId, itemId } = req.params;
     const { redirectTo } = req.body;
 
-    const order = await Order.findOne({ orderId });
+    const order = await Order.findOne({ orderId }).populate("couponId");
 
     if (!order) return res.redirect(redirectTo);
 
     const item = order.items.id(itemId);
     if (!item) return res.redirect(redirectTo);
 
-    // Mark item as return requested
     item.status = "Return Requested";
 
-    // If all items returned → update entire order
     const allReturned = order.items.every(i => i.status === "Return Requested");
     if (allReturned) order.status = "Return Requested";
 
@@ -321,6 +353,47 @@ const returnOrderItem = async (req, res) => {
   }
 };
 
+const cancelPreview = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.params;
+
+    const order = await Order.findOne({ orderId }).populate("couponId");
+    if (!order) return res.json({ success: false });
+
+    const item = order.items.id(itemId);
+    if (!item) return res.json({ success: false });
+
+    const newTotal = order.items.reduce((sum, i) => {
+      if (i._id.toString() === itemId) return sum; 
+      return sum + i.price * i.quantity;
+    }, 0);
+
+    if (!order.couponId) {
+      return res.json({
+        success: true,
+        couponWillBreak: false,
+        newTotal
+      });
+    }
+
+    const coupon = order.couponId;
+    const minRequired = coupon.minPurchaseAmount || 0;
+
+    const couponWillBreak = newTotal < minRequired;
+
+    return res.json({
+      success: true,
+      couponWillBreak,
+      newTotal,
+      minRequired
+    });
+
+  } catch (err) {
+    console.log("Preview error:", err);
+    res.json({ success: false });
+  }
+};
+
 module.exports = {
   loadMyOrders,
   loadOrderDetails,
@@ -329,6 +402,7 @@ module.exports = {
   viewInvoice,
   downloadInvoice,
   returnOrderItem,
-  cancelOrderItem 
+  cancelOrderItem,
+  cancelPreview
   
 };

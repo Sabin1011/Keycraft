@@ -1,0 +1,140 @@
+<%- include('../partials/admin/header') %>
+
+<div class="container mt-5">
+  <h3 class="mb-4">Add Coupon</h3>
+
+  <div class="card p-4 shadow-sm">
+    <form id="addCouponForm">
+      <div class="mb-3">
+        <label class="form-label">Coupon Code</label>
+        <input type="text" class="form-control" name="code" id="code" />
+        <small class="text-danger" id="err-code"></small>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Discount Type</label>
+        <select class="form-control" name="discountType" id="discountType">
+          <option value="percentage">Percentage</option>
+          <option value="flat">Flat</option>
+        </select>
+        <small class="text-danger" id="err-discountType"></small>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Discount Value</label>
+        <input
+          type="number"
+          class="form-control"
+          name="discountValue"
+          id="discountValue"
+        />
+        <small class="text-danger" id="err-discountValue"></small>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Max Discount Amount (Optional)</label>
+        <input
+          type="number"
+          class="form-control"
+          name="maxDiscountAmount"
+          id="maxDiscountAmount"
+        />
+        <small class="text-danger" id="err-maxDiscountAmount"></small>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Minimum Purchase Amount</label>
+        <input
+          type="number"
+          class="form-control"
+          name="minPurchaseAmount"
+          id="minPurchaseAmount"
+        />
+        <small class="text-danger" id="err-minPurchaseAmount"></small>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Expiry Date</label>
+        <input
+          type="date"
+          class="form-control"
+          name="expiryDate"
+          id="expiryDate"
+        />
+        <small class="text-danger" id="err-expiryDate"></small>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Description (Optional)</label>
+        <textarea
+          class="form-control"
+          id="description"
+          name="description"
+        ></textarea>
+        <small class="text-danger" id="err-description"></small>
+      </div>
+
+      <button type="submit" class="btn btn-dark w-100">Add Coupon</button>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document
+    .getElementById("addCouponForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      document
+        .querySelectorAll("small.text-danger")
+        .forEach((el) => (el.innerText = ""));
+      const formData = {
+        code: code.value,
+        discountType: discountType.value,
+        discountValue: discountValue.value,
+        maxDiscountAmount: maxDiscountAmount.value || null,
+        minPurchaseAmount: minPurchaseAmount.value || null,
+        expiryDate: expiryDate.value,
+        description: description.value || null,
+      };
+
+      const response = await fetch("/admin/coupon/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Coupon Added!",
+          text: data.message,
+        }).then(() => {
+          window.location.href = "/admin/couponManage";
+        });
+      } else {
+        if (data.errors) {
+          for (let field in data.errors) {
+            const errorField = document.getElementById(`err-${field}`);
+            if (errorField) {
+              errorField.innerText = data.errors[field];
+            }
+          }
+        }
+
+        if (data.errors && data.errors.general) {
+          Swal.fire({
+            icon: "error",
+            title: "Failed",
+            text: data.message,
+          });
+        }
+      }
+    });
+</script>
+
+<%- include('../partials/admin/footer') %>

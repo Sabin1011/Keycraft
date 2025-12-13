@@ -424,10 +424,43 @@
               <span>Shipping</span>
               <span>Free</span>
             </div>
-            <div class="summary-row">
+            <div id="discountRow"></div>
+
+            <div class="summary-row" id="finalTotalRow">
               <span>Total</span>
               <span>₹<%= cartTotal.toFixed(2) %></span>
             </div>
+          </div>
+
+          <div class="checkout-card" style="margin-top: 20px;">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fa fa-tag"></i> apply coupon
+              </h2>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <input 
+                type="text" 
+                id="couponInput" 
+                name="couponCode"
+                placeholder="Enter coupon code"
+                class="form-control"
+                style="flex: 1; text-transform: uppercase;"
+              />
+
+              <button 
+                type="button" 
+                id="applyCouponBtn"
+                class="btn btn-primary"
+                style="white-space: nowrap;"
+              >
+                Apply
+              </button>
+            </div>
+
+            <small id="couponMessage" style="color: red; display: block; margin-top: 8px;"></small>
+            <!-- <input type="hidden" name="couponCode" id="hiddenCouponCode" /> -->
           </div>
 
             <div class="checkout-card" style="margin-top: 20px;">
@@ -440,6 +473,7 @@
           <form id="checkoutForm" action="/proceedToCheckout" method="POST">
 
             <input type="hidden" name="addressId" value="<%= selectedAddressId %>">
+            <input type="hidden" name="couponCode" id="hiddenCouponCode">
 
             <label class="address-item" style="cursor: pointer;">
               
@@ -460,8 +494,6 @@
             </button>
           </form>
 
-
-
           <% if (!selectedAddressId && addresses.length > 0) { %>
             <p style="text-align: center; color: #999; font-size: 12px; margin-top: 10px;">
               Please select a delivery address
@@ -477,7 +509,7 @@
 
 
   document.getElementById("checkoutForm").addEventListener("submit", function(e){
-    const paymentSelected = document.querySelector('input[name = "paymentMethod"]: checked');
+    const paymentSelected = document.querySelector('input[name="paymentMethod"]:checked');
 
     if(!paymentSelected){
       e.preventDefault();
@@ -529,6 +561,50 @@
     });
   });
 
+  document.getElementById("applyCouponBtn").addEventListener("click", async () => {
+    const code = document.getElementById("couponInput").value.trim().toUpperCase();
+    const msg = document.getElementById("couponMessage");
+
+    if (!code) {
+      msg.style.color = "red";
+      msg.innerText = "Please enter a coupon code.";
+      return;
+    }
+
+    const response = await fetch("/coupon/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ couponCode: code, cartTotal: Number("<%= cartTotal %>") })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      msg.style.color = "red";
+      msg.innerText = data.message;
+      document.getElementById("hiddenCouponCode").value = "";
+      return;
+    }
+
+    msg.style.color = "green";
+    msg.innerText = `Coupon applied! You saved ₹${data.discountAmount}`;
+
+    document.getElementById("hiddenCouponCode").value = code;
+
+    document.getElementById("discountRow").innerHTML = `
+      <div class="summary-row">
+        <span>Discount (${code})</span>
+        <span style="color: green;">-₹${data.discountAmount}</span>
+      </div>
+    `;
+
+    document.getElementById("finalTotalRow").innerHTML = `
+        <span>Total</span>  
+        <span>₹${data.finalAmount}</span>
+
+    `;
+
+  });
 </script>
 
 <%- include('../partials/user/footer') %>

@@ -153,12 +153,16 @@
 
         <% if(!disabledForStatuses.includes(order.status.toLowerCase())) { %>
 <form
+  id="cancelForm_<%= item._id %>"
   action="/order/<%= order.orderId %>/cancel-item/<%= item._id %>"
   method="POST"
+  onsubmit="return handleCancel(event, '<%= order.orderId %>', '<%= item._id %>')"
 >
   <input type="hidden" name="redirectTo" value="<%= currentUrl %>">
+  <input type="hidden" id="reason_<%= order.orderId %>" name="reason">
   <button class="btn btn-cancel">Cancel Item</button>
 </form>
+
 
           
         <% } %> 
@@ -183,15 +187,19 @@
 
   <div class="section-box">
     <div class="info-row">
-      <span>Subtotal:</span> <span>₹<%= order.subtotal %></span>
+      <span>Subtotal:</span>
+      <span>₹<%= order.totalAmount.toFixed(2) %></span>
     </div>
+
     <div class="info-row">
-      <span>Shipping Fee:</span> <span>₹<%= order.shippingFee %></span>
+      <span>Shipping Fee:</span>
+      <span>₹0</span>
     </div>
-    <div class="info-row"><span>Tax:</span> <span>₹<%= order.tax %></span></div>
-    <% if(order.discount) { %>
+
+    <% if (order.discountAmount > 0) { %>
     <div class="info-row">
-      <span>Discount:</span> <span>-₹<%= order.discount %></span>
+      <span>Discount:</span>
+      <span style="color:green;">-₹<%= order.discountAmount.toFixed(2) %></span>
     </div>
     <% } %>
 
@@ -199,8 +207,9 @@
 
     <div class="info-row" style="font-size: 18px; font-weight: 700">
       <span>Total Paid:</span>
-      <span>₹<%= order.totalAmount %></span>
+      <span>₹<%= order.finalAmount.toFixed(2) %></span>
     </div>
+
   </div>
 
   <h3>Shipping Address</h3>
@@ -260,33 +269,52 @@ function handleReturn(event, orderId) {
     });
 }
 
-  function handleCancel(event, orderId) {
-    event.preventDefault(); 
+async function handleCancel(event, orderId, itemId) {
+  event.preventDefault(); 
 
-    Swal.fire({
-      title: "Cancel Order?",
-      text: "Please enter a reason for cancellation",
-      input: "text",
-      inputPlaceholder: "Reason is required",
-      showCancelButton: true,
-      confirmButtonText: "Confirm Cancel",
-      cancelButtonText: "Close",
-      inputValidator: (value) => {
-        if (!value) {
-          return "Reason is required!";
-        }
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
+  const reasonPopup = await Swal.fire({
+    title: "Cancel Item?",
+    text: "Please provide a reason",
+    input: "text",
+    inputPlaceholder: "Reason is required",
+    showCancelButton: true,
+    confirmButtonText: "Next",
+    cancelButtonText: "Close",
+    inputValidator: (value) => !value && "Reason is required!"
+  });
 
-        document.getElementById("reason_" + orderId).value = result.value;
+  if (!reasonPopup.isConfirmed) return;
 
-        document.getElementById("cancelForm_" + orderId).submit();
-      }
-    });
+  document.getElementById("reason_" + orderId).value = reasonPopup.value;
 
-    return false; 
+  const preview = await fetch(`/order/${orderId}/cancel-preview/${itemId}`);
+  const data = await preview.json();
+
+  if (!data.couponWillBreak) {
+    document.getElementById("cancelForm_" + itemId).submit();
+    return false;
   }
+
+  const confirmLoss = await Swal.fire({
+    title: "Coupon Will Be Removed!",
+    html: `
+      Cancelling this item reduces the total below minimum purchase.<br><br>
+      <strong>New Total: ₹${data.newTotal}</strong>
+      <p style="color:red; margin-top:10px;">Coupon will no longer apply.</p>
+    `,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Proceed",
+    cancelButtonText: "Keep Item"
+  });
+
+  if (confirmLoss.isConfirmed) {
+    document.getElementById("cancelForm_" + itemId).submit();
+  }
+
+  return false;
+}
+
 </script>
 
 <%- include('../partials/user/footer') %>
