@@ -1,6 +1,7 @@
 const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
-const Product = require("../../models/productSchema")
+const Product = require("../../models/productSchema");
+const Wallet = require("../../models/walletSchema")
 
 const loadOrders = async (req, res) => {
   try {
@@ -110,6 +111,34 @@ const acceptReturn = async (req, res) => {
       { status: "Returned" },
       { new: true }
     );
+
+    const wallet = await Wallet.findOne({userId: order.userId});
+
+    const alreadyCredited = wallet?.transaction?.some(
+      tx => 
+        tx.orderId?.toString() === order._id.toString() &&
+        tx.reason === "Refund for returned order"
+    );
+
+    if(!alreadyCredited){
+      const refundAmount = order.finalAmount;
+
+      await Wallet.findOneAndUpdate(
+        { userId: order.userId },
+        {
+          $inc: { balance: refundAmount },
+          $push: {
+            transactions: {
+              amount: refundAmount,
+              type: "credit",
+              reason: "Refund for returned order",
+              orderId: order._id
+            }
+          }
+        },
+        { upsert: true }
+      );
+    }
     return res.redirect("/admin/orders/"); 
   } catch (error) {
     console.log("Accept return error:", error);
