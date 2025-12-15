@@ -179,7 +179,7 @@
         <div class="order-total">
         <%
           const paidAmount = order.finalAmount ??
-                            (order.totalAmount - (order.discountAmount || 0));
+          (order.totalAmount - (order.discountAmount || 0));
         %>
 
         Total Paid: ₹<%= paidAmount.toFixed(2) %>

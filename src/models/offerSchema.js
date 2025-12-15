@@ -22,7 +22,7 @@ const offerSchema = new mongoose.Schema(
     productIds: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: "product",
         default: [],
       },
     ],
@@ -30,7 +30,7 @@ const offerSchema = new mongoose.Schema(
     categoryIds: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",
+        ref: "categories",
         default: [],
       },
     ],

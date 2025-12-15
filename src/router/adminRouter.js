@@ -6,6 +6,7 @@ const userManageController = require("../controller/admin/userManageController")
 const productController = require("../controller/admin/productController");
 const adminOrderController = require("../controller/admin/adminOrderController");
 const couponController = require("../controller/admin/couponController");
+const OfferController = require("../controller/admin/offerController")
 const {upload} = require("../middleware/multer");
 const cloudinary = require("../config/cloudinary")
 
@@ -96,6 +97,16 @@ router.post("/coupon/add", auth.isAdminLoggedIn,couponController.addCoupon);
 router.get("/coupon/edit/:id",auth.isAdminLoggedIn ,couponController.loadEditCoupon);
 router.patch("/coupon/edit", auth.isAdminLoggedIn, couponController.editCoupon);
 router.patch("/coupon/toggle/:id",auth.isAdminLoggedIn , couponController.toggleCouponStatus);
+
+router.get("/offerManage",auth.isAdminLoggedIn, OfferController.loadOfferManage);
+router.get("/offer/add",auth.isAdminLoggedIn, OfferController.loadAddOfferPage)
+router.post("/offer/add",auth.isAdminLoggedIn, OfferController.addOffer);
+router.get("/offer/edit/:id", auth.isAdminLoggedIn, OfferController.loadEditOffer);
+router.post("/offer/edit", OfferController.updateOffer);
+
+
+// router.post("/offer/edit",auth.isAdminLoggedIn, OfferController.editOffer);
+// router.patch("/offer/toggle/:id",auth.isAdminLoggedIn, OfferController.toggleOffer);
 
 
 router.get("/logout", adminController.logout);

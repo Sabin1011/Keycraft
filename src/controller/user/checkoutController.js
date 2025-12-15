@@ -3,7 +3,8 @@ const Cart = require("../../models/cartModel");
 const User = require("../../models/userSchema");
 const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
-const Coupon = require("../../models/couponSchema")
+const Coupon = require("../../models/couponSchema");
+const Offer = require("../../models/offerSchema")
 
 const loadCheckout = async (req, res) => {
   try {
@@ -14,7 +15,10 @@ const loadCheckout = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.redirect("/login");
 
-    const cart = await Cart.findOne({ userId }).populate("items.product");
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.product",
+      populate: { path: "category" }
+    });
 
     if (!cart || cart.items.length === 0) {
       req.session.errorMessage = "Your cart is empty";
@@ -25,52 +29,47 @@ const loadCheckout = async (req, res) => {
     let hasStockIssue = false;
 
     const cartItems = cart.items.map(item => {
+    const product = item.product;
+    const variant = item.variantId ? product.variants.id(item.variantId) : null;
 
-      const product = item.product;
-      const variant = item.variantId ? product.variants.id(item.variantId) : null;
+    const discountedPrice =typeof item.discountedPrice === "number"
+      ? item.discountedPrice
+      : product.price;
 
-      let isAvailable = true; 
-      let stockMessage = "";
+    const originalPrice =
+      typeof item.originalPrice === "number"? item.originalPrice : product.price;
 
-      if (!product || product.status === false) {
-        isAvailable = false;
-        stockMessage = "Product unavailable";
-        hasStockIssue = true;
-      }
+    const itemTotal = discountedPrice * item.quantity;
 
-      if (product.category?.status === false) {
-        isAvailable = false;
-        stockMessage = "Category blocked";
-        hasStockIssue = true;
-      }
+  return {
+    product,
+    quantity: item.quantity,
+    selectedVariant: variant,
 
-      if (variant) {
-        if (variant.quantity <= 0) {
-          isAvailable = false;
-          stockMessage = "Out of stock";
-          hasStockIssue = true;
-        } else if (item.quantity > variant.quantity) {
-          isAvailable = false;
-          stockMessage = `Only ${variant.quantity} left in stock`;
-          hasStockIssue = true;
-        }
-      }
+    originalPrice,
+    discountedPrice,
+    itemTotal,
 
-      const itemTotal = isAvailable ? product.price * item.quantity : 0;
-      cartTotal += itemTotal;
+    offerDetails: item.offerDetails || null,
+  };
 
+});
 
-      return {
-        product,
-        quantity: item.quantity,
-        variantId: item.variantId,
-        selectedVariant: variant,
-        isAvailable,
-        stockMessage,
-        itemTotal,
-        cartTotal     
-      };
-    });
+const originalSubtotal = cartItems.reduce(
+  (sum, item) => sum + item.originalPrice * item.quantity,
+  0
+);
+
+const itemOfferDiscount = cartItems.reduce(
+  (sum, item) =>
+    sum + (item.originalPrice - item.discountedPrice) * item.quantity,
+  0
+);
+
+const cartOfferDiscount = cart.cartDiscount || 0;
+
+const totalOfferDiscount = itemOfferDiscount + cartOfferDiscount;
+
 
     const defaultAddress =
       user.addresses?.find(a => a.isDefault) || null;
@@ -79,16 +78,89 @@ const loadCheckout = async (req, res) => {
       req.session.selectedAddressId ||
       (defaultAddress ? defaultAddress._id.toString() : null);
 
+
+      // ALWAYS re-check cart offers at checkout
+const offers = await Offer.find({
+  isActive: true,
+  startDate: { $lte: new Date() },
+  expiryDate: { $gte: new Date() }
+});
+
+const cartOffers = offers.filter(o => o.offerType === "cart");
+
+let cartDiscount = 0;
+let cartBestOffer = null;
+
+cartOffers.forEach(offer => {
+  if (cart.totalPrice >= offer.minPurchaseAmount) {
+    let calculated = 0;
+
+    if (offer.discountType === "percentage") {
+      calculated = (cart.totalPrice * offer.discountValue) / 100;
+      if (offer.maxDiscountAmount && calculated > offer.maxDiscountAmount) {
+        calculated = offer.maxDiscountAmount;
+      }
+    } else {
+      calculated = offer.discountValue;
+    }
+
+    if (calculated > cartDiscount) {
+      cartDiscount = calculated;
+      cartBestOffer = offer;
+    }
+  }
+});
+
+cart.cartDiscount = cartDiscount;
+cart.cartOffer = cartBestOffer;
+cart.grandTotal = Math.max(cart.totalPrice - cartDiscount, 0);
+
+await cart.save();
+
+  const appliedOffers = [];
+
+cartItems.forEach(item => {
+  if (item.offerDetails) {
+    appliedOffers.push({
+      level: "item",
+      title: item.offerDetails.title,
+      type: item.offerDetails.discountType,
+      value: item.offerDetails.discountValue,
+      productName: item.product.name,
+      amount: (item.originalPrice - item.discountedPrice) * item.quantity
+    });
+  }
+});
+
+if (cart.cartOffer && cart.cartDiscount > 0) {
+  appliedOffers.push({
+    level: "cart",
+    title: cart.cartOffer.title,
+    type: cart.cartOffer.discountType,
+    value: cart.cartOffer.discountValue,
+    amount: cart.cartDiscount
+  });
+}
     return res.render("checkout", {
       user,
       cartItems,
-      cartTotal,
+
+        originalSubtotal,
+  itemOfferDiscount,
+  cartOfferDiscount,
+  totalOfferDiscount,
+
+      cartSubtotal: cart.totalPrice,
+      cartDiscount: cart.cartDiscount || 0,
+      cartOffer: cart.cartOffer || null,
+      grandTotal: cart.grandTotal || cart.totalPrice,
+       appliedOffers,
+
       hasStockIssue,
       addresses: user.addresses || [],
       selectedAddressId,
       error: req.session.errorMessage,
       success: req.session.successMessage,
-
     });
 
   } catch (error) {
