@@ -106,8 +106,8 @@ const loadEditOffer = async (req, res) => {
       return res.redirect("/admin/offerManage");
     }
 
-    const allProducts = await Product.find({ isDeleted: false });
-    const allCategories = await Category.find({ isDeleted: false });
+    const allProducts = await Product.find();
+    const allCategories = await Category.find();
 
     res.render("editOffer", {
       offer,
@@ -127,6 +127,7 @@ const loadEditOffer = async (req, res) => {
     res.redirect("/offerManage");
   }
 };
+
 const updateOffer = async (req, res) => {
   try {
     const {
@@ -184,10 +185,36 @@ const updateOffer = async (req, res) => {
   }
 };
 
+const toggleOfferStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const offer = await Offer.findById(id);
+    if (!offer) {
+      return res.status(404).json({ success: false, message: "Offer not found" });
+    }
+
+    // 🔁 Toggle isActive
+    offer.isActive = !offer.isActive;
+    await offer.save();
+
+    return res.json({
+      success: true,
+      isActive: offer.isActive
+    });
+
+  } catch (error) {
+    console.error("Toggle Offer Error:", error);
+    return res.status(500).json({ success: false });
+  }
+};
+
+
 module.exports = {
     loadOfferManage,
     loadAddOfferPage,
     addOffer,
     loadEditOffer,
     updateOffer,
+    toggleOfferStatus
 }

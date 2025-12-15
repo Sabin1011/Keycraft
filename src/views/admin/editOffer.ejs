@@ -106,21 +106,14 @@
             <!-- PRODUCT SELECT -->
             
             <h5>Select Products</h5>
-
 <div id="productSelect" class="mb-3 select-box <%= offer.offerType !== 'product' ? 'd-none' : '' %>">
   <label>Select Products</label>
 
-  <select class="styled-multiselect" name="productIds[]" multiple>
-    <%
-      const selectedProducts = Array.isArray(offer.productIds)
-        ? offer.productIds.map(id => id.toString())
-        : [];
-    %>
-
+  <select class="styled-multiselect" name="productIds" multiple>
     <% allProducts.forEach(p => { %>
       <option
         value="<%= p._id %>"
-        <%= selectedProducts.includes(p._id.toString()) ? 'selected' : '' %>
+        <%= selectedProducts.includes(p._id.toString()) ? "selected" : "" %>
       >
         <%= p.name %>
       </option>
@@ -132,25 +125,16 @@
 </div>
 
 
-
-            </div>
-
   
 
             <div id="categorySelect" class="mb-3 select-box <%= offer.offerType !== 'category' ? 'd-none' : '' %>">
   <label>Select Categories</label>
 
-  <select class="styled-multiselect" name="categoryIds[]" multiple>
-    <%
-      const selectedCategories = Array.isArray(offer.categoryIds)
-        ? offer.categoryIds.map(id => id.toString())
-        : [];
-    %>
-
+  <select class="styled-multiselect" name="categoryIds" multiple>
     <% allCategories.forEach(c => { %>
       <option
         value="<%= c._id %>"
-        <%= selectedCategories.includes(c._id.toString()) ? 'selected' : '' %>
+        <%= selectedCategories.includes(c._id.toString()) ? "selected" : "" %>
       >
         <%= c.name %>
       </option>
@@ -160,7 +144,6 @@
   <small class="text-muted">Hold CTRL (Windows) or CMD (Mac) to select multiple</small>
   <div id="categoryPreview" class="selected-preview"></div>
 </div>
-
 
             <!-- CART MIN PURCHASE -->
             <div id="minPurchaseWrapper" class="mb-3 <%= offer.offerType !== "cart" ? "d-none" : "" %>">
@@ -231,7 +214,6 @@
   </div>
 
 <%- include('../partials/admin/footer') %>
-
 <script>
   const offerType = document.getElementById("offerType");
   const productSelect = document.getElementById("productSelect");
@@ -251,12 +233,15 @@
     if (!select || !preview) return;
 
     const selected = [...select.selectedOptions].map(opt => opt.text);
-    preview.innerHTML = selected.map(s => `<span class="preview-badge">${s}</span>`).join("");
+    preview.innerHTML = selected.map(
+      s => `<span class="preview-badge">${s}</span>`
+    ).join("");
+
     preview.classList.toggle("d-none", selected.length === 0);
   }
 
-  updatePreview("productIds[]", "productPreview");
-  updatePreview("categoryIds[]", "categoryPreview");
+  updatePreview("productIds", "productPreview");
+  updatePreview("categoryIds", "categoryPreview");
 </script>
 
 </body>
