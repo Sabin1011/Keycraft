@@ -8,7 +8,8 @@ const wishlistController = require('../controller/user/wishlistController');
 const cartController = require('../controller/user/cartController');
 const orderController = require('../controller/user/orderController')
 const checkoutController = require('../controller/user/checkoutController');
-const couponController = require("../controller/admin/couponController.js")
+const couponController = require("../controller/admin/couponController.js");
+const walletController = require("../controller/user/walletController.js") 
 const auth = require("../middleware/auth");
 const multer = require('multer');
 const { profileUpload } = require("../middleware/multer");
@@ -98,6 +99,8 @@ router.get("/logout", userController.userLogout);
 router.post("/coupon/validate", auth.isLoggedIn,couponController.validateCoupon);
 
 router.get("/order/:orderId/cancel-preview/:itemId",auth.isLoggedIn ,orderController.cancelPreview);
+
+router.get("/wallet", auth.isLoggedIn, walletController.loadWalletPage);
 
 // router.get('/header-partial', userController.loadHeaderPartial);
 

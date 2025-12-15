@@ -115,6 +115,7 @@ const returnOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { reason,redirectTo } = req.body;
+    const userId = req.session.userId;
 
     console.log("Return request received for:", orderId);
     console.log("Reason:", reason);
