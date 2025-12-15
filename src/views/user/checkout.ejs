@@ -396,7 +396,7 @@
                       <%= item.product.name %>
                     </div>
                     <div style="color: #666; font-size: 13px;">
-                      Qty: <%= item.quantity %> × ₹<%= item.product.price.toFixed(2) %>
+                      Qty: <%= item.quantity %> × ₹<%= item.discountedPrice.toFixed(2) %>
                                         <div>
                     <% if (item.selectedVariant) { %>
                         Variant: <strong><%= item.selectedVariant.name %></strong>
@@ -416,20 +416,41 @@
           <% } %>
 
           <div class="order-summary">
-            <div class="summary-row">
-              <span>Subtotal (<%= cartItems.length %> items)</span>
-              <span>₹<%= cartTotal.toFixed(2) %></span>
-            </div>
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>₹<%= cartSubtotal.toFixed(2) %></span>
+          </div>
+
+            <% if (appliedOffers && appliedOffers.length > 0) { %>
+              <div class="order-summary" style="margin-top: 15px;">
+                <h4 style="font-size:14px; margin-bottom:10px;">Applied Offers</h4>
+
+                <% appliedOffers.forEach(offer => { %>
+                  <div class="summary-row" style="color:#27ae60;">
+                    <span>
+                      <% if (offer.level === "item") { %>
+                        🎁 <%= offer.title %> — <%= offer.productName %>
+                      <% } else { %>
+                        🛒 <%= offer.title %> (Cart Offer)
+                      <% } %>
+                    </span>
+
+                    <span>-₹<%= offer.amount.toFixed(2) %></span>
+                  </div>
+                <% }) %>
+              </div>
+            <% } %>
+
             <div class="summary-row">
               <span>Shipping</span>
               <span>Free</span>
             </div>
             <div id="discountRow"></div>
 
-            <div class="summary-row" id="finalTotalRow">
-              <span>Total</span>
-              <span>₹<%= cartTotal.toFixed(2) %></span>
-            </div>
+          <div class="summary-row">
+            <span>Total</span>
+            <span>₹<%= grandTotal.toFixed(2) %></span>
+          </div>
           </div>
 
           <div class="checkout-card" style="margin-top: 20px;">
@@ -574,7 +595,7 @@
     const response = await fetch("/coupon/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ couponCode: code, cartTotal: Number("<%= cartTotal %>") })
+      body: JSON.stringify({ couponCode: code, cartTotal: Number("<%= cartSubtotal %>") })
     });
 
     const data = await response.json();

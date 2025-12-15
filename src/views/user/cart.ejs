@@ -406,12 +406,30 @@
             </div>
             <% } %>
 
-            <div
-              class="item-price"
-              id="price-<%= item.product._id %>-<%= item.variantId %>"
-            >
-              ₹<%= item.product.price.toFixed(2) %> × <%= item.quantity %>
-            </div>
+<div class="item-price">
+  <% if (item.offerDetails) { %>
+    <span style="text-decoration: line-through; color:#999;">
+      ₹<%= item.originalPrice.toFixed(2) %>
+    </span>
+    <strong>
+      ₹<%= item.discountedPrice.toFixed(2) %>
+    </strong>
+
+    <% if (item.offerDetails.discountType === 'percentage') { %>
+      <span style="color:green;font-size:12px;">
+        (<%= item.discountPercentage %>% OFF)
+      </span>
+    <% } else { %>
+      <span style="color:green;font-size:12px;">
+        (₹<%= item.discountAmount.toFixed(0) %> OFF)
+      </span>
+    <% } %>
+  <% } else { %>
+    ₹<%= item.originalPrice.toFixed(2) %>
+  <% } %>
+  × <%= item.quantity %>
+</div>
+
           </div>
 
           <div class="item-actions">
@@ -655,6 +673,6 @@
       });
     });
   });
-</script>
+</script> 
 
 <%- include('../partials/user/footer') %>
