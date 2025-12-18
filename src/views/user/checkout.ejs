@@ -535,6 +535,17 @@
               </div>
             </label>
 
+
+            <label class="address-item" style="cursor: pointer; margin-top: 10px;">
+              <div class="address-radio">
+                <input type="radio" name="paymentMethod" value="razorpay">
+                <div class="address-content">
+                  <div class="address-type">Online Payment</div>
+                  <div class="address-text">Pay securely using Razorpay</div>
+                </div>
+              </div>
+            </label>
+
             <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
               <i class="fa fa-lock"></i> Proceed to Payment
             </button>
@@ -551,15 +562,21 @@
   </div>
 </section>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
 
 
   document.getElementById("checkoutForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
     const paymentSelected = document.querySelector('input[name="paymentMethod"]:checked');
+    const addressId =  document.querySelector('input[name="addressId"]').value;
+    const couponCode = document.getElementById("hiddenCouponCode").value;
+
 
     if(!paymentSelected){
-      e.preventDefault();
-
+  
       swal.fire({
         icon:"error",
         title:"Selected Payment Method",
@@ -567,7 +584,18 @@
       });
       return false;
     }
+
+    if(paymentSelected.value === "cod"){
+      this.submit();
+      return;
+    }
+
+    if(paymentSelected.value === "razorpay"){
+      startRazorpayPayment(addressId, couponCode);
+    }
   })
+
+
 
   const addressRadios = document.querySelectorAll('input[name="selectedAddress"]');
   const mainAddressInput = document.querySelector('input[name="addressId"]');
@@ -651,6 +679,79 @@
     <span>₹${data.finalAmount.toFixed(2)}</span>
   `;
 });
+
+async function startRazorpayPayment(addressId, couponCode) {
+  try {
+    const res = await fetch("/place-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        addressId,
+        paymentMethod: "razorpay",
+        couponCode
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      Swal.fire("Error", "Unable to initiate payment", "error");
+      return;
+    }
+
+    openRazorpay(data);
+
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error", "Something went wrong", "error");
+  }
+}
+
+
+function openRazorpay(data) {
+  const options = {
+    key: data.key,
+    amount: data.amount,
+    currency: "INR",
+    name: "Your Store",
+    description: "Order Payment",
+    order_id: data.razorpayOrderId,
+
+    handler: function (response) {
+      verifyPayment(response);
+    },
+
+    theme: {
+      color: "#401f75"
+    }
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.open();
+}
+
+async function verifyPayment(response) {
+  try {
+    const res = await fetch("/verify-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(response),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      window.location.href = `/order-success?orderId=${data.orderId}`;
+    } else {
+      Swal.fire("Payment Failed", "Verification failed", "error");
+    }
+
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error", "Payment verification error", "error");
+  }
+}
+
 </script>
 
 <%- include('../partials/user/footer') %>
