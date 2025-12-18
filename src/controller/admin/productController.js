@@ -24,12 +24,14 @@ const loadAdminProduct = async (req, res) => {
 
     const totalProducts = await Product.countDocuments(searchQuery);
 
+
     const products = await Product.find(searchQuery)
       .populate("category", "name")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
+    const price = products.price;
     const allCategories = await Category.find({});
 
     res.render("adminProduct", {
@@ -39,6 +41,7 @@ const loadAdminProduct = async (req, res) => {
       currentPage: page,
       totalProducts,
       limit,
+      price,
       search,
       success: req.session.success,
       error: req.session.error,
@@ -51,8 +54,6 @@ const loadAdminProduct = async (req, res) => {
     res.status(500).send("Error loading products page.");
   }
 };
-
-// LOAD ADD PRODUCT PAGE
 
 const loadAddProduct = async (req, res) => {
   try {

@@ -40,6 +40,10 @@ const orderSchema = new Schema({
     type: Number,
     required: true
   },
+  offerDiscount: {
+  type: Number,
+  default: 0
+},
 
   couponId: {
     type: mongoose.Schema.Types.ObjectId,

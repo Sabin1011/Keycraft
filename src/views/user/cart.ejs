@@ -27,7 +27,6 @@
     margin: 20px auto 0;
   }
 
-  /* Message Alert Styles */
   .alert-message {
     max-width: 600px;
     margin: 0 auto 30px;
@@ -365,7 +364,6 @@
       <div class="title-underline"></div>
     </div>
 
-    <!-- Display Messages -->
     <% if (message) { %>
     <div class="alert-message alert-<%= messageType %>"><%= message %></div>
     <% } %> <% if (cart && cart.items && cart.items.length > 0) { %>
@@ -406,30 +404,57 @@
             </div>
             <% } %>
 
-<div class="item-price">
-  <% if (item.offerDetails) { %>
-    <span style="text-decoration: line-through; color:#999;">
-      ₹<%= item.originalPrice.toFixed(2) %>
-    </span>
-    <strong>
-      ₹<%= item.discountedPrice.toFixed(2) %>
-    </strong>
+            <div class="item-price">
+              <% if (item.discountedPrice < item.originalPrice) { %>
+              <span
+                style="
+                  text-decoration: line-through;
+                  color: #999;
+                  font-size: 14px;
+                "
+              >
+                ₹<span id="base-<%= item.product._id %>-<%= item.variantId %>">
+                  <%= item.originalPrice.toFixed(2) %>
+                </span>
+              </span>
 
-    <% if (item.offerDetails.discountType === 'percentage') { %>
-      <span style="color:green;font-size:12px;">
-        (<%= item.discountPercentage %>% OFF)
-      </span>
-    <% } else { %>
-      <span style="color:green;font-size:12px;">
-        (₹<%= item.discountAmount.toFixed(0) %> OFF)
-      </span>
-    <% } %>
-  <% } else { %>
-    ₹<%= item.originalPrice.toFixed(2) %>
-  <% } %>
-  × <%= item.quantity %>
-</div>
+              <br />
+              <% } %> ₹<span
+                id="unit-<%= item.product._id %>-<%= item.variantId %>"
+              >
+                <%= item.discountedPrice.toFixed(2) %>
+              </span>
+              ×
+              <span id="qty-text-<%= item.product._id %>-<%= item.variantId %>">
+                <%= item.quantity %>
+              </span>
+              <span
+                style="
+                  margin-left: 8px;
+                  background:#27ae60;
+                  color:#fff;
+                  padding:3px 7px;
+                  font-size:11px;
+                  font-weight:600;
+                  border-radius:3px;
+                "
+              >
+                <% if (item.offerDetails?.discountType === 'percentage') { %>
+                  <%= item.discountPercentage %>% OFF
+                <% } else { %>
+                  ₹<%= item.discountAmount.toFixed(0) %> OFF
+                <% } %>
+              </span>
 
+              <% if (item.offerDetails?.title) { %>
+                <div style="margin-top:5px; font-size:11px; color:#e67e22; font-weight:600;">
+                  🎉 <%= item.offerDetails.title %>
+                </div>
+              <% } %>
+
+              
+            </div>
+            
           </div>
 
           <div class="item-actions">
@@ -476,12 +501,20 @@
       <div class="cart-summary">
         <h3 class="summary-title">Order Summary</h3>
 
-        <div class="summary-row">
-          <span id="subtotal-items"
-            >Subtotal (<%= cart.items.length %> items)</span
+        <div>
+          Subtotal(<span id="subtotal-items"> <%= cartCount%> </span>
+          items ) ₹<span id="subtotal-amount"
+            ><%= cart.baseTotal.toFixed(2) %></span
           >
-          <span id="subtotal-amount">₹<%= cart.totalPrice.toFixed(2) %></span>
         </div>
+
+        <%if(totalDiscount>0) {%>
+          <div class="summary-row" style="color: #27ae60;" >
+            <span>Discount</span>
+            <span>- ₹<span id="discount-amount"><%= totalDiscount.toFixed(2) %></span> </span>
+          </div>
+        <%}%> 
+
 
         <div class="summary-row">
           <span>Shipping</span>
@@ -550,34 +583,43 @@
         });
 
         const data = await res.json();
+        
 
-        if (data.success) {
+        if(data.success) {
 
-            document.getElementById("grand-total").textContent = `₹${data.totalPrice}`;
-
-          const qtyEl = document.getElementById(
-            `qty-${productId}-${variantId}`
-          );
-          const priceEl = document.getElementById(
-            `price-${productId}-${variantId}`
-          );
-
-          if (qtyEl) qtyEl.textContent = data.quantity;
-          if (priceEl)
-            priceEl.textContent = `₹${data.unitPrice * data.quantity}`;
-
-          document.getElementById(
-            "subtotal-items"
-          ).textContent = `Subtotal (${data.totalItems} items)`;
-
-          document.getElementById(
-            "subtotal-amount"
-          ).textContent = `₹${data.totalPrice}`;
-
-          if (data.quantity <= 0) {
+          if(data.removed){
             btn.closest(".cart-item").remove();
+          } else {
+             document.getElementById(`qty-${productId}-${variantId}`).textContent = data.quantity;
+            
+          const qty1 = document.getElementById(`qty-${productId}-${variantId}`);
+          const qty2 = document.getElementById(`qty-text-${productId}-${variantId}`);
+
+            if(qty1){
+              qty1.textContent = data.quantity;
+            } 
+
+            if(qty2){
+              qty2.textContent = data.quantity;
+            }
+
           }
-        }   
+
+          const discountElement = document.getElementById("discount-amount");
+          if(discountElement) {
+            discountElement.textContent = data.totalDiscount.toFixed(2)
+          }
+          document.getElementById("subtotal-items").textContent = data.totalItems;
+
+          document.getElementById("subtotal-amount").textContent = data.baseTotal.toFixed(2);
+
+          document.getElementById("grand-total").textContent = `₹${data.totalPrice.toFixed(2)}`;
+
+          if(data.totalItems ===0){
+            location.reload();
+          }
+        }
+
       });
     });
 
@@ -588,52 +630,39 @@
         const productId = btn.dataset.product;
         const variantId = btn.dataset.variant;
 
-        const url = `/cart/increase/${productId}?variantId=${variantId}`;
-
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "X-Requested-With": "XMLHttpRequest" },
-        });
+        const res = await fetch(
+          `/cart/increase/${productId}?variantId=${variantId}`,
+          {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+          }
+        );
 
         const data = await res.json();
 
-        if (data.success) {
-
-            document.getElementById("grand-total").textContent = `₹${data.totalPrice}`;
-
-          const qtyEl = document.getElementById(
-            `qty-${productId}-${variantId}`
-          );
-          qtyEl.textContent = data.quantity;
-
-          const priceEl = document.getElementById(
-            `price-${productId}-${variantId}`
-          );
-          priceEl.textContent = `₹${data.unitPrice * data.quantity}`;
-
-          document.getElementById(`qty-${productId}-${variantId}`).textContent =
-            data.quantity;
-
-          document.getElementById(
-            `price-${productId}-${variantId}`
-          ).textContent = `₹${data.unitPrice * data.quantity}`;
-
-          document.getElementById(
-            "subtotal-items"
-          ).textContent = `Subtotal (${data.totalItems} items)`;
-
-          document.getElementById(
-            "subtotal-amount"
-          ).textContent = `₹${data.totalPrice}`;
-
-          document.querySelector(
-            ".summary-row:last-child span:last-child"
-          ).textContent = "₹" + data.totalPrice;
-
-          if (data.quantity <= 0) {
-            btn.closest(".cart-item").remove();
-          }
+        if (!data.success) {
+          alert(data.message);
+          return;
         }
+
+        document.getElementById(`qty-${productId}-${variantId}`).textContent =
+          data.quantity;
+        document.getElementById(
+          `qty-text-${productId}-${variantId}`
+        ).textContent = data.quantity;  
+
+
+        const discountElement = document.getElementById("discount-amount");
+        if (discountElement) {
+          discountElement.textContent = data.totalDiscount.toFixed(2);
+        }
+        document.getElementById("subtotal-items").textContent = data.totalItems;
+
+        document.getElementById("subtotal-amount").textContent =data.baseTotal.toFixed(2);
+
+        document.getElementById(
+          "grand-total"
+        ).textContent = `₹${data.totalPrice.toFixed(2)}`;
       });
     });
 
@@ -656,13 +685,18 @@
         if (data.success) {
           btn.closest(".cart-item").remove();
 
+                    const discountElement = document.getElementById("discount-amount");
+          if (discountElement) {
+            discountElement.textContent = data.totalDiscount.toFixed(2);
+          }
+
           document.getElementById(
             "subtotal-items"
           ).textContent = `Subtotal (${data.totalItems} items)`;
 
           document.getElementById(
             "subtotal-amount"
-          ).textContent = `₹${data.totalPrice}`;
+          ).textContent = `₹${data.baseTotal}`;
 
           if (document.querySelectorAll(".cart-item").length === 0) {
             location.reload();
@@ -673,6 +707,6 @@
       });
     });
   });
-</script> 
+</script>
 
 <%- include('../partials/user/footer') %>

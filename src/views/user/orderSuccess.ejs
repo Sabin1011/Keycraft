@@ -97,24 +97,34 @@
     <div style="margin-top: 20px; text-align:left;">
       
       <p>
-        <strong>Subtotal:</strong> 
+        <strong>Subtotal:</strong>
         ₹<%= order.totalAmount.toFixed(2) %>
       </p>
 
-      <% if (order.discountAmount > 0) { %>
+      <% if (order.offerDiscount > 0) { %>
         <p>
-          <strong>Discount:</strong>
-          <span style="color: green;">-₹<%= order.discountAmount.toFixed(2) %></span>
+          <strong>Offer Discount:</strong>
+          <span style="color: green;">
+            -₹<%= order.offerDiscount.toFixed(2) %>
+          </span>
         </p>
       <% } %>
 
-      <p style="font-size: 18px; margin-top: 10px;">
-        <strong>Total Paid:</strong>  
-        ₹<%= (order.finalAmount || (order.totalAmount - order.discountAmount)).toFixed(2) %>
+      <% if (order.discountAmount > 0) { %>
+        <p>
+          <strong>Coupon Discount:</strong>
+          <span style="color: green;">
+            -₹<%= order.discountAmount.toFixed(2) %>
+          </span>
+        </p>
+      <% } %>
+
+      <p style="font-size: 18px;">
+        <strong>Total Paid:</strong>
+        ₹<%= order.finalAmount.toFixed(2) %>
       </p>
 
     </div>
-
         
     <a href="/order/<%= order._id %>" class="btn btn-primary">View Order Details</a>
     <a href="/home" class="btn btn-secondary">Continue Shopping</a>
