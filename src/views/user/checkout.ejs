@@ -395,16 +395,57 @@
                     <div style="font-weight: 600; font-size: 14px; margin-bottom: 5px;">
                       <%= item.product.name %>
                     </div>
-                    <div style="color: #666; font-size: 13px;">
-                      Qty: <%= item.quantity %> × ₹<%= item.discountedPrice.toFixed(2) %>
-                                        <div>
-                    <% if (item.selectedVariant) { %>
-                        Variant: <strong><%= item.selectedVariant.name %></strong>
-                    <% } else { %>
-                        Variant: <strong>Default</strong>
-                    <% } %>
-                  </div>
-                    </div>
+
+                    
+                      <div style="color: #666; font-size: 13px;">
+
+                        Qty: <%= item.quantity %> × ₹<%= item.discountedPrice.toFixed(2) %>
+
+                        <% if (item.offerDetails) { %>
+                          <span
+                            style="
+                              margin-left: 8px;
+                              background: #27ae60;
+                              color: #fff;
+                              padding: 3px 7px;
+                              font-size: 10px;
+                              font-weight: 600;
+                              border-radius: 3px;
+                              vertical-align: middle;
+                            "
+                          >
+                            <% if (item.offerDetails.discountType === 'percentage') { %>
+                              <%= item.offerDetails.discountValue %>% OFF
+                            <% } else { %>
+                              ₹<%= item.offerDetails.discountValue %> OFF
+                            <% } %>
+                          </span>
+                        <% } %>
+
+                        <div style="margin-top: 4px;">
+                          <% if (item.selectedVariant) { %>
+                            Variant: <strong><%= item.selectedVariant.name %></strong>
+                          <% } else { %>
+                            Variant: <strong>Default</strong>
+                          <% } %>
+                        </div>
+
+                        <% if (item.offerDetails?.title) { %>
+                          <div
+                            style="
+                              margin-top: 4px;
+                              font-size: 11px;
+                              color: #e67e22;
+                              font-weight: 600;
+                            "
+                          >
+                            🎉 <%= item.offerDetails.title %>
+                          </div>
+                        <% } %>
+
+                      </div>
+
+
                   </div>
                   
                   <div style="font-weight: 600; color: #401f75;">
@@ -416,42 +457,26 @@
           <% } %>
 
           <div class="order-summary">
-          <div class="summary-row">
-            <span>Subtotal</span>
-            <span>₹<%= cartSubtotal.toFixed(2) %></span>
-          </div>
 
-            <% if (appliedOffers && appliedOffers.length > 0) { %>
-              <div class="order-summary" style="margin-top: 15px;">
-                <h4 style="font-size:14px; margin-bottom:10px;">Applied Offers</h4>
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span>₹<span id="subtotal"><%= cartSubtotal.toFixed(2) %></span></span>
+            </div>
 
-                <% appliedOffers.forEach(offer => { %>
-                  <div class="summary-row" style="color:#27ae60;">
-                    <span>
-                      <% if (offer.level === "item") { %>
-                        🎁 <%= offer.title %> — <%= offer.productName %>
-                      <% } else { %>
-                        🛒 <%= offer.title %> (Cart Offer)
-                      <% } %>
-                    </span>
-
-                    <span>-₹<%= offer.amount.toFixed(2) %></span>
-                  </div>
-                <% }) %>
-              </div>
-            <% } %>
+            <div id="couponDiscountRow"></div>
 
             <div class="summary-row">
               <span>Shipping</span>
               <span>Free</span>
             </div>
-            <div id="discountRow"></div>
 
-          <div class="summary-row">
-            <span>Total</span>
-            <span>₹<%= grandTotal.toFixed(2) %></span>
+            <div class="summary-row" id="finalTotalRow">
+              <span>Total</span>
+              <span>₹<%= grandTotal.toFixed(2) %></span>
+            </div>
+
           </div>
-          </div>
+
 
           <div class="checkout-card" style="margin-top: 20px;">
             <div class="card-header">
@@ -583,49 +608,49 @@
   });
 
   document.getElementById("applyCouponBtn").addEventListener("click", async () => {
-    const code = document.getElementById("couponInput").value.trim().toUpperCase();
-    const msg = document.getElementById("couponMessage");
+  const code = document.getElementById("couponInput").value.trim().toUpperCase();
+  const msg = document.getElementById("couponMessage");
 
-    if (!code) {
-      msg.style.color = "red";
-      msg.innerText = "Please enter a coupon code.";
-      return;
-    }
+  if (!code) {
+    msg.style.color = "red";
+    msg.innerText = "Please enter a coupon code";
+    return;
+  }
 
-    const response = await fetch("/coupon/validate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ couponCode: code, cartTotal: Number("<%= cartSubtotal %>") })
-    });
+  const cartTotal = Number("<%= cartSubtotal %>");
 
-    const data = await response.json();
-
-    if (!data.success) {
-      msg.style.color = "red";
-      msg.innerText = data.message;
-      document.getElementById("hiddenCouponCode").value = "";
-      return;
-    }
-
-    msg.style.color = "green";
-    msg.innerText = `Coupon applied! You saved ₹${data.discountAmount}`;
-
-    document.getElementById("hiddenCouponCode").value = code;
-
-    document.getElementById("discountRow").innerHTML = `
-      <div class="summary-row">
-        <span>Discount (${code})</span>
-        <span style="color: green;">-₹${data.discountAmount}</span>
-      </div>
-    `;
-
-    document.getElementById("finalTotalRow").innerHTML = `
-        <span>Total</span>  
-        <span>₹${data.finalAmount}</span>
-
-    `;
-
+  const res = await fetch("/coupon/validate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ couponCode: code, cartTotal })
   });
+
+  const data = await res.json();
+
+  if (!data.success) {
+    msg.style.color = "red";
+    msg.innerText = data.message;
+    document.getElementById("hiddenCouponCode").value = "";
+    return;
+  }
+
+  msg.style.color = "green";
+  msg.innerText = `Coupon applied! You saved ₹${data.discountAmount}`;
+
+  document.getElementById("hiddenCouponCode").value = code;
+
+  document.getElementById("couponDiscountRow").innerHTML = `
+    <div class="summary-row" style="color:#27ae60;">
+      <span>Coupon (${code})</span>
+      <span>-₹${data.discountAmount.toFixed(2)}</span>
+    </div>
+  `;
+
+  document.getElementById("finalTotalRow").innerHTML = `
+    <span>Total</span>
+    <span>₹${data.finalAmount.toFixed(2)}</span>
+  `;
+});
 </script>
 
 <%- include('../partials/user/footer') %>

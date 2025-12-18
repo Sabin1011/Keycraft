@@ -136,7 +136,7 @@
 
           <td><%= order.paymentMethod %></td>
 
-          <td>₹ <%= order.totalAmount %></td>
+          <td>₹ <%= order.finalAmount %></td>
 
           <td>
             <form action="/admin/orders/update-status/<%= order.orderId %>" method="POST">

@@ -35,14 +35,29 @@ const offerSchema = new mongoose.Schema(
       },
     ],
 
-    minPurchaseAmount: { type: Number, default: 0 }, // for cart-level
+    minPurchaseAmount: {
+      type: Number,
+      default: 0,
+    },
 
-    maxDiscountAmount: { type: Number, default: null },
+    maxDiscountAmount: {
+      type: Number,
+      default: null,
+    },
 
-    startDate: { type: Date, required: true },
-    expiryDate: { type: Date, required: true },
+    startDate: {
+      type: Date,
+      required: true,
+    },
+    expiryDate: {
+      type: Date,
+      required: true,
+    },
 
-    isActive: { type: Boolean, default: true },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

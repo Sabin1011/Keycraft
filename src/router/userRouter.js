@@ -102,6 +102,4 @@ router.get("/order/:orderId/cancel-preview/:itemId",auth.isLoggedIn ,orderContro
 
 router.get("/wallet", auth.isLoggedIn, walletController.loadWalletPage);
 
-// router.get('/header-partial', userController.loadHeaderPartial);
-
 module.exports = router;
