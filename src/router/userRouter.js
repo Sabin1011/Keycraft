@@ -85,6 +85,17 @@ router.get("/order-success", auth.isLoggedIn, checkoutController.loadSuccessPage
 
 router.get("/my-orders", auth.isLoggedIn, orderController.loadMyOrders);
 router.get("/order/:id", auth.isLoggedIn, orderController.loadOrderDetails);
+router.post(
+  "/place-order",
+  auth.isLoggedIn,
+  checkoutController.createRazorpayOrder
+);
+
+router.post(
+  "/verify-payment",
+  auth.isLoggedIn,
+  checkoutController.verifyRazorpayPayment
+);
 
 router.post("/order/:orderId/cancel", auth.isLoggedIn, orderController.cancelOrder);
 router.post("/order/:orderId/return", auth.isLoggedIn, orderController.returnOrder);
