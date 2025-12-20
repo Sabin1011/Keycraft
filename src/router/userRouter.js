@@ -111,6 +111,19 @@ router.post("/coupon/validate", auth.isLoggedIn,couponController.validateCoupon)
 
 router.get("/order/:orderId/cancel-preview/:itemId",auth.isLoggedIn ,orderController.cancelPreview);
 
+router.get(
+  "/payment-failed",
+  auth.isLoggedIn,
+  checkoutController.loadPaymentFailed
+);
+
+router.get(
+  "/retry-payment",
+  auth.isLoggedIn,
+  checkoutController.retryPayment
+);
+
+
 router.get("/wallet", auth.isLoggedIn, walletController.loadWalletPage);
   
 module.exports = router;

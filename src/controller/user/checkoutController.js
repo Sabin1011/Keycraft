@@ -635,6 +635,47 @@ const verifyRazorpayPayment = async (req, res) => {
   }
 };
 
+
+const loadPaymentFailed = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    if (!req.session.pendingOrder) {
+      return res.redirect("/cart");
+    }
+
+    res.render("paymentFailed");
+  } catch (error) {
+    console.log("Load Payment Failed Error:", error);
+    res.redirect("/cart");
+  }
+};
+
+const retryPayment = async (req, res) => {
+  try {
+    const pendingOrder = req.session.pendingOrder;
+
+    if (!pendingOrder) {
+      return res.redirect("/cart");
+    }
+
+    const razorpayOrder = await razorpay.orders.create({
+      amount: pendingOrder.finalAmount * 100,
+      currency: "INR",
+      receipt: `retry_${Date.now()}`,
+    });
+
+    res.render("retryRazorpay", {
+      key: process.env.RAZORPAY_KEY_ID,
+      razorpayOrderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+    });
+  } catch (error) {
+    console.log("Retry Payment Error:", error);
+    res.redirect("/cart");
+  }
+};
+
 module.exports = {
   loadCheckout,
   loadSuccessPage,
@@ -642,4 +683,6 @@ module.exports = {
   validateCoupon,
   createRazorpayOrder,
   verifyRazorpayPayment,
+  loadPaymentFailed,
+  retryPayment
 };
