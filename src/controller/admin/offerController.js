@@ -176,7 +176,11 @@ const updateOffer = async (req, res) => {
       updateData.minPurchaseAmount = minPurchaseAmount || 0;
     }
 
-    await Offer.findByIdAndUpdate(offerId, updateData);
+    await Offer.findByIdAndUpdate(
+      offerId,
+      updateData,
+      { runValidators:true}
+    );
 
     res.redirect("/admin/offerManage");
   } catch (error) {

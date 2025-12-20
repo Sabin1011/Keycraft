@@ -222,9 +222,21 @@
 
   offerType.addEventListener("change", () => {
     const type = offerType.value;
+
     productSelect.classList.toggle("d-none", type !== "product");
     categorySelect.classList.toggle("d-none", type !== "category");
     minPurchaseWrapper.classList.toggle("d-none", type !== "cart");
+
+    if(type!=="product"){
+      document.querySelector("select[name='productIds']").selectedIndex=-1;
+      document.getElementById("productPreview").innerHTML="";
+    }
+
+    if (type !== "category") {
+      document.querySelector("select[name='categoryIds']").selectedIndex = -1;
+      document.getElementById("categoryPreview").innerHTML = "";
+    }
+
   });
 
   function updatePreview(selectName, previewId) {
@@ -242,6 +254,15 @@
 
   updatePreview("productIds", "productPreview");
   updatePreview("categoryIds", "categoryPreview");
+
+
+  document.querySelector("select[name='productIds']")?.addEventListener("change", ()=> {
+    updatePreview("productIds","productPreview");
+  });
+
+  document.querySelector("select[name='categoryIds']")?.addEventListener("change",()=>{
+    updatePreview("categoryIds","categoryPreview")
+  })
 </script>
 
 </body>

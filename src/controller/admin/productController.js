@@ -231,7 +231,6 @@ const updateProduct = async (req, res) => {
       variantQty,
     } = req.body;
 
-    // Handle existing images - can be string or array
     let existingImages = [];
     if (req.body['existingImages[]']) {
       existingImages = Array.isArray(req.body['existingImages[]']) 
@@ -247,7 +246,6 @@ const updateProduct = async (req, res) => {
       });
     }
 
-    // Build variants array
     const variants = [];
     if (Array.isArray(variantName) && Array.isArray(variantQty)) {
       for (let i = 0; i < variantName.length; i++) {
@@ -262,10 +260,12 @@ const updateProduct = async (req, res) => {
 
     const totalStock = variants.reduce((s, v) => s + v.quantity, 0);
 
-    // Start with existing images that weren't removed
-    let finalImages = [...existingImages];
+    let finalImages = product.images;
 
-    // Add newly uploaded/cropped images
+    if(existingImages.length > 0){
+      finalImages = [...existingImages];
+    }
+
     if (req.files && req.files.length > 0) {
       const uploaded = req.files.map(
         (file) => `/uploads/products/${file.filename}`
@@ -273,7 +273,6 @@ const updateProduct = async (req, res) => {
       finalImages = [...finalImages, ...uploaded];
     }
 
-    // Update product
     product.name = productName;
     product.description = description;
     product.price = price;
@@ -294,8 +293,6 @@ const updateProduct = async (req, res) => {
     });
   }
 };
-
-// TOGGLE PRODUCT STATUS
 
 const toggleProductStatus = async (req, res) => {
   try {
@@ -329,5 +326,4 @@ module.exports = {
   AddProduct,
   toggleProductStatus,
   updateProduct,
-  // addproduct,
 };
