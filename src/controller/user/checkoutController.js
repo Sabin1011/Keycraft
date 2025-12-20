@@ -205,12 +205,13 @@ const placeOrder = async (req, res) => {
       return res.redirect("/checkout?error=Invalid address");
     }
 
+    const subtotal = cart.items.reduce((sum, item) => {
+      return sum + item.product.price * item.quantity;
+    }, 0);
+
+
     const cartOfferDiscount = cart.cartDiscount || 0;
 
-    const offerDiscount =
-      cart.cartDiscount || 0;
-
-    const totalAfterOffers = Math.max(offerSubtotal - cartOfferDiscount, 0);
 
     const items = cart.items.map((item) => ({
       product: item.product._id,
@@ -219,49 +220,90 @@ const placeOrder = async (req, res) => {
       price: item.discountedPrice || item.product.price,
     }));
 
-    let discountAmount = 0;
+    // let discountAmount = 0;
+    // let finalAmount = cart.grandTotal;
+    // let appliedCouponId = null;
+
+    // if (couponCode) {
+    //   const coupon = await Coupon.findOne({
+    //     code: couponCode.toUpperCase(),
+    //     isDeleted: false,
+    //   });
+
+    //   if (!coupon) {
+    //     return res.redirect("/checkout?error=Invalid coupon");
+    //   }
+
+    //   if (new Date(coupon.expiryDate) < new Date()) {
+    //     return res.redirect("/checkout?error=Coupon expired");
+    //   }
+
+    //   if (coupon.minPurchaseAmount && total < coupon.minPurchaseAmount) {
+    //     return res.redirect(
+    //       `/checkout?error=Minimum purchase required ₹${coupon.minPurchaseAmount}`
+    //     );
+    //   }
+
+    //   if (coupon.discountType === "percentage") {
+    //     discountAmount = (finalAmount * coupon.discountValue) / 100;
+
+    //     if (
+    //       coupon.maxDiscountAmount &&
+    //       discountAmount > coupon.maxDiscountAmount
+    //     ) {
+    //       discountAmount = coupon.maxDiscountAmount;
+    //     }
+    //   } else {
+    //     discountAmount = coupon.discountValue;
+    //   }
+
+    //   finalAmount = Math.max(fnalAmount - discountAmount, 0);
+    //   appliedCouponId = coupon._id;
+
+    //   coupon.usedCount = (coupon.usedCount || 0) + 1;
+    //   await coupon.save();
+    // }
+
+    await calculateCartTotals(cart);
+
     let finalAmount = cart.grandTotal;
-    let appliedCouponId = null;
+    const offerDiscount = subtotal- cart.totalPrice;
 
-    if (couponCode) {
+    let discountAmount = 0;
+    let appliedcouponId = null;
+
+    if(couponCode){
       const coupon = await Coupon.findOne({
-        code: couponCode.toUpperCase(),
-        isDeleted: false,
-      });
+        code:couponCode,
+        isDeleted:false,
+      })
 
-      if (!coupon) {
-        return res.redirect("/checkout?error=Invalid coupon");
+      if(!coupon){
+        return res.redirect("/checkout?error=Invalid coupon")
+      };
+
+      if(coupon.expiryDate< new Date()){
+        return res.redirect("/checkout?error = Coupon expired")
+      };
+
+      if(coupon.minPurchaseAmount && finalAmount< coupon.minPurchaseAmount){
+        return res.redirect(`/checkout?error= minimum Purchase ₹${coupon.minPurchaseAmount}`);
       }
 
-      if (new Date(coupon.expiryDate) < new Date()) {
-        return res.redirect("/checkout?error=Coupon expired");
-      }
-
-      if (coupon.minPurchaseAmount && total < coupon.minPurchaseAmount) {
-        return res.redirect(
-          `/checkout?error=Minimum purchase required ₹${coupon.minPurchaseAmount}`
-        );
-      }
-
-      if (coupon.discountType === "percentage") {
+      if(coupon.discountType === "percentage") {
         discountAmount = (finalAmount * coupon.discountValue) / 100;
 
-        if (
-          coupon.maxDiscountAmount &&
-          discountAmount > coupon.maxDiscountAmount
-        ) {
+        if(coupon.maxDiscountAmount&& discountAmount>coupon.maxDiscountAmount){
           discountAmount = coupon.maxDiscountAmount;
         }
-      } else {
-        discountAmount = coupon.discountValue;
+      }else{
+        discountAmount = coupon.discountValue
       }
-
-      finalAmount = Math.max(fnalAmount - discountAmount, 0);
-      appliedCouponId = coupon._id;
-
-      coupon.usedCount = (coupon.usedCount || 0) + 1;
-      await coupon.save();
+      finalAmount = Math.max(finalAmount - discountAmount, 0);
+      appliedcouponId = coupon._id;
     }
+
+    finalAmount = Math.round(finalAmount)
 
     if (paymentMethod === "razorpay") {
       const razorpayOrder = await razorpay.orders.create({
@@ -277,7 +319,7 @@ const placeOrder = async (req, res) => {
         offerDiscount,
         discountAmount,
         finalAmount,
-        couponId: appliedCouponId,
+        couponId: appliedcouponId,
         address: selectedAddress,
         paymentMethod,
       };
@@ -293,10 +335,12 @@ const placeOrder = async (req, res) => {
     const newOrder = new Order({
       userId,
       items,
-      totalAmount: originalSubtotal,
+      subtotal,
+      totalAmount: cart.totalPrice,
+      offerDiscount,
       discountAmount,
       finalAmount,
-      couponId: appliedCouponId,
+      couponId: appliedcouponId,
       address: selectedAddress,
       status: "Confirmed",
       paymentMethod: req.body.paymentMethod,
@@ -415,6 +459,7 @@ const validateCoupon = async (req, res) => {
       success: true,
       discountAmount,
       finalAmount,
+
     });
   } catch (err) {
     console.error(err);
@@ -439,21 +484,48 @@ const createRazorpayOrder = async (req, res) => {
 
     const cart = await Cart.findOne({ userId }).populate("items.product");
 
-    let finalAmount = cart.grandTotal;
+    const subtotal = cart.items.reduce((sum, item)=>{
+      const price = typeof item.originalPrice === "number" ? item.originalPrice: item.product.price;
 
-    if (req.session.coupon && req.session.coupon.finalAmount) {
-      finalAmount = req.session.coupon.finalAmount;
-    }
+      return sum + price * item.quantity;
+    },0);
 
-    if (!finalAmount || isNaN(finalAmount) || finalAmount <= 0) {
-      console.error("Invalid finalAmount:", finalAmount);
-      return res.json({
-        success: false,
-        message: "Invalid order amount",
-      });
-    }
     await calculateCartTotals(cart);
-    await cart.save();
+    let finalAmount = cart.grandTotal;
+    const offerDiscount = subtotal  - cart.totalPrice;
+
+    let discountAmount = 0;
+    let appliedCouponId = null;
+
+    if(couponCode) {
+      const coupon = await Coupon.findOne({
+        code: couponCode.toUpperCase(),
+        isDeleted: false,
+      });
+
+      if(!coupon) {
+        return res.json({success:false, message:"Invalid coupon"})
+      }
+
+      if(coupon.expiryDate < new Date()){
+        return res.json({success:false, message: "Coupon expired"});
+      }
+
+      if(coupon.discountType === "percentage") {
+        discountAmount = (finalAmount * coupon.discountValue) / 100;
+
+        if(coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount){
+          discountAmount = coupon.maxDiscountAmount;
+        }
+      }
+      else{
+        discountAmount = coupon.discountValue;
+      }
+      finalAmount = Math.max(finalAmount - discountAmount, 0);
+      appliedCouponId = coupon._id;
+    }
+    finalAmount = Math.round(finalAmount);
+
 
     if (!finalAmount || isNaN(finalAmount) || finalAmount <= 0) {
       console.error("Invalid finalAmount:", finalAmount);
@@ -480,11 +552,12 @@ const createRazorpayOrder = async (req, res) => {
             ? item.discountedPrice
             : item.product.price,
       })),
-      totalAmount: cart.totalPrice,
-      offerDiscount: cart.cartDiscount || 0,
-      discountAmount: req.session.coupon?.discountAmount || 0,
+      priceAfterOffers : cart.totalPrice,
+      offerDiscount,
+      discountAmount,
       finalAmount,
-      couponId: req.session.coupon?.couponId || null,
+      subtotal,
+      couponId:appliedCouponId,
       address: user.addresses.id(addressId),
       paymentMethod: "razorpay",
     };
@@ -525,12 +598,13 @@ const verifyRazorpayPayment = async (req, res) => {
     const newOrder = new Order({
       userId: pendingOrder.userId,
       items: pendingOrder.items,
-      totalAmount: pendingOrder.totalAmount,
+      totalAmount: pendingOrder.priceAfterOffers,
       discountAmount: pendingOrder.discountAmount,
       finalAmount: pendingOrder.finalAmount,
       couponId: pendingOrder.couponId,
       address: pendingOrder.address,
       paymentMethod: "razorpay",
+      subtotal:pendingOrder.subtotal,
       paymentStatus: "Paid",
       status: "Confirmed",
       razorpayPaymentId: razorpay_payment_id,

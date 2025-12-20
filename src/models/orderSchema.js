@@ -35,6 +35,10 @@ const orderSchema = new Schema({
     type: Number,
     default: 0
   },
+    subtotal: {
+    type: Number,
+    required: true,
+  },
 
   finalAmount: {
     type: Number,
