@@ -3,6 +3,7 @@ const User = require("../../models/userSchema");
 const Cart = require('../../models/cartModel');
 const Product = require("../../models/productSchema");
 const PDFDocument = require("pdfkit");
+const Wallet = require("../../models/walletSchema");
 
 const loadMyOrders = async (req, res) => {
   try {
@@ -102,6 +103,36 @@ const cancelOrder = async (req, res) => {
     order.status = "Cancelled";
     order.cancelReason = reason;
     await order.save();
+
+    if(order.paymentMethod !== "cod"){
+      const wallet = await Wallet.findOne({userId: order.userId});
+
+      const alreadyCredited = wallet?.transactions?.some(
+        tx=>
+          tx.orderId?.toString() === order._id.toString() &&
+        tx.reason === "Refund for cancelled order"
+      );
+
+      if(!alreadyCredited){
+        const refundAmount = order.finalAmount;
+        
+        await Wallet.findOneAndUpdate(
+          { userId: order.userId },
+          {
+            $inc:{balance: refundAmount },
+            $push:{
+              transactions:{
+                amount: refundAmount,
+                type: "credit",
+                reason: "Refund for cancelled order",
+                orderId: order._id,
+              },
+            },
+          },
+          {upsert:true}
+        );
+      }
+    }
 
     return res.redirect("/my-orders?success=Order cancelled successfully");
 

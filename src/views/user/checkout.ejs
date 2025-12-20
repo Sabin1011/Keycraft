@@ -546,6 +546,14 @@
               </div>
             </label>
 
+            <label>
+              <input type="radio" name="paymentMethod" value="wallet" />
+              Pay using Wallet
+              <% if (wallet) { %>
+                (Balance: ₹<%= wallet.balance.toFixed(2) %>)
+              <% } %>
+            </label>
+
             <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
               <i class="fa fa-lock"></i> Proceed to Payment
             </button>
@@ -585,7 +593,7 @@
       return false;
     }
 
-    if(paymentSelected.value === "cod"){
+    if(paymentSelected.value === "cod" || paymentSelected.value=== "wallet"){
       this.submit();
       return;
     }
