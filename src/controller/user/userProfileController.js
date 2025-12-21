@@ -10,6 +10,8 @@ const Cart = require("../../models/cartModel");
 const bcrypt = require("bcrypt");
 
 const loadprofile = async (req, res) => {
+  
+    let cartCount = 0;
   try {
     const userId = req.session.userId;
 
@@ -17,15 +19,28 @@ const loadprofile = async (req, res) => {
       return res.redirect("/login");
     }
 
-    let cartCount = 0;
-    if (userId) {
-      const cart = await Cart.findOne({ userId });
-      cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-    }
+
     const user = await User.findById(userId).lean();
 
     if (!user) {
       return res.redirect("/login");
+    } 
+
+    if (!user.referralCode) {
+      const code = generateReferralCode();
+      await User.findByIdAndUpdate(userId, { referralCode: code });
+      user.referralCode = code; 
+    }
+
+
+    //     if (userId) {
+    //   const cart = await Cart.findOne({ userId });
+    //   cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    // }
+
+    const cart = await Cart.findOne({userId});
+    if(cart && cart.items){
+      cartCount = cart.items.reduce((sum, item)=>sum+item.quantity,0);
     }
 
     const returnUrl = "/profile";
@@ -39,7 +54,9 @@ const loadprofile = async (req, res) => {
     });
     delete req.session.successMessage;
     delete req.session.errorMessage;
-  } catch (error) {}
+  } catch (error) {
+    console.log("error in the loading of user log", error)
+  }
 };
 
 const loadChangePassword = async (req, res) => {
