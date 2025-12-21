@@ -610,6 +610,7 @@ const verifyRazorpayPayment = async (req, res) => {
       paymentMethod: "razorpay",
       subtotal:pendingOrder.subtotal,
       paymentStatus: "Paid",
+      offerDiscount:pendingOrder.offerDiscount,
       status: "Confirmed",
       razorpayPaymentId: razorpay_payment_id,
     });
