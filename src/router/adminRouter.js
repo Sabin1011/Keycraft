@@ -6,7 +6,9 @@ const userManageController = require("../controller/admin/userManageController")
 const productController = require("../controller/admin/productController");
 const adminOrderController = require("../controller/admin/adminOrderController");
 const couponController = require("../controller/admin/couponController");
-const OfferController = require("../controller/admin/offerController")
+const OfferController = require("../controller/admin/offerController");
+const salesController = require("../controller/admin/salesReportController");
+
 const {upload} = require("../middleware/multer");
 const cloudinary = require("../config/cloudinary")
 
@@ -104,6 +106,9 @@ router.post("/offer/add",auth.isAdminLoggedIn, OfferController.addOffer);
 router.get("/offer/edit/:id", auth.isAdminLoggedIn, OfferController.loadEditOffer);
 router.post("/offer/edit", auth.isAdminLoggedIn,OfferController.updateOffer);
 router.patch("/offer/toggle/:id",auth.isAdminLoggedIn, OfferController.toggleOfferStatus);
+
+router.get("/sales-report", auth.isAdminLoggedIn, salesController.loadSalesReport);
+
 
 
 router.get("/logout", adminController.logout);
