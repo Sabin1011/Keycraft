@@ -2,6 +2,9 @@ const User = require("../../models/userSchema");
 const sendEmail = require("../../utils/sendEmail");
 const bcrypt = require("bcrypt");
 const passport = require("passport");
+const generateRefferalCode = require("../../utils/generateReferralCode");
+const Wallet = require("../../models/walletSchema");
+const generateReferralCode = require("../../utils/generateReferralCode");
 
 // REGISTER
 
@@ -20,9 +23,10 @@ const loadRegister = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { username, email, phone, password, confirm_password, agree } =
+    const { username, email, phone, password, confirm_password, agree, referralCode} =
       req.body;
 
+      req.session.referralCode = referralCode?.trim().toUpperCase() || null;
     let errors = {};
 
     if (!agree) {
@@ -156,14 +160,64 @@ const verifyOtp = async (req, res) => {
       email: regUser.email,
       phone: regUser.phone,
       password: regUser.password,
+      referralCode: generateReferralCode()
     });
+
+    let referrer = null;
+    if(req.session.referralCode) {
+      referrer = await User.findOne({
+        referralCode: req.session.referralCode,
+      });
+      if(referrer){
+        newUser.referredBy= referrer._id;
+      }
+    }
+
     await newUser.save();
-    // const user = await User.findOne({ email });
-    // if(!user){
-    //     return res.render("Otp",{email, messge:"user not found"})
-    // }
+
+    await Wallet.create({
+      userId: newUser._id,
+      balance:0,
+      transactions: []
+    });
+
+    if (referrer) {
+      await Wallet.findOneAndUpdate(
+        { userId: referrer._id },
+        {
+          $inc: { balance: 200 },
+          $push: {
+            transactions: {
+              amount: 200,
+              type: "credit",
+              reason: "Referral reward"
+            }
+          }
+        },
+        { upsert: true }
+      );
+
+      await Wallet.findOneAndUpdate(
+        { userId: newUser._id },
+        {
+          $inc: { balance: 50 },
+          $push: {
+            transactions: {
+              amount: 50,
+              type: "credit",
+              reason: "Signup referral bonus"
+            }
+          }
+        }
+      );
+
+      newUser.referralRewarded = true;
+      await newUser.save();
+    }
 
     req.session.sendedOtp = null;
+    req.session.user = null;
+    req.session.referralCode = null;
 
     return res.redirect("/login");
   } catch (error) {}

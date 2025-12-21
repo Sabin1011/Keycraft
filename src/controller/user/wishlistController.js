@@ -13,15 +13,19 @@ const bcrypt = require("bcrypt");
 const loadWishlist = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const user = await User.findById(userId)
-    
+    const user = await User.findById( userId )
+     
     
     const cart = await  Cart.findOne({userId: req.session.userId});
-      let cartCount = 0;  
-      if(userId){
-        const cart = await Cart.findOne({userId})
-        cartCount = cart.items.reduce((sum, item)=>sum + item.quantity, 0)
+      let cartCount = 0;
+
+      if (userId) {
+        const cart = await Cart.findOne({ userId });
+        if (cart && cart.items) {
+          cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        }
       }
+
     const wishlist = await Wishlist.findOne({
       userId: req.session.userId,
     }).populate({

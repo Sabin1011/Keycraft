@@ -281,11 +281,20 @@ const loadShop = async (req, res) => {
       }
     }
 
+    
     let cartCount = 0;
+
     if (userId) {
       const cart = await Cart.findOne({ userId });
-      cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+      if (cart && Array.isArray(cart.items)) {
+        cartCount = cart.items.reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        );
+      }
     }
+
 
     const offers = await Offer.find({
       isActive: true,
