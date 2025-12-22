@@ -33,14 +33,21 @@
 
   <h2>Sales Report</h2>
 
-  <!-- Filter -->
+    <div style="margin:15px 0;">
+      <a href="/admin/sales-report/pdf?startDate=<%= startDate %>&endDate=<%= endDate %>"
+        class="btn"
+        style="padding:10px 15px; background:#401f75; color:#fff; text-decoration:none;">
+        Download PDF
+      </a>
+    </div>
+
+
   <form method="GET" action="/admin/sales-report" style="margin:20px 0;">
     <input type="date" name="startDate" value="<%= startDate %>">
     <input type="date" name="endDate" value="<%= endDate %>">
     <button type="submit">Apply</button>
   </form>
 
-  <!-- Summary Cards -->
   <div class="cards">
     <div class="card">
       <h4>Total Orders</h4>
@@ -64,7 +71,6 @@
     </div>
   </div>
 
-  <!-- Payment Stats -->
   <div style="margin-top:25px;">
     <strong>Payment Methods:</strong>
     Razorpay: <%= paymentStats.razorpay %> |
@@ -72,7 +78,6 @@
     COD: <%= paymentStats.cod %>
   </div>
 
-  <!-- Orders Table -->
   <table>
     <thead>
       <tr>

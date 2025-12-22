@@ -108,7 +108,7 @@ router.post("/offer/edit", auth.isAdminLoggedIn,OfferController.updateOffer);
 router.patch("/offer/toggle/:id",auth.isAdminLoggedIn, OfferController.toggleOfferStatus);
 
 router.get("/sales-report", auth.isAdminLoggedIn, salesController.loadSalesReport);
-
+router.get("/sales-report/pdf", auth.isAdminLoggedIn, salesController.downloadSalesReportPDF);
 
 
 router.get("/logout", adminController.logout);
