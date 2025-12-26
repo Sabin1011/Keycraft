@@ -264,6 +264,13 @@ const placeOrder = async (req, res) => {
 
     finalAmount = Math.round(finalAmount)
 
+    if (paymentMethod === "cod" && finalAmount > 1000) {
+      return res.json({
+        success: false,
+        message: "COD not allowed for orders above ₹1000"
+      });
+    }
+
     if (paymentMethod === "razorpay") {
       const razorpayOrder = await razorpay.orders.create({
         amount: finalAmount * 100,

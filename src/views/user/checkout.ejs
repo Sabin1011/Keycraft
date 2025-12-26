@@ -524,12 +524,18 @@
             <label class="address-item" style="cursor: pointer;">
               
               <div class="address-radio">
-                <input type="radio" name="paymentMethod" value="cod" >
+                <input type="radio" name="paymentMethod" value="cod" id="codOption">
+
                 <div class="address-content">
+                  
                   
                   <div class="address-type">Cash on Delivery</div>
 
+
                           <div class="address-text">Pay once the product is delivered</div>
+                                          <p id="codMessage" style="color: red; font-size: 12px; display: none;">
+                  Cash on Delivery is not available for orders above ₹1000
+                </p>
                   
                 </div>
               </div>
@@ -686,6 +692,7 @@
     <span>Total</span>
     <span>₹${data.finalAmount.toFixed(2)}</span>
   `;
+  updateCODAvailability(data.finalAmount);
 });
 
 async function startRazorpayPayment(addressId, couponCode) {
@@ -760,6 +767,24 @@ async function verifyPayment(response) {
   }
 }
 
+
+const ORDER_LIMIT_FOR_COD = 1000;
+const grandTotal = Number("<%= grandTotal %>");
+
+const codRadio = document.getElementById("codOption")
+const codMessage = document.getElementById("codMessage")
+function updateCODAvailability(Total) {
+  if(Total > ORDER_LIMIT_FOR_COD) {
+    codRadio.disabled = true;
+    codRadio.checked = false;
+    codMessage.style.display = "block";
+  } else {
+    codRadio.disabled = false;
+    codMessage.style.display = "none";
+  }
+}
+
+updateCODAvailability(grandTotal)
 </script>
 
 <%- include('../partials/user/footer') %>
