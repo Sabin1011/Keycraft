@@ -1,0 +1,411 @@
+<%- include('../partials/admin/header') %>
+
+<style>
+  body {
+    background-color: #f8f9fa;
+    font-family: "Poppins", sans-serif;
+  }
+  .page-title-box {
+    margin-top: 20px;
+  }
+  .search-container {
+    max-width: 400px;
+  }
+  .search-input {
+    height: 38px;
+  }
+  .add-button {
+    background: #000;
+    color: white;
+    border-radius: 4px;
+    padding: 8px 15px;
+    border: none;
+  }
+  .add-button:hover {
+    background: #333;
+  }
+</style>
+
+<body data-sidebar="dark">
+<div class="main-content">
+  <div class="page-content">
+    <div class="container-fluid">
+
+      <!-- PAGE TITLE -->
+      <div class="row">
+        <div class="col-12">
+          <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0 font-size-18">Offers</h4>
+
+            <a href="/admin/offer/add" class="add-button btn">+ Add Offer</a>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="row mb-3">
+        <div class="col-sm-12 col-md-6">
+          <div class="search-container">
+            <form action="/admin/offerManage" method="GET" class="search-form">
+
+              <div class="search-input-wrapper position-relative">
+                <i class="bx bx-search search-icon"
+                   style="left:10px; position:absolute; top:50%; transform:translateY(-50%);"></i>
+
+                <input 
+                  type="text" 
+                  class="search-input form-control"
+                  placeholder="Search offers..."
+                  name="search"
+                  value="<%= search || '' %>"
+                  autocomplete="off"
+                />
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+
+              <div class="table-responsive">
+                <table class="table align-middle table-nowrap w-100">
+                  <thead class="table-light">
+                    <tr>
+                      <th>#</th>
+                      <th>Title</th>
+                      <th>Offer Type</th>
+                      <th>Discount</th>
+                      <th>Validity</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+
+                  <% if(offers && offers.length > 0) { %>
+                    <% offers.forEach((offer, index) => { %>
+
+                    <tr>
+                      <td><%= ((currentPage - 1) * limit) + index + 1 %></td>
+
+                      <td><%= offer.title %></td>
+
+                      <td>
+                        <span class="badge bg-info text-dark"><%= offer.offerType %></span>
+                      </td>
+
+                      <td>
+                        <% if (offer.discountType === "percentage") { %>
+                          <%= offer.discountValue %>% 
+                          <% if(offer.maxDiscountAmount > 0) { %>
+                            (Max ₹<%= offer.maxDiscountAmount %>)
+                          <% } %>
+                        <% } else { %>
+                          ₹<%= offer.discountValue %>
+                        <% } %>
+                      </td>
+
+                      <td>
+                        <%= new Date(offer.startDate).toDateString() %> → 
+                        <%= new Date(offer.expiryDate).toDateString() %>
+                      </td>
+
+                      <td>
+                        <% if (offer.isActive) { %>
+                          <span class="badge bg-success">Active</span>
+                        <% } else { %>
+                          <span class="badge bg-danger">Disabled</span>
+                        <% } %>
+                      </td>
+
+                      <td>
+                      <a 
+                        href="/admin/offer/edit/<%= offer._id %>" 
+                        class="btn btn-warning btn-sm"
+                      >
+                        Edit
+                      </a>
+
+                        <% if (offer.isActive) { %>
+                          <button 
+                            class="btn btn-danger btn-sm"
+                            onclick="toggleOffer('<%= offer._id %>', true)"
+                          >
+                            Disable
+                          </button>
+                        <% } else { %>
+                          <button 
+                            class="btn btn-success btn-sm"
+                            onclick="toggleOffer('<%= offer._id %>', false)"
+                          >
+                            Enable
+                          </button>
+                        <% } %>
+                      </td>
+                    </tr>
+
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="7" class="text-center py-4 text-muted">
+                        <i class="bx bx-x-circle" style="font-size:40px;"></i>
+                        <p>No offers found</p>
+                      </td>
+                    </tr>
+                  <% } %>
+
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              <% if(totalOffers > 0) { %>
+              <div class="pagination-container d-flex justify-content-between mt-3">
+                <div class="pagination-info">
+                  Showing <strong><%= ((currentPage - 1) * limit) + 1 %></strong> -
+                  <strong><%= Math.min(currentPage * limit, totalOffers) %></strong> of
+                  <strong><%= totalOffers %></strong>
+                </div>
+
+                <ul class="pagination">
+                  <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                    <a class="page-link" href="?page=<%= currentPage - 1 %>">←</a>
+                  </li>
+
+                  <% const totalPages = Math.ceil(totalOffers / limit); %>
+                  <% for(let i=1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                      <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                    </li>
+                  <% } %>
+
+                  <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                    <a class="page-link" href="?page=<%= currentPage + 1 %>">→</a>
+                  </li>
+                </ul>
+              </div>
+              <% } %>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<%- include('../partials/admin/footer') %>
+
+<!-- ADD OFFER MODAL -->
+<div class="modal fade" id="addOfferModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <form action="/admin/offer/add" method="POST" class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Add Offer</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <input class="form-control mb-2" name="title" placeholder="Offer Title" required />
+
+        <textarea class="form-control mb-2" name="description" placeholder="Description"></textarea>
+
+        <select class="form-control mb-2" name="offerType" id="offerTypeAdd" required>
+          <option value="">Select Offer Type</option>
+          <option value="product">Product Offer</option>
+          <option value="category">Category Offer</option>
+          <option value="cart">Cart Offer</option>
+        </select>
+
+        <!-- Product Select -->
+        <select class="form-control mb-2 d-none" id="productSelectAdd" name="productIds" multiple>
+          <% allProducts.forEach(p => { %>
+            <option value="<%= p._id %>"><%= p.name %></option>
+          <% }) %>
+        </select>
+
+        <!-- Category Select -->
+        <select class="form-control mb-2 d-none" id="categorySelectAdd" name="categoryIds" multiple>
+          <% allCategories.forEach(c => { %>
+            <option value="<%= c._id %>"><%= c.name %></option>
+          <% }) %>
+        </select>
+
+        <input class="form-control mb-2" type="number" name="minPurchaseAmount" placeholder="Min Purchase (Cart Offer)" />
+
+        <select class="form-control mb-2" name="discountType" required>
+          <option value="percentage">Percentage</option>
+          <option value="flat">Flat</option>
+        </select>
+
+        <input class="form-control mb-2" type="number" name="discountValue" placeholder="Discount Value" required />
+
+        <input class="form-control mb-2" type="number" name="maxDiscountAmount" placeholder="Max Discount Amount" />
+
+        <input class="form-control mb-2" type="date" name="startDate" required />
+
+        <input class="form-control mb-2" type="date" name="expiryDate" required />
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary">Add Offer</button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- EDIT OFFER MODAL -->
+<div class="modal fade" id="editOfferModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <form action="/admin/offer/edit" method="POST" class="modal-content">
+
+      <input type="hidden" name="offerId" id="editOfferId">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Offer</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <input class="form-control mb-2" name="title" id="editTitle" placeholder="Offer Title" required />
+
+        <textarea class="form-control mb-2" name="description" id="editDescription"></textarea>
+
+        <select class="form-control mb-2" name="offerType" id="editOfferType" required>
+          <option value="product">Product Offer</option>
+          <option value="category">Category Offer</option>
+          <option value="cart">Cart Offer</option>
+        </select>
+
+        <!-- Product Select -->
+        <select class="form-control mb-2 d-none" id="productSelectEdit" name="productIds" multiple>
+          <% allProducts.forEach(p => { %>
+            <option value="<%= p._id %>"><%= p.name %></option>
+          <% }) %>
+        </select>
+
+        <!-- Category Select -->
+        <select class="form-control mb-2 d-none" id="categorySelectEdit" name="categoryIds" multiple>
+          <% allCategories.forEach(c => { %>
+            <option value="<%= c._id %>"><%= c.name %></option>
+          <% }) %>
+        </select>
+
+        <input class="form-control mb-2" type="number" name="minPurchaseAmount" id="editMinPurchase" placeholder="Min Purchase (Cart Offer)" />
+
+        <select class="form-control mb-2" name="discountType" id="editDiscountType">
+          <option value="percentage">Percentage</option>
+          <option value="flat">Flat</option>
+        </select>
+
+        <input class="form-control mb-2" type="number" name="discountValue" id="editDiscountValue" placeholder="Discount Value" />
+
+        <input class="form-control mb-2" type="number" name="maxDiscountAmount" id="editMaxDiscount" placeholder="Max Discount Amount" />
+
+        <input class="form-control mb-2" type="date" name="startDate" id="editStartDate" required />
+
+        <input class="form-control mb-2" type="date" name="expiryDate" id="editExpiryDate" required />
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary">Save Changes</button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- SweetAlert + JS Functions -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+/* ---------------------------------------------
+  ENABLE / DISABLE OFFER (Soft Delete)
+--------------------------------------------- */
+function toggleOffer(id, disable) {
+  Swal.fire({
+    title: disable ? "Disable this offer?" : "Enable this offer?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: disable ? "#d33" : "#28a745",
+    confirmButtonText: disable ? "Disable" : "Enable"
+  })
+  .then(result => {
+    if (result.isConfirmed) {
+      fetch(`/admin/offer/toggle/${id}`, { method: "PATCH" })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) location.reload();
+        });
+    }
+  });
+}
+
+/* ---------------------------------------------
+  ADD MODAL — Show/Hide Fields by Type
+--------------------------------------------- */
+document.getElementById("offerTypeAdd").addEventListener("change", function () {
+  const type = this.value;
+
+  document.getElementById("productSelectAdd").classList.toggle("d-none", type !== "product");
+  document.getElementById("categorySelectAdd").classList.toggle("d-none", type !== "category");
+});
+
+/* ---------------------------------------------
+  OPEN EDIT MODAL
+--------------------------------------------- */
+function openEditOffer(offer) {
+  document.getElementById("editOfferId").value = offer._id;
+  document.getElementById("editTitle").value = offer.title;
+  document.getElementById("editDescription").value = offer.description;
+  document.getElementById("editOfferType").value = offer.offerType;
+
+  document.getElementById("editDiscountType").value = offer.discountType;
+  document.getElementById("editDiscountValue").value = offer.discountValue;
+  document.getElementById("editMaxDiscount").value = offer.maxDiscountAmount;
+  document.getElementById("editMinPurchase").value = offer.minPurchaseAmount;
+
+  document.getElementById("editStartDate").value = offer.startDate.split("T")[0];
+  document.getElementById("editExpiryDate").value = offer.expiryDate.split("T")[0];
+
+  // Show/hide selects
+  const type = offer.offerType;
+  document.getElementById("productSelectEdit").classList.toggle("d-none", type !== "product");
+  document.getElementById("categorySelectEdit").classList.toggle("d-none", type !== "category");
+
+  // Pre-fill product/category selections
+  if (type === "product" && offer.productIds) {
+    const prodSelect = document.getElementById("productSelectEdit");
+    [...prodSelect.options].forEach(opt => {
+      opt.selected = offer.productIds.includes(opt.value);
+    });
+  }
+
+  if (type === "category" && offer.categoryIds) {
+    const catSelect = document.getElementById("categorySelectEdit");
+    [...catSelect.options].forEach(opt => {
+      opt.selected = offer.categoryIds.includes(opt.value);
+    });
+  }
+
+  new bootstrap.Modal(document.getElementById("editOfferModal")).show();
+}
+</script>
+
+</body>
+</html>

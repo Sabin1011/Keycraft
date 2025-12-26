@@ -667,7 +667,34 @@
           <span class="rating-text">4.5 (127 reviews)</span>
         </div>
 
-        <div class="product-price">₹<%= product.price.toFixed(2) %></div>
+<div class="product-price">
+  <% if (product.hasOffer) { %>
+    <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+      <span style="text-decoration:line-through; color:#999; font-size:20px;">
+        ₹<%= product.originalPrice.toFixed(2) %>
+      </span>
+
+      <span style="font-size:42px; font-weight:700;">
+        ₹<%= product.discountedPrice.toFixed(2) %>
+      </span>
+
+      <span style="background:#27ae60; color:#fff; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;">
+        <% if (product.offerDetails.discountType === 'percentage') { %>
+          <%= product.discountPercentage %>% OFF
+        <% } else { %>
+          ₹<%= product.discountAmount.toFixed(0) %> OFF
+        <% } %>
+      </span>
+    </div>
+
+    <div style="margin-top:10px; font-size:13px; color:#e67e22; font-weight:600;">
+      🎉 <%= product.offerDetails.title %>
+    </div>
+  <% } else { %>
+    ₹<%= product.originalPrice.toFixed(2) %>
+  <% } %>
+</div>
+
 
         <p class="product-description"><%= product.description %></p>
 

@@ -7,7 +7,9 @@ const userProfileController = require("../controller/user/userProfileController"
 const wishlistController = require('../controller/user/wishlistController');
 const cartController = require('../controller/user/cartController');
 const orderController = require('../controller/user/orderController')
-const checkoutController = require('../controller/user/checkoutController')
+const checkoutController = require('../controller/user/checkoutController');
+const couponController = require("../controller/admin/couponController.js");
+const walletController = require("../controller/user/walletController.js") 
 const auth = require("../middleware/auth");
 const multer = require('multer');
 const { profileUpload } = require("../middleware/multer");
@@ -83,6 +85,17 @@ router.get("/order-success", auth.isLoggedIn, checkoutController.loadSuccessPage
 
 router.get("/my-orders", auth.isLoggedIn, orderController.loadMyOrders);
 router.get("/order/:id", auth.isLoggedIn, orderController.loadOrderDetails);
+router.post(
+  "/place-order",
+  auth.isLoggedIn,
+  checkoutController.createRazorpayOrder
+);
+
+router.post(
+  "/verify-payment",
+  auth.isLoggedIn,
+  checkoutController.verifyRazorpayPayment
+);
 
 router.post("/order/:orderId/cancel", auth.isLoggedIn, orderController.cancelOrder);
 router.post("/order/:orderId/return", auth.isLoggedIn, orderController.returnOrder);
@@ -94,6 +107,23 @@ router.get("/order/:orderId/invoice", auth.isLoggedIn, orderController.viewInvoi
 router.get("/order/:orderId/invoice/downlaod", auth.isLoggedIn, orderController.downloadInvoice);
 router.get("/logout", userController.userLogout);
 
-// router.get('/header-partial', userController.loadHeaderPartial);
+router.post("/coupon/validate", auth.isLoggedIn,couponController.validateCoupon);
 
+router.get("/order/:orderId/cancel-preview/:itemId",auth.isLoggedIn ,orderController.cancelPreview);
+
+router.get(
+  "/payment-failed",
+  auth.isLoggedIn,
+  checkoutController.loadPaymentFailed
+);
+
+router.get(
+  "/retry-payment",
+  auth.isLoggedIn,
+  checkoutController.retryPayment
+);
+
+
+router.get("/wallet", auth.isLoggedIn, walletController.loadWalletPage);
+  
 module.exports = router;

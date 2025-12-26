@@ -1,0 +1,269 @@
+<%- include('../partials/admin/header') %>
+
+<style>
+  body {
+    background-color: #f8f9fa;
+    font-family: "Poppins", sans-serif;
+  }
+
+  .container {
+    max-width: 900px;
+  }
+
+  .page-title-box {
+    margin: 20px 0;
+  }
+
+  .btn-black {
+    background: #000;
+    color: #fff;
+  }
+
+  .btn-black:hover {
+    background: #333;
+  }
+
+  .select-box {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff;
+  }
+
+  .select-box label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .styled-multiselect {
+    width: 100%;
+    height: 180px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    font-size: 14px;
+  }
+
+  .selected-preview {
+    margin-top: 10px;
+    padding: 10px;
+    min-height: 45px;
+    border-radius: 8px;
+    border: 1px dashed #bbb;
+    background: #fdfdfd;
+  }
+
+  .preview-badge {
+    display: inline-block;
+    background: #401f75;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 12px;
+    margin: 3px;
+    font-size: 13px;
+  }
+</style>
+
+<body data-sidebar="dark">
+<div class="main-content">
+  <div class="page-content">
+    <div class="container">
+
+      <div class="page-title-box d-flex align-items-center justify-content-between">
+        <h4 class="font-size-18">Edit Offer</h4>
+        <a href="/admin/offerManage" class="btn btn-secondary">← Back</a>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+
+          <form action="/admin/offer/edit" method="POST">
+
+            <!-- IMPORTANT -->
+            <input type="hidden" name="offerId" value="<%= offer._id %>">
+
+            <label class="form-label">Offer Title</label>
+            <input
+              type="text"
+              class="form-control mb-3"
+              name="title"
+              value="<%= offer.title %>"
+              required
+            >
+
+            <label class="form-label">Description</label>
+            <textarea class="form-control mb-3" name="description"><%= offer.description || "" %></textarea>
+
+            <label class="form-label">Offer Type</label>
+            <select class="form-control mb-3" name="offerType" id="offerType" required>
+              <option value="product" <%= offer.offerType === "product" ? "selected" : "" %>>Product Offer</option>
+              <option value="category" <%= offer.offerType === "category" ? "selected" : "" %>>Category Offer</option>
+              <option value="cart" <%= offer.offerType === "cart" ? "selected" : "" %>>Cart Offer</option>
+            </select>
+
+            <!-- PRODUCT SELECT -->
+            
+            <h5>Select Products</h5>
+<div id="productSelect" class="mb-3 select-box <%= offer.offerType !== 'product' ? 'd-none' : '' %>">
+  <label>Select Products</label>
+
+  <select class="styled-multiselect" name="productIds" multiple>
+    <% allProducts.forEach(p => { %>
+      <option
+        value="<%= p._id %>"
+        <%= selectedProducts.includes(p._id.toString()) ? "selected" : "" %>
+      >
+        <%= p.name %>
+      </option>
+    <% }) %>
+  </select>
+
+  <small class="text-muted">Hold CTRL (Windows) or CMD (Mac) to select multiple</small>
+  <div id="productPreview" class="selected-preview"></div>
+</div>
+
+
+  
+
+            <div id="categorySelect" class="mb-3 select-box <%= offer.offerType !== 'category' ? 'd-none' : '' %>">
+  <label>Select Categories</label>
+
+  <select class="styled-multiselect" name="categoryIds" multiple>
+    <% allCategories.forEach(c => { %>
+      <option
+        value="<%= c._id %>"
+        <%= selectedCategories.includes(c._id.toString()) ? "selected" : "" %>
+      >
+        <%= c.name %>
+      </option>
+    <% }) %>
+  </select>
+
+  <small class="text-muted">Hold CTRL (Windows) or CMD (Mac) to select multiple</small>
+  <div id="categoryPreview" class="selected-preview"></div>
+</div>
+
+            <!-- CART MIN PURCHASE -->
+            <div id="minPurchaseWrapper" class="mb-3 <%= offer.offerType !== "cart" ? "d-none" : "" %>">
+              <label class="form-label">Minimum Purchase Amount</label>
+              <input
+                type="number"
+                class="form-control"
+                name="minPurchaseAmount"
+                value="<%= offer.minPurchaseAmount || "" %>"
+              >
+            </div>
+
+            <label class="form-label">Discount Type</label>
+            <select class="form-control mb-3" name="discountType" required>
+              <option value="percentage" <%= offer.discountType === "percentage" ? "selected" : "" %>>
+                Percentage
+              </option>
+              <option value="flat" <%= offer.discountType === "flat" ? "selected" : "" %>>
+                Flat
+              </option>
+            </select>
+
+            <label class="form-label">Discount Value</label>
+            <input
+              type="number"
+              class="form-control mb-3"
+              name="discountValue"
+              value="<%= offer.discountValue %>"
+              required
+            >
+
+            <label class="form-label">Max Discount Amount (optional)</label>
+            <input
+              type="number"
+              class="form-control mb-3"
+              name="maxDiscountAmount"
+              value="<%= offer.maxDiscountAmount || "" %>"
+            >
+
+            <label class="form-label">Start Date</label>
+            <input
+              type="date"
+              class="form-control mb-3"
+              name="startDate"
+              value="<%= offer.startDate.toISOString().split('T')[0] %>"
+              required
+            >
+
+            <label class="form-label">Expiry Date</label>
+            <input
+              type="date"
+              class="form-control mb-4"
+              name="expiryDate"
+              value="<%= offer.expiryDate.toISOString().split('T')[0] %>"
+              required
+            >
+
+            <button class="btn btn-black w-100 py-2">
+              Update Offer
+            </button>
+
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<%- include('../partials/admin/footer') %>
+<script>
+  const offerType = document.getElementById("offerType");
+  const productSelect = document.getElementById("productSelect");
+  const categorySelect = document.getElementById("categorySelect");
+  const minPurchaseWrapper = document.getElementById("minPurchaseWrapper");
+
+  offerType.addEventListener("change", () => {
+    const type = offerType.value;
+
+    productSelect.classList.toggle("d-none", type !== "product");
+    categorySelect.classList.toggle("d-none", type !== "category");
+    minPurchaseWrapper.classList.toggle("d-none", type !== "cart");
+
+    if(type!=="product"){
+      document.querySelector("select[name='productIds']").selectedIndex=-1;
+      document.getElementById("productPreview").innerHTML="";
+    }
+
+    if (type !== "category") {
+      document.querySelector("select[name='categoryIds']").selectedIndex = -1;
+      document.getElementById("categoryPreview").innerHTML = "";
+    }
+
+  });
+
+  function updatePreview(selectName, previewId) {
+    const select = document.querySelector(`select[name='${selectName}']`);
+    const preview = document.getElementById(previewId);
+    if (!select || !preview) return;
+
+    const selected = [...select.selectedOptions].map(opt => opt.text);
+    preview.innerHTML = selected.map(
+      s => `<span class="preview-badge">${s}</span>`
+    ).join("");
+
+    preview.classList.toggle("d-none", selected.length === 0);
+  }
+
+  updatePreview("productIds", "productPreview");
+  updatePreview("categoryIds", "categoryPreview");
+
+
+  document.querySelector("select[name='productIds']")?.addEventListener("change", ()=> {
+    updatePreview("productIds","productPreview");
+  });
+
+  document.querySelector("select[name='categoryIds']")?.addEventListener("change",()=>{
+    updatePreview("categoryIds","categoryPreview")
+  })
+</script>
+
+</body>
+</html>

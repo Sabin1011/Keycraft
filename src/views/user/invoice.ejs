@@ -224,24 +224,38 @@
     </table>
   </div>
 
-
-  <!-- TOTAL SUMMARY -->
   <div class="total-box">
-    <div class="row"><span>Subtotal:</span> <strong>₹<%= order.subtotal %></strong></div>
-    <div class="row"><span>Shipping:</span> <strong>₹<%= order.shippingFee %></strong></div>
-    <div class="row"><span>Tax:</span> <strong>₹<%= order.tax %></strong></div>
 
-    <% if(order.discount) { %>
-      <div class="row"><span>Discount:</span> <strong>-₹<%= order.discount %></strong></div>
-    <% } %>
-
-    <hr>
-
-    <div class="row" style="margin-top: 10px;">
-      <strong>Total Paid:</strong> 
-      <strong style="font-size: 18px;">₹<%= order.totalAmount %></strong>
-    </div>
+  <div class="row">
+    <span>Subtotal:</span>
+    <strong>₹<%= order.totalAmount.toFixed(2) %></strong>
   </div>
+
+  <div class="row">
+    <span>Shipping:</span>
+    <strong>₹0.00</strong>
+  </div>
+
+  <% if (order.discountAmount && order.discountAmount > 0) { %>
+    <div class="row">
+      <span>Discount:</span>
+      <strong style="color: green;">-₹<%= order.discountAmount.toFixed(2) %></strong>
+    </div>
+  <% } %>
+
+  <hr>
+
+  <div class="row" style="margin-top: 10px;">
+    <strong>Total Paid:</strong>
+    <strong style="font-size: 18px;">
+        ₹<%= order.finalAmount 
+              ? order.finalAmount.toFixed(2)
+              : (order.totalAmount - order.discountAmount).toFixed(2) %>
+    </strong>
+  </div>
+
+</div>
+
   
   <div style="clear: both;"></div>
 

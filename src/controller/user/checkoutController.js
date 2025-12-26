@@ -3,17 +3,30 @@ const Cart = require("../../models/cartModel");
 const User = require("../../models/userSchema");
 const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
+const Coupon = require("../../models/couponSchema");
+const Offer = require("../../models/offerSchema");
+const Wallet = require("../../models/walletSchema")
+const calculateCartTotals = require("../../utils/cartCalculator");
+const crypto = require("crypto");
+const razorpay = require("../../config/razorpay");
 
 const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.userId;
+    const wallet = await Wallet.findOne({userId})
 
     if (!userId) return res.redirect("/login");
 
     const user = await User.findById(userId);
     if (!user) return res.redirect("/login");
 
-    const cart = await Cart.findOne({ userId }).populate("items.product");
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.product",
+      populate: { path: "category" },
+    });
+
+    await calculateCartTotals(cart);
+    await cart.save();
 
     if (!cart || cart.items.length === 0) {
       req.session.errorMessage = "Your cart is empty";
@@ -23,72 +36,143 @@ const loadCheckout = async (req, res) => {
     let cartTotal = 0;
     let hasStockIssue = false;
 
-    const cartItems = cart.items.map(item => {
-
+    const cartItems = cart.items.map((item) => {
       const product = item.product;
-      const variant = item.variantId ? product.variants.id(item.variantId) : null;
+      const variant = item.variantId
+        ? product.variants.id(item.variantId)
+        : null;
 
-      let isAvailable = true; 
-      let stockMessage = "";
+      const discountedPrice =
+        typeof item.discountedPrice === "number"
+          ? item.discountedPrice
+          : product.price;
 
-      if (!product || product.status === false) {
-        isAvailable = false;
-        stockMessage = "Product unavailable";
-        hasStockIssue = true;
-      }
+      const originalPrice =
+        typeof item.originalPrice === "number"
+          ? item.originalPrice
+          : product.price;
 
-      if (product.category?.status === false) {
-        isAvailable = false;
-        stockMessage = "Category blocked";
-        hasStockIssue = true;
-      }
-
-      if (variant) {
-        if (variant.quantity <= 0) {
-          isAvailable = false;
-          stockMessage = "Out of stock";
-          hasStockIssue = true;
-        } else if (item.quantity > variant.quantity) {
-          isAvailable = false;
-          stockMessage = `Only ${variant.quantity} left in stock`;
-          hasStockIssue = true;
-        }
-      }
-
-      const itemTotal = isAvailable ? product.price * item.quantity : 0;
-      cartTotal += itemTotal;
-
+      const itemTotal = discountedPrice * item.quantity;
 
       return {
         product,
         quantity: item.quantity,
-        variantId: item.variantId,
         selectedVariant: variant,
-        isAvailable,
-        stockMessage,
-        itemTotal        
+
+        originalPrice,
+        discountedPrice,
+        itemTotal,
+
+        offerDetails: item.offerDetails || null,
       };
     });
 
-    const defaultAddress =
-      user.addresses?.find(a => a.isDefault) || null;
+    const originalSubtotal = cartItems.reduce(
+      (sum, item) => sum + item.originalPrice * item.quantity,
+      0
+    );
+
+    const itemOfferDiscount = cartItems.reduce(
+      (sum, item) =>
+        sum + (item.originalPrice - item.discountedPrice) * item.quantity,
+      0
+    );
+
+    const cartOfferDiscount = cart.cartDiscount || 0;
+
+    const totalOfferDiscount = itemOfferDiscount + cartOfferDiscount;
+
+    const defaultAddress = user.addresses?.find((a) => a.isDefault) || null;
 
     const selectedAddressId =
       req.session.selectedAddressId ||
       (defaultAddress ? defaultAddress._id.toString() : null);
 
+    const offers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: new Date() },
+      expiryDate: { $gte: new Date() },
+    });
+
+    const cartOffers = offers.filter((o) => o.offerType === "cart");
+
+    let cartDiscount = 0;
+    let cartBestOffer = null;
+
+    cartOffers.forEach((offer) => {
+      if (cart.totalPrice >= offer.minPurchaseAmount) {
+        let calculated = 0;
+
+        if (offer.discountType === "percentage") {
+          calculated = (cart.totalPrice * offer.discountValue) / 100;
+          if (offer.maxDiscountAmount && calculated > offer.maxDiscountAmount) {
+            calculated = offer.maxDiscountAmount;
+          }
+        } else {
+          calculated = offer.discountValue;
+        }
+
+        if (calculated > cartDiscount) {
+          cartDiscount = calculated;
+          cartBestOffer = offer;
+        }
+      }
+    });
+
+    cart.cartDiscount = cartDiscount;
+    cart.cartOffer = cartBestOffer;
+    cart.grandTotal = Math.max(cart.totalPrice - cartDiscount, 0);
+
+    await cart.save();
+
+    const appliedOffers = [];
+
+    cartItems.forEach((item) => {
+      if (item.offerDetails) {
+        appliedOffers.push({
+          level: "item",
+          title: item.offerDetails.title,
+          type: item.offerDetails.discountType,
+          value: item.offerDetails.discountValue,
+          productName: item.product.name,
+          amount: (item.originalPrice - item.discountedPrice) * item.quantity,
+        });
+      }
+    });
+
+    if (cart.cartOffer && cart.cartDiscount > 0) {
+      appliedOffers.push({
+        level: "cart",
+        title: cart.cartOffer.title,
+        type: cart.cartOffer.discountType,
+        value: cart.cartOffer.discountValue,
+        amount: cart.cartDiscount,
+      });
+    }
+
+    const totalDiscount = itemOfferDiscount + cartOfferDiscount;
     return res.render("checkout", {
       user,
       cartItems,
-      cartTotal,
+      totalDiscount,
+      originalSubtotal,
+      itemOfferDiscount,
+      cartOfferDiscount,
+      totalOfferDiscount,
+      wallet,
+
+      cartSubtotal: cart.totalPrice,
+      cartDiscount: cart.cartDiscount || 0,
+      cartOffer: cart.cartOffer || null,
+      grandTotal: cart.grandTotal || cart.totalPrice,
+      appliedOffers,
+
       hasStockIssue,
       addresses: user.addresses || [],
       selectedAddressId,
       error: req.session.errorMessage,
       success: req.session.successMessage,
-
     });
-
   } catch (error) {
     console.error("Error loading checkout:", error);
     req.session.errorMessage = "Failed to load checkout";
@@ -96,11 +180,12 @@ const loadCheckout = async (req, res) => {
   }
 };
 
-
 const placeOrder = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const { addressId, paymentMethod } = req.body;
+    let { addressId, paymentMethod, couponCode } = req.body;
+    console.log("coupon code: ", couponCode);
+    couponCode = couponCode ? couponCode.trim().toUpperCase() : "";
 
     if (!addressId) {
       return res.redirect("/checkout?error=Please select an address");
@@ -123,25 +208,143 @@ const placeOrder = async (req, res) => {
       return res.redirect("/checkout?error=Invalid address");
     }
 
-    let total = 0;
-    const items = cart.items.map((item) => {
-      const variant = item.variantId
-        ? item.product.variants.id(item.variantId)
-        : null;
+    const subtotal = cart.items.reduce((sum, item) => {
+      return sum + item.product.price * item.quantity;
+    }, 0);
 
-      total += item.product.price * item.quantity;
-      return {
-        product: item.product._id,
-        variantId: item.variantId || null,
-        quantity: item.quantity,
-        price: item.product.price,
+
+    const cartOfferDiscount = cart.cartDiscount || 0;
+
+
+    const items = cart.items.map((item) => ({
+      product: item.product._id,
+      variantId: item.variantId || null,
+      quantity: item.quantity,
+      price: item.discountedPrice || item.product.price,
+    }));
+
+    await calculateCartTotals(cart);
+
+    let finalAmount = cart.grandTotal;
+    const offerDiscount = subtotal- cart.totalPrice;
+
+    let discountAmount = 0;
+    let appliedCouponId = null;
+
+    if(couponCode){
+      const coupon = await Coupon.findOne({
+        code:couponCode,
+        isDeleted:false,
+      })
+
+      if(!coupon){
+        return res.redirect("/checkout?error=Invalid coupon")
       };
-    });
+
+      if(coupon.expiryDate< new Date()){
+        return res.redirect("/checkout?error = Coupon expired")
+      };
+
+      if(coupon.minPurchaseAmount && finalAmount< coupon.minPurchaseAmount){
+        return res.redirect(`/checkout?error= minimum Purchase ₹${coupon.minPurchaseAmount}`);
+      }
+
+      if(coupon.discountType === "percentage") {
+        discountAmount = (finalAmount * coupon.discountValue) / 100;
+
+        if(coupon.maxDiscountAmount&& discountAmount>coupon.maxDiscountAmount){
+          discountAmount = coupon.maxDiscountAmount;
+        }
+      }else{
+        discountAmount = coupon.discountValue
+      }
+      finalAmount = Math.max(finalAmount - discountAmount, 0);
+      appliedCouponId = coupon._id;
+    }
+
+    finalAmount = Math.round(finalAmount)
+
+    if (paymentMethod === "razorpay") {
+      const razorpayOrder = await razorpay.orders.create({
+        amount: finalAmount * 100,
+        currency: "INR",
+        receipt: `order_${Date.now()}`,
+      });
+
+      req.session.pendingOrder = {
+        userId,
+        items,
+        totalAmount:cart.totalPrice,
+        offerDiscount,
+        discountAmount,
+        finalAmount,
+        couponId: appliedCouponId,
+        address: selectedAddress,
+        paymentMethod,
+      };
+
+      return res.json({
+        success: true,
+        razorpayOrderId: razorpayOrder.id,
+        amount: razorpayOrder.amount,
+        key: process.env.RAZORPAY_KEY_ID,
+      });
+    }
+
+    if(paymentMethod === "wallet"){
+      const wallet = await Wallet.findOne({ userId });
+
+      if(!wallet || wallet.balance < finalAmount) {
+        return res.redirect(
+          "/checkout?error=Insufficient wallet balance"
+        );
+      }
+
+      await Wallet.findOneAndUpdate(
+        { userId },
+        {
+          $inc:{balance: -finalAmount},
+          $push:{
+            transactions:{
+              amount:finalAmount,
+              type: "debit",
+              reason: "Order payment via wallet",
+            },
+          },
+        }
+      );
+
+      const newOrder = new Order({
+        userId, 
+        items,
+        subtotal,
+        totalAmount: cart.totalPrice,
+        offerDiscount,
+        finalAmount,
+        discountAmount,
+        couponId: appliedCouponId,
+        address: selectedAddress,
+        paymentMethod: "wallet",
+        paymentStatus: "Paid",
+        status: "Confirmed",
+      });
+
+      await newOrder.save();
+      await Cart.findOneAndUpdate({userId}, {$set: {items: []}});
+
+      return res.redirect(`/order-success?orderId=${newOrder._id}`);
+
+    }
 
     const newOrder = new Order({
       userId,
       items,
-      totalAmount: total,
+      subtotal,
+      totalAmount: cart.totalPrice,
+      offerDiscount,
+      discountAmount,
+      finalAmount,
+      couponId: appliedCouponId,
       address: selectedAddress,
       status: "Confirmed",
       paymentMethod: req.body.paymentMethod,
@@ -175,7 +378,6 @@ const placeOrder = async (req, res) => {
   }
 };
 
-
 const loadSuccessPage = async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -205,9 +407,283 @@ const loadSuccessPage = async (req, res) => {
   }
 };
 
+const validateCoupon = async (req, res) => {
+  try {
+    const { couponCode, cartTotal } = req.body;
+
+    if (!couponCode) {
+      return res.json({ success: false, message: "Coupon code required" });
+    }
+
+    const coupon = await Coupon.findOne({
+      code: couponCode.toUpperCase(),
+      isDeleted: false,
+    });
+
+    if (!coupon) {
+      return res.json({ success: false, message: "Invalid coupon" });
+    }
+
+    if (new Date(coupon.expiryDate) < new Date()) {
+      return res.json({ success: false, message: "Coupon expired" });
+    }
+
+    if (coupon.minPurchaseAmount && cartTotal < coupon.minPurchaseAmount) {
+      return res.json({
+        success: false,
+        message: `Minimum purchase ₹${coupon.minPurchaseAmount}`,
+      });
+    }
+
+    let discountAmount = 0;
+
+    if (coupon.discountType === "percentage") {
+      discountAmount = (cartTotal * coupon.discountValue) / 100;
+      if (
+        coupon.maxDiscountAmount &&
+        discountAmount > coupon.maxDiscountAmount
+      ) {
+        discountAmount = coupon.maxDiscountAmount;
+      }
+    } else {
+      discountAmount = coupon.discountValue;
+    }
+
+    const finalAmount = Math.max(cartTotal - discountAmount, 0);
+
+
+    req.session.coupon = {
+      code: coupon.code,
+      discountAmount,
+      finalAmount
+    };
+
+
+    return res.json({
+      success: true,
+      discountAmount,
+      finalAmount,
+
+    });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: "Coupon validation failed" });
+  }
+};
+
+const createRazorpayOrder = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { addressId, couponCode } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
+    }
+
+    if (!addressId) {
+      return res.json({ success: false, message: "Address required" });
+    }
+
+    const cart = await Cart.findOne({ userId }).populate("items.product");
+
+    const subtotal = cart.items.reduce((sum, item)=>{
+      const price = typeof item.originalPrice === "number" ? item.originalPrice: item.product.price;
+
+      return sum + price * item.quantity;
+    },0);
+
+    await calculateCartTotals(cart);
+    let finalAmount = cart.grandTotal;
+    const offerDiscount = subtotal  - cart.totalPrice;
+
+    let discountAmount = 0;
+    let appliedCouponId = null;
+
+    if(couponCode) {
+      const coupon = await Coupon.findOne({
+        code: couponCode.toUpperCase(),
+        isDeleted: false,
+      });
+
+      if(!coupon) {
+        return res.json({success:false, message:"Invalid coupon"})
+      }
+
+      if(coupon.expiryDate < new Date()){
+        return res.json({success:false, message: "Coupon expired"});
+      }
+
+      if(coupon.discountType === "percentage") {
+        discountAmount = (finalAmount * coupon.discountValue) / 100;
+
+        if(coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount){
+          discountAmount = coupon.maxDiscountAmount;
+        }
+      }
+      else{
+        discountAmount = coupon.discountValue;
+      }
+      finalAmount = Math.max(finalAmount - discountAmount, 0);
+      appliedCouponId = coupon._id;
+    }
+    finalAmount = Math.round(finalAmount);
+
+
+    if (!finalAmount || isNaN(finalAmount) || finalAmount <= 0) {
+      console.error("Invalid finalAmount:", finalAmount);
+      return res.json({
+        success: false,
+        message: "Invalid order amount",
+      });
+    }
+
+    const razorpayOrder = await razorpay.orders.create({
+      amount: finalAmount * 100,
+      currency: "INR",
+      receipt: `order_${Date.now()}`,
+    });
+
+    req.session.pendingOrder = {
+      userId,
+      items: cart.items.map((item) => ({
+        product: item.product._id,
+        variantId: item.variantId || null,
+        quantity: item.quantity,
+        price:
+          typeof item.discountedPrice === "number"
+            ? item.discountedPrice
+            : item.product.price,
+      })),
+      priceAfterOffers : cart.totalPrice,
+      offerDiscount,
+      discountAmount,
+      finalAmount,
+      subtotal,
+      couponId:appliedCouponId,
+      address: user.addresses.id(addressId),
+      paymentMethod: "razorpay",
+    };
+
+    return res.json({
+      success: true,
+      razorpayOrderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      key: process.env.RAZORPAY_KEY_ID,
+    });
+  } catch (error) {
+    console.error("Razorpay order error:", error);
+    return res.json({ success: false });
+  }
+};
+
+const verifyRazorpayPayment = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      req.body;
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body)
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.json({ success: false });
+    }
+
+    const pendingOrder = req.session.pendingOrder;
+    if (!pendingOrder) {
+      return res.json({ success: false });
+    }
+
+    const newOrder = new Order({
+      userId: pendingOrder.userId,
+      items: pendingOrder.items,
+      totalAmount: pendingOrder.priceAfterOffers,
+      discountAmount: pendingOrder.discountAmount,
+      finalAmount: pendingOrder.finalAmount,
+      couponId: pendingOrder.couponId,
+      address: pendingOrder.address,
+      paymentMethod: "razorpay",
+      subtotal:pendingOrder.subtotal,
+      paymentStatus: "Paid",
+      offerDiscount:pendingOrder.offerDiscount,
+      status: "Confirmed",
+      razorpayPaymentId: razorpay_payment_id,
+    });
+
+    await newOrder.save();
+    
+    delete req.session.coupon;
+
+    await Cart.findOneAndUpdate(
+      { userId: pendingOrder.userId },
+      { $set: { items: [] } }
+    );
+
+    delete req.session.pendingOrder;
+
+    return res.json({
+      success: true,
+      orderId: newOrder._id,
+    });
+  } catch (error) {
+    console.error("Payment verification error:", error);
+    return res.json({ success: false });
+  }
+};
+
+
+const loadPaymentFailed = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    if (!req.session.pendingOrder) {
+      return res.redirect("/cart");
+    }
+
+    res.render("paymentFailed");
+  } catch (error) {
+    console.log("Load Payment Failed Error:", error);
+    res.redirect("/cart");
+  }
+};
+
+const retryPayment = async (req, res) => {
+  try {
+    const pendingOrder = req.session.pendingOrder;
+
+    if (!pendingOrder) {
+      return res.redirect("/cart");
+    }
+
+    const razorpayOrder = await razorpay.orders.create({
+      amount: pendingOrder.finalAmount * 100,
+      currency: "INR",
+      receipt: `retry_${Date.now()}`,
+    });
+
+    res.render("retryRazorpay", {
+      key: process.env.RAZORPAY_KEY_ID,
+      razorpayOrderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+    });
+  } catch (error) {
+    console.log("Retry Payment Error:", error);
+    res.redirect("/cart");
+  }
+};
 
 module.exports = {
   loadCheckout,
   loadSuccessPage,
   placeOrder,
+  validateCoupon,
+  createRazorpayOrder,
+  verifyRazorpayPayment,
+  loadPaymentFailed,
+  retryPayment
 };

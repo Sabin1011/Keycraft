@@ -1,0 +1,116 @@
+<%- include('../partials/admin/header') %>
+
+<style>
+  .report-container { padding: 30px; }
+  .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
+  .card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .card h4 { margin-bottom: 8px; color: #666; }
+  .card p { font-size: 20px; font-weight: bold; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+    background: #fff;
+  }
+  th, td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+  }
+  th {
+    background: #f4f4f4;
+  }
+</style>
+
+<div class="report-container">
+
+  <h2>Sales Report</h2>
+
+    <div style="margin:15px 0;">
+      <a href="/admin/sales-report/pdf?startDate=<%= startDate %>&endDate=<%= endDate %>"
+        class="btn"
+        style="padding:10px 15px; background:#401f75; color:#fff; text-decoration:none;">
+        Download PDF
+      </a>
+    </div>
+
+
+  <form method="GET" action="/admin/sales-report" style="margin:20px 0;">
+    <input type="date" name="startDate" value="<%= startDate %>">
+    <input type="date" name="endDate" value="<%= endDate %>">
+    <button type="submit">Apply</button>
+  </form>
+
+  <div class="cards">
+    <div class="card">
+      <h4>Total Orders</h4>
+      <p><%= summary.totalOrders %></p>
+    </div>
+    <div class="card">
+      <h4>Gross Sales</h4>
+      <p>₹<%= summary.grossSales.toFixed(2) %></p>
+    </div>
+    <div class="card">
+      <h4>Offer Discount</h4>
+      <p>-₹<%= summary.offerDiscount.toFixed(2) %></p>
+    </div>
+    <div class="card">
+      <h4>Coupon Discount</h4>
+      <p>-₹<%= summary.couponDiscount.toFixed(2) %></p>
+    </div>
+    <div class="card">
+      <h4>Net Revenue</h4>
+      <p>₹<%= summary.netRevenue.toFixed(2) %></p>
+    </div>
+  </div>
+
+  <div style="margin-top:25px;">
+    <strong>Payment Methods:</strong>
+    Razorpay: <%= paymentStats.razorpay %> |
+    Wallet: <%= paymentStats.wallet %> |
+    COD: <%= paymentStats.cod %>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Date</th>
+        <th>Payment</th>
+        <th>Subtotal</th>
+        <th>Discount</th>
+        <th>Final Amount</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (orders.length === 0) { %>
+        <tr>
+          <td colspan="7">No orders found</td>
+        </tr>
+      <% } %>
+
+      <% orders.forEach(order => { %>
+        <tr>
+          <td><%= order.orderId || order._id %></td>
+          <td><%= order.createdAt.toDateString() %></td>
+          <td><%= order.paymentMethod %></td>
+          <td>₹<%= (order.subtotal || 0).toFixed(2) %></td>
+          <td>₹<%= ((order.offerDiscount || 0) + (order.discountAmount || 0)).toFixed(2) %></td>
+          <td>₹<%= (order.finalAmount || 0).toFixed(2) %></td>
+          <td><%= order.status %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/admin/footer') %>
+    

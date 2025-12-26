@@ -2,6 +2,7 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Wishlist = require("../../models/wishlistModel");
+const Offer = require("../../models/offerSchema");
 const Cart = require("../../models/cartModel");
 const mongoose = require("mongoose");
 const path = require("path");
@@ -12,24 +13,27 @@ const bcrypt = require("bcrypt");
 
 // HOME
 
-
 const loadHome = async (req, res) => {
   try {
     const userId = req.session.userId;
 
-    let user = null;
+    const offers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: new Date() },
+      expiryDate: { $gte: new Date() },
+    });
 
+    let user = null;
     let wishlistProductIds = [];
     const cart = await Cart.findOne({ userId });
-
     let cartCount = 0;
 
     if (userId) {
       user = await User.findById(userId);
-      if(cart  && cart.items){
+      if (cart && cart.items) {
         cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
       }
-      
+
       const wishlist = await Wishlist.findOne({ userId });
       if (wishlist) {
         wishlistProductIds = wishlist.products.map((p) =>
@@ -46,9 +50,80 @@ const loadHome = async (req, res) => {
 
     const filteredProducts = products.filter((p) => p.category !== null);
 
+    const productWithOffers = filteredProducts.map((product) => {
+      const applicableOffers = [];
+
+      const productOffers = offers.filter(
+        (offer) =>
+          offer.offerType === "product" &&
+          offer.productIds.some(
+            (id) => id.toString() === product._id.toString()
+          )
+      );
+      applicableOffers.push(...productOffers);
+
+      const categoryOffers = offers.filter(
+        (offer) =>
+          offer.offerType === "category" &&
+          offer.categoryIds.some(
+            (id) => id.toString() === product.category._id.toString()
+          )
+      );
+      applicableOffers.push(...categoryOffers);
+
+      let bestOffer = null;
+      let discountedPrice = product.price;
+      let discountAmount = 0;
+
+      if (applicableOffers.length > 0) {
+        applicableOffers.forEach((offer) => {
+          let calculatedDiscount = 0;
+
+          if (offer.discountType === "percentage") {
+            calculatedDiscount = (product.price * offer.discountValue) / 100;
+
+            if (
+              offer.maxDiscountAmount &&
+              calculatedDiscount > offer.maxDiscountAmount
+            ) {
+              calculatedDiscount = offer.maxDiscountAmount;
+            }
+          } else if (offer.discountType === "flat") {
+            calculatedDiscount = offer.discountValue;
+          }
+
+          if (calculatedDiscount > discountAmount) {
+            discountAmount = calculatedDiscount;
+            bestOffer = offer;
+          }
+        });
+
+        discountedPrice = product.price - discountAmount;
+      }
+
+      return {
+        ...product.toObject(),
+        originalPrice: product.price,
+        discountedPrice: discountedPrice,
+        discountAmount: discountAmount,
+        discountPercentage:
+          product.price > 0
+            ? Math.round((discountAmount / product.price) * 100)
+            : 0,
+        hasOffer: bestOffer !== null,
+        offerDetails: bestOffer
+          ? {
+              title: bestOffer.title,
+              description: bestOffer.description,
+              offerType: bestOffer.offerType,
+              discountType: bestOffer.discountType,
+            }
+          : null,
+      };
+    });
     res.render("home", {
       user,
-      products: filteredProducts,
+      products: productWithOffers,
       wishlistProductIds,
       cartCount,
     });
@@ -79,6 +154,60 @@ const loadSingleProduct = async (req, res) => {
       return res.status(404).render("404", { message: "Product not found" });
     }
 
+    const offers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: new Date() },
+      expiryDate: { $gte: new Date() },
+    });
+
+    const applicableOffers = [];
+
+    const productOffers = offers.filter(
+      (offer) =>
+        offer.offerType === "product" &&
+        offer.productIds.some((id) => id.toString() === product._id.toString())
+    );
+    applicableOffers.push(...productOffers);
+
+    const categoryOffers = offers.filter(
+      (offer) =>
+        offer.offerType === "category" &&
+        offer.categoryIds.some(
+          (id) => id.toString() === product.category._id.toString()
+        )
+    );
+    applicableOffers.push(...categoryOffers);
+
+    let bestOffer = null;
+    let discountAmount = 0;
+    let discountedPrice = product.price;
+
+    if (applicableOffers.length > 0) {
+      applicableOffers.forEach((offer) => {
+        let calculatedDiscount = 0;
+
+        if (offer.discountType === "percentage") {
+          calculatedDiscount = (product.price * offer.discountValue) / 100;
+
+          if (
+            offer.maxDiscountAmount &&
+            calculatedDiscount > offer.maxDiscountAmount
+          ) {
+            calculatedDiscount = offer.maxDiscountAmount;
+          }
+        } else {
+          calculatedDiscount = offer.discountValue;
+        }
+
+        if (calculatedDiscount > discountAmount) {
+          discountAmount = calculatedDiscount;
+          bestOffer = offer;
+        }
+      });
+
+      discountedPrice = Math.max(product.price - discountAmount, 0);
+    }
+
     const relatedProducts = await Product.find({
       category: product.category._id,
       _id: { $ne: productId },
@@ -99,8 +228,27 @@ const loadSingleProduct = async (req, res) => {
       wishlistProductIds = wishlist.products.map((p) => p.productId.toString());
     }
 
+    const productWithOffer = {
+      ...product.toObject(),
+      originalPrice: product.price,
+      discountedPrice,
+      discountAmount,
+      discountPercentage:
+        product.price > 0
+          ? Math.round((discountAmount / product.price) * 100)
+          : 0,
+      hasOffer: bestOffer !== null,
+      offerDetails: bestOffer
+        ? {
+            title: bestOffer.title,
+            offerType: bestOffer.offerType,
+            discountType: bestOffer.discountType,
+          }
+        : null,
+    };
+
     res.render("productDetails", {
-      product,
+      product: productWithOffer,
       relatedProducts,
       wishlistProductIds,
       cartCount,
@@ -133,11 +281,26 @@ const loadShop = async (req, res) => {
       }
     }
 
+    
     let cartCount = 0;
+
     if (userId) {
       const cart = await Cart.findOne({ userId });
-      cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+      if (cart && Array.isArray(cart.items)) {
+        cartCount = cart.items.reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        );
+      }
     }
+
+
+    const offers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: new Date() },
+      expiryDate: { $gte: new Date() },
+    });
 
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
@@ -195,6 +358,80 @@ const loadShop = async (req, res) => {
       .lean();
 
     const filteredProducts = products.filter((p) => p.category !== null);
+    const productsWithOffers = filteredProducts.map((product) => {
+      const applicableOffers = [];
+
+      // Product offers
+      const productOffers = offers.filter(
+        (offer) =>
+          offer.offerType === "product" &&
+          offer.productIds.some(
+            (id) => id.toString() === product._id.toString()
+          )
+      );
+
+      applicableOffers.push(...productOffers);
+
+      // Category offers
+      const categoryOffers = offers.filter(
+        (offer) =>
+          offer.offerType === "category" &&
+          offer.categoryIds.some(
+            (id) => id.toString() === product.category._id.toString()
+          )
+      );
+
+      applicableOffers.push(...categoryOffers);
+
+      let bestOffer = null;
+      let discountAmount = 0;
+      let discountedPrice = product.price;
+
+      if (applicableOffers.length > 0) {
+        applicableOffers.forEach((offer) => {
+          let calculatedDiscount = 0;
+
+          if (offer.discountType === "percentage") {
+            calculatedDiscount = (product.price * offer.discountValue) / 100;
+            if (
+              offer.maxDiscountAmount &&
+              calculatedDiscount > offer.maxDiscountAmount
+            ) {
+              calculatedDiscount = offer.maxDiscountAmount;
+            }
+          } else {
+            calculatedDiscount = offer.discountValue;
+          }
+
+          if (calculatedDiscount > discountAmount) {
+            discountAmount = calculatedDiscount;
+            bestOffer = offer;
+          }
+        });
+
+        discountedPrice = product.price - discountAmount;
+      }
+
+      return {
+        ...product,
+        originalPrice: product.price,
+        discountedPrice,
+        discountAmount,
+        discountPercentage:
+          product.price > 0
+            ? Math.round((discountAmount / product.price) * 100)
+            : 0,
+        hasOffer: bestOffer !== null,
+        offerDetails: bestOffer
+          ? {
+              title: bestOffer.title,
+              offerType: bestOffer.offerType,
+              discountType: bestOffer.discountType,
+            }
+          : null,
+      };
+    });
+
     const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / limit);
 
@@ -207,7 +444,7 @@ const loadShop = async (req, res) => {
 
     res.render("shop", {
       user,
-      products: filteredProducts,
+      products: productsWithOffers,
       categories,
       totalPages,
       currentPage: page,
@@ -257,5 +494,4 @@ module.exports = {
   loadShop,
   loadSingleProduct,
   userLogout,
-
 };

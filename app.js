@@ -13,7 +13,6 @@ const noCache = require("nocache");
 
 const cartCountMiddleware = require("./src/middleware/cartCount")
 
-// Routes
 const userRoutes = require("./src/router/userRouter");
 const adminRoutes = require("./src/router/adminRouter");
 const authRoutes = require("./src/router/authRouter");

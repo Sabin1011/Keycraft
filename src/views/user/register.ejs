@@ -411,6 +411,17 @@
                     <% } %>
                 </div>
 
+                <div class="input-wrapper">
+                    <label>Referral Code (Optional)</label>
+                    <input 
+                        type="text"
+                        name="referralCode"
+                        placeholder="Enter referral code"
+                        value="<%= oldInput?.referralCode || '' %>"
+                    >
+                </div>
+
+
                 <!-- Checkbox (Fixed!) -->
                 <div class="checkbox-wrapper">
                     <label class="checkbox-entry">

@@ -31,6 +31,30 @@ const orderSchema = new Schema({
       }
     }
   ],
+  discountAmount: {
+    type: Number,
+    default: 0
+  },
+    subtotal: {
+    type: Number,
+    required: true,
+  },
+
+  finalAmount: {
+    type: Number,
+    required: true
+  },
+  offerDiscount: {
+  type: Number,
+  default: 0
+},
+
+  couponId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Coupon",
+    default: null
+  },
+
 
   orderId: {
     type: String,

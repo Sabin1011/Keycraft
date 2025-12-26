@@ -416,7 +416,34 @@
                         <div class="product-info">
                             <div class="product-category"><%= p.category ? p.category.name : "Uncategorized" %></div>
                             <div class="product-name"><%= p.name %></div>
-                            <div class="product-price">₹<%= p.price.toFixed(2) %></div>
+<div class="product-price">
+  <% if (p.hasOffer) { %>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <span style="text-decoration:line-through; color:#888; font-size:14px;">
+        ₹<%= p.originalPrice.toFixed(2) %>
+      </span>
+
+      <span style="font-size:18px; font-weight:700;">
+        ₹<%= p.discountedPrice.toFixed(2) %>
+      </span>
+
+      <span style="background:#27ae60; color:#fff; padding:3px 8px; border-radius:20px; font-size:11px; font-weight:600;">
+        <% if (p.offerDetails.discountType === 'percentage') { %>
+          <%= p.discountPercentage %>% OFF
+        <% } else { %>
+          ₹<%= p.discountAmount.toFixed(0) %> OFF
+        <% } %>
+      </span>
+    </div>
+
+    <div style="font-size:11px; color:#e67e22; margin-top:4px; font-weight:600;">
+      🎉 <%= p.offerDetails.title %>
+    </div>
+  <% } else { %>
+    ₹<%= p.originalPrice.toFixed(2) %>
+  <% } %>
+</div>
+
 
                             <div class="product-actions">
                                 <a href="/singleProduct/<%= p._id %>" class="btn-small btn-primary">details</a>
