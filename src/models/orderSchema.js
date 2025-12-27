@@ -35,6 +35,12 @@ const orderSchema = new Schema({
     type: Number,
     default: 0
   },
+  paymentStatus: {
+    type: String,
+    enum: ["Pending", "Paid", "Failed"],
+    default: "Pending"
+  },
+
     subtotal: {
     type: Number,
     required: true,

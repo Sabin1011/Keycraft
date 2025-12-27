@@ -391,14 +391,15 @@
             <div class="item-name"><%= item.product.name %></div>
 
             <% if (item.selectedVariant) { %>
-            <div style="font-size: 14px; color: #2c3e50; margin-bottom: 8px">
-              Switch Type: <strong><%= item.selectedVariant.name %></strong>
-            </div>
+              Variant: <strong><%= item.selectedVariant.name %></strong>
             <% } else { %>
-            <div style="font-size: 14px; color: #2c3e50; margin-bottom: 8px">
-              Switch Type: <strong>Default</strong>
-            </div>
-            <% } %> <% if (!item.isAvailable) { %>
+              <span style="color:red;font-size:13px;">
+                Variant unavailable
+              </span>
+            <% } %>
+
+
+            <% if (!item.isAvailable) { %>
             <div style="color: red; font-size: 13px; font-weight: 600">
               <%= item.outOfStockMessage %>
             </div>
@@ -539,12 +540,15 @@
           your cart to proceed.
         </div>
         <% } %>
-        <a
-          href="<%= invalidItemExists ? '#' : '/checkout' %>"
-          class="checkout-btn <%= invalidItemExists ? 'disabled' : '' %>"
-        >
+        <button id="checkoutBtn" class="checkout-btn">
           Proceed to Checkout
-        </a>
+        </button>
+
+        <div
+          id="checkoutError"
+          style="display:none;color:red;font-size:14px;margin-top:10px;text-align:center;">
+        </div>
+
 
         <a href="/shop" class="continue-shopping">Continue Shopping</a>
       </div>
@@ -706,6 +710,44 @@
         }
       });
     });
+  });
+
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  const checkoutError = document.getElementById("checkoutError");
+
+  checkoutBtn.addEventListener("click", async () => {
+    checkoutBtn.disabled = true;
+    checkoutBtn.textContent = "Checking stock...";
+
+    const res = await fetch("/cart/validate-stock", {
+      method: "POST",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+      },
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      checkoutBtn.disabled = true;
+      checkoutBtn.classList.add("disabled");
+
+      checkoutError.style.display = "block";
+      checkoutError.innerHTML = "";
+
+      if (data.stockErrors) {
+        data.stockErrors.forEach(err => {
+          checkoutError.innerHTML += `<div>${err.message}</div>`;
+        });
+      } else {
+        checkoutError.innerText = data.message || "Stock issue detected";
+      }
+
+      checkoutBtn.textContent = "Cannot Proceed";
+      return;
+    }
+
+    window.location.href = "/checkout";
   });
 </script>
 

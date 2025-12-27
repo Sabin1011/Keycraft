@@ -8,6 +8,7 @@ const adminOrderController = require("../controller/admin/adminOrderController")
 const couponController = require("../controller/admin/couponController");
 const OfferController = require("../controller/admin/offerController");
 const salesController = require("../controller/admin/salesReportController");
+const dashboardController = require("../controller/admin/dashboardController");
 
 const {upload} = require("../middleware/multer");
 const cloudinary = require("../config/cloudinary")
@@ -110,6 +111,7 @@ router.patch("/offer/toggle/:id",auth.isAdminLoggedIn, OfferController.toggleOff
 router.get("/sales-report", auth.isAdminLoggedIn, salesController.loadSalesReport);
 router.get("/sales-report/pdf", auth.isAdminLoggedIn, salesController.downloadSalesReportPDF);
 
+router.get("/dashboard", auth.isAdminLoggedIn, dashboardController.loadDashboard);
 
 router.get("/logout", adminController.logout);
 

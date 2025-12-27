@@ -264,13 +264,6 @@ const placeOrder = async (req, res) => {
 
     finalAmount = Math.round(finalAmount)
 
-    if (paymentMethod === "cod" && finalAmount > 1000) {
-      return res.json({
-        success: false,
-        message: "COD not allowed for orders above ₹1000"
-      });
-    }
-
     if (paymentMethod === "razorpay") {
       const razorpayOrder = await razorpay.orders.create({
         amount: finalAmount * 100,
@@ -586,7 +579,7 @@ const createRazorpayOrder = async (req, res) => {
 };
 
 const verifyRazorpayPayment = async (req, res) => {
-  try {
+  try { 
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       req.body;
 
@@ -684,6 +677,82 @@ const retryPayment = async (req, res) => {
   }
 };
 
+
+const validateCartStock = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    if (!userId) {
+      return res.json({ success: false, message: "Please login" });
+    }
+
+    const cart = await Cart.findOne({ userId }).populate("items.product");
+
+    if (!cart || cart.items.length === 0) {
+      return res.json({
+        success: false,
+        message: "Your cart is empty",
+      });
+    } 
+
+    const stockErrors = [];
+
+    for (const item of cart.items) {
+      const product = item.product;
+
+      if (!product) {
+        stockErrors.push({
+          productId: item.product,
+          message: "Product unavailable",
+        });
+        continue;
+      }
+
+      const variant = item.variantId
+        ? product.variants.id(item.variantId)
+        : null;
+
+      if (!variant) {
+        stockErrors.push({
+          productId: product._id,
+          message: `${product.name}: Variant unavailable`,
+        });
+        continue;
+      }
+
+      if (variant.quantity <= 0) {
+        stockErrors.push({
+          productId: product._id,
+          variantId: item.variantId,
+          message: `${product.name} is out of stock`,
+        });
+      } else if (variant.quantity < item.quantity) {
+        stockErrors.push({
+          productId: product._id,
+          variantId: item.variantId,
+          message: `Only ${variant.quantity} left for ${product.name}`,
+        });
+      }
+    }
+
+    if (stockErrors.length > 0) {
+      return res.json({
+        success: false,
+        stockErrors,
+      });
+    }
+
+    return res.json({ success: true });
+
+  } catch (err) {
+    console.error("Stock validation error:", err);
+    return res.json({
+      success: false,
+      message: "Failed to validate stock",
+    });
+  }
+};
+
+
 module.exports = {
   loadCheckout,
   loadSuccessPage,
@@ -692,5 +761,6 @@ module.exports = {
   createRazorpayOrder,
   verifyRazorpayPayment,
   loadPaymentFailed,
-  retryPayment
+  retryPayment,
+  validateCartStock
 };
