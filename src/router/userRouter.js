@@ -125,5 +125,8 @@ router.get(
 
 
 router.get("/wallet", auth.isLoggedIn, walletController.loadWalletPage);
+
+router.post("/cart/validate-stock", auth.isLoggedIn,checkoutController.validateCartStock);
+
   
 module.exports = router;

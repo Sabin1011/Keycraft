@@ -1,0 +1,82 @@
+<%- include('../partials/admin/header') %>
+
+<div class="container-fluid px-4">
+  <h2 class="mt-4">Admin Dashboard</h2>
+
+  <div class="d-flex gap-2 my-3">
+    <select id="filter" class="form-select w-auto">
+      <option value="year">Yearly</option>
+      <option value="month">Monthly</option>
+    </select>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      📊 Sales Overview
+    </div>
+    <div class="card-body">
+      <canvas id="salesChart"></canvas>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header"> Top 10 Products</div>
+        <ul class="list-group list-group-flush">
+          <% bestProducts.forEach((p, i) => { %>
+            <li class="list-group-item d-flex justify-content-between">
+              <span><%= i + 1 %>. <%= p.name %></span>
+              <strong><%= p.totalSold %></strong>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header"> Top 10 Categories</div>
+        <ul class="list-group list-group-flush">
+          <% bestCategories.forEach((c, i) => { %>
+            <li class="list-group-item d-flex justify-content-between">
+              <span><%= i + 1 %>. <%= c._id %></span>
+              <strong><%= c.totalSold %></strong>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+
+   
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const ctx = document.getElementById("salesChart").getContext("2d");
+
+  const salesChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: <%- JSON.stringify(salesChartData.labels) %>,
+      datasets: [{
+        label: "Total Sales (₹)",
+        data: <%- JSON.stringify(salesChartData.values) %>,
+        backgroundColor: "#2c3e50"
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+<%- include('../partials/admin/footer') %>
