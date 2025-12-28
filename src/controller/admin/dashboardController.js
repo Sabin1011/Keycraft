@@ -115,6 +115,73 @@ const loadDashboard = async (req, res) => {
   }
 };
 
+const getSalesChartDate = async(req, res)=>{
+  try {
+    const filter = req.query.filter;
+    let groupStage = {};
+    let sortStage = {};
+
+    if(filter === "daily"){
+      groupStage = {
+        _id:{
+          day: { $dayOfMonth: "$createdAt" },
+          month: { $month: "$createdAt" },
+          year: { $year: "$createdAt" },
+        },
+        totalSales: {$sum:"$finalAmount"}
+        
+      };
+      sortStage = { "_id.day":1 };
+    } else if(filter === "month") {
+      groupStage = {
+        _id: {$month: "$createdAt"},
+        totalSales: { $sum: "$finalAmount" }
+      };
+      sortStage = {"_id":1}
+    } else if(filter === "year") {
+      groupStage={
+        _id:{$year: "$createdAt"},
+        totalSales:{$sum:"$finalAmount"}
+      };
+      sortStage={"_id":1}
+    };
+
+    const salesData = await Order.aggregate([
+      {$match: {status:{$in: ["Placed","Confirmed","Delivered"]}}},
+      {$group: groupStage},
+      {$sort: sortStage}
+    ]);
+
+    let labels = [];
+    let values = [];
+
+
+    if(filter === "daily") {
+      labels = salesData.map(d=>`Day ${d._id.day}`);
+      values = salesData.map(d=>d.totalSales);
+    }
+
+    if(filter === "month") {
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      labels = salesData.map(d=>months[d._id - 1]);
+      values = salesData.map(d => d.totalSales);
+    }
+
+    if (filter === "year") {
+      labels = salesData.map(d => d._id);
+      values = salesData.map(d => d.totalSales);
+    }
+
+    res.json({labels,values});
+
+
+  } catch (error) {
+    console.error("Sales chart error:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+}
+
 module.exports = {
-  loadDashboard
+  loadDashboard,
+  getSalesChartDate
 };
