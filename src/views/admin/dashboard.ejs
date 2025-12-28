@@ -5,6 +5,7 @@
 
   <div class="d-flex gap-2 my-3">
     <select id="filter" class="form-select w-auto">
+      <option value="daily">Daily</option>
       <option value="year">Yearly</option>
       <option value="month">Monthly</option>
     </select>
@@ -61,21 +62,33 @@
   const salesChart = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: <%- JSON.stringify(salesChartData.labels) %>,
+      labels: [],
       datasets: [{
         label: "Total Sales (₹)",
-        data: <%- JSON.stringify(salesChartData.values) %>,
+        data: [],
         backgroundColor: "#2c3e50"
       }]
     },
     options: {
       responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
+      scales: { y: { beginAtZero: true } }
     }
+  });
+
+  async function loadChart(filter) {
+    const res = await fetch(`/admin/sales-data?filter=${filter}`);
+    const data = await res.json();
+
+    salesChart.data.labels = data.labels;
+    salesChart.data.datasets[0].data = data.values;
+    salesChart.update();
+  }
+
+  // Initial load (monthly)
+  loadChart("month");
+
+  document.getElementById("filter").addEventListener("change", (e) => {
+    loadChart(e.target.value);
   });
 </script>
 

@@ -112,6 +112,7 @@ router.get("/sales-report", auth.isAdminLoggedIn, salesController.loadSalesRepor
 router.get("/sales-report/pdf", auth.isAdminLoggedIn, salesController.downloadSalesReportPDF);
 
 router.get("/dashboard", auth.isAdminLoggedIn, dashboardController.loadDashboard);
+router.get("/sales-data", auth.isAdminLoggedIn, dashboardController.getSalesChartDate)
 
 router.get("/logout", adminController.logout);
 
