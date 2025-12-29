@@ -46,6 +46,11 @@ const orderSchema = new Schema({
     required: true,
   },
 
+  orderStatus:{
+    type: String,
+    enum: ["NotRefunded", "Refunded"],
+    default:"NotRefunded"
+  },
   finalAmount: {
     type: Number,
     required: true
