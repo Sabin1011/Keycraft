@@ -113,7 +113,7 @@ router.get("/sales-report/pdf", auth.isAdminLoggedIn, salesController.downloadSa
 
 router.get("/dashboard", auth.isAdminLoggedIn, dashboardController.loadDashboard);
 router.get("/sales-data", auth.isAdminLoggedIn, dashboardController.getSalesChartDate)
-
+router.get("/sales-report/excel", auth.isAdminLoggedIn, salesController.downloadSalesReportExcel)
 router.get("/logout", adminController.logout);
 
 module.exports = router;
