@@ -552,12 +552,19 @@
               </div>
             </label>
 
-            <label>
-              <input type="radio" name="paymentMethod" value="wallet" />
-              Pay using Wallet
-              <% if (wallet) { %>
-                (Balance: ₹<%= wallet.balance.toFixed(2) %>)
-              <% } %>
+            <label class="address-item" style="cursor: pointer; margin-top: 10px;">
+              <div class="address-radio">
+
+                <input type="radio" name="paymentMethod" value="wallet" />
+                <div class="address-content">
+                <div class="address-type">Pay using Wallet</div>
+                <div class="address-text">
+                  <% if (wallet) { %>
+                    (Balance: ₹<%= wallet.balance.toFixed(2) %>)
+                  <% } %>
+                </div>
+                </div>     
+              </div>
             </label>
 
             <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">

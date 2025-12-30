@@ -22,18 +22,18 @@ const auth = require("../middleware/auth");
 router.get("/login", auth.adminLogoutCheck, adminController.loadLogin);
 router.post("/adminlogin", adminController.adminlogin);
 
-router.get("/category", auth.isAdminLoggedIn, categoryController.loadCategory);
+router.get("/category", auth.adminAuth, categoryController.loadCategory);
 
 router.get(
   "/addCategory",
-  auth.isAdminLoggedIn,
+  auth.adminAuth,
   categoryController.loadAddCategory
 );
 router.post("/addcategory", categoryController.addCategory);
 
 router.get(
   "/editCategory/:id",
-  auth.isAdminLoggedIn,
+  auth.adminAuth,
   categoryController.loadEditCategory
 );
 
@@ -43,7 +43,7 @@ router.patch("/blockCategory/:id", categoryController.blockCategory);
 
 router.get(
   "/userManage",
-  auth.isAdminLoggedIn,
+  auth.adminAuth,
   userManageController.loadUserManage
 );
 
@@ -51,12 +51,12 @@ router.patch("/blockUser/:id", userManageController.blockUser);
 
 router.get(
   "/adminProduct",
-  auth.isAdminLoggedIn,
+  auth.adminAuth,
   productController.loadAdminProduct
 );
 router.get(
   "/adminAddProduct",
-  auth.isAdminLoggedIn,
+  auth.adminAuth,
   productController.loadAddProduct
 );
 
@@ -68,12 +68,12 @@ router.post(
 
 router.get(
   "/editProduct/:id",
-  auth.isAdminLoggedIn,
+  auth.adminAuth,
   productController.loadEditProduct
 );
 router.post(
   "/updateProduct/:id",
-  auth.isAdminLoggedIn,
+  auth.adminAuth,
   upload.array("images", 10),
   productController.updateProduct
 );
@@ -86,34 +86,34 @@ router.post(
 
 router.patch("/toggleProductStatus/:id", productController.toggleProductStatus);
 
-router.get("/orders", auth.isAdminLoggedIn,adminOrderController.loadOrders);
+router.get("/orders", auth.adminAuth,adminOrderController.loadOrders);
 router.post("/orders/update-status/:id", adminOrderController.updateOrderStatus);
 
 
-router.post("/order/:orderId/accept-return", auth.isAdminLoggedIn, adminOrderController.acceptReturn);
-router.post("/order/:orderId/reject-return", auth.isAdminLoggedIn, adminOrderController.rejectReturn);
+router.post("/order/:orderId/accept-return", auth.adminAuth, adminOrderController.acceptReturn);
+router.post("/order/:orderId/reject-return", auth.adminAuth, adminOrderController.rejectReturn);
 
 
-router.get("/couponManage",auth.isAdminLoggedIn, couponController.loadCouponList);
-router.get("/coupon/add", auth.isAdminLoggedIn, couponController.loadAddCoupon)
-router.post("/coupon/add", auth.isAdminLoggedIn,couponController.addCoupon);
-router.get("/coupon/edit/:id",auth.isAdminLoggedIn ,couponController.loadEditCoupon);
-router.patch("/coupon/edit", auth.isAdminLoggedIn, couponController.editCoupon);
-router.patch("/coupon/toggle/:id",auth.isAdminLoggedIn , couponController.toggleCouponStatus);
+router.get("/couponManage",auth.adminAuth, couponController.loadCouponList);
+router.get("/coupon/add", auth.adminAuth, couponController.loadAddCoupon)
+router.post("/coupon/add", auth.adminAuth,couponController.addCoupon);
+router.get("/coupon/edit/:id",auth.adminAuth,couponController.loadEditCoupon);
+router.patch("/coupon/edit", auth.adminAuth, couponController.editCoupon);
+router.patch("/coupon/toggle/:id",auth.adminAuth, couponController.toggleCouponStatus);
 
-router.get("/offerManage",auth.isAdminLoggedIn, OfferController.loadOfferManage);
-router.get("/offer/add",auth.isAdminLoggedIn, OfferController.loadAddOfferPage)
-router.post("/offer/add",auth.isAdminLoggedIn, OfferController.addOffer);
-router.get("/offer/edit/:id", auth.isAdminLoggedIn, OfferController.loadEditOffer);
-router.post("/offer/edit", auth.isAdminLoggedIn,OfferController.updateOffer);
-router.patch("/offer/toggle/:id",auth.isAdminLoggedIn, OfferController.toggleOfferStatus);
+router.get("/offerManage",auth.adminAuth, OfferController.loadOfferManage);
+router.get("/offer/add",auth.adminAuth, OfferController.loadAddOfferPage)
+router.post("/offer/add",auth.adminAuth, OfferController.addOffer);
+router.get("/offer/edit/:id", auth.adminAuth, OfferController.loadEditOffer);
+router.post("/offer/edit", auth.adminAuth,OfferController.updateOffer);
+router.patch("/offer/toggle/:id",auth.adminAuth, OfferController.toggleOfferStatus);
 
-router.get("/sales-report", auth.isAdminLoggedIn, salesController.loadSalesReport);
-router.get("/sales-report/pdf", auth.isAdminLoggedIn, salesController.downloadSalesReportPDF);
+router.get("/sales-report", auth.adminAuth, salesController.loadSalesReport);
+router.get("/sales-report/pdf", auth.adminAuth, salesController.downloadSalesReportPDF);
 
-router.get("/dashboard", auth.isAdminLoggedIn, dashboardController.loadDashboard);
-router.get("/sales-data", auth.isAdminLoggedIn, dashboardController.getSalesChartDate)
-router.get("/sales-report/excel", auth.isAdminLoggedIn, salesController.downloadSalesReportExcel)
+router.get("/dashboard", auth.adminAuth, dashboardController.loadDashboard);
+router.get("/sales-data", auth.adminAuth, dashboardController.getSalesChartDate)
+router.get("/sales-report/excel", auth.adminAuth, salesController.downloadSalesReportExcel)
 router.get("/logout", adminController.logout);
 
 module.exports = router;

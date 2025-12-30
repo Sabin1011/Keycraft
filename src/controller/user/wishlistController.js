@@ -134,7 +134,7 @@ const addAllToCart = async (req, res) => {
     for (const item of wishlist.products) {
       const productId = item.productId;
       const variantId = item.variantId || null;
-      const quantity = 1; // Default quantity when adding from wishlist
+      const quantity = 1; 
 
       const product = await Product.findById(productId).populate("category");
       if (!product) continue;
@@ -180,7 +180,6 @@ const addAllToCart = async (req, res) => {
 
     await cart.save();
 
-    // OPTIONAL → Clear wishlist after adding
     wishlist.products = [];
     await wishlist.save();
 

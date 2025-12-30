@@ -54,6 +54,13 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use(noCache());
 
+app.use("/admin",(req,res,next)=>{
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.setHeader("Pragma","no-cache");
+    res.setHeader("Expires","0");
+    next();
+});
+
 app.use("/", userRoutes);
 app.use("/admin", adminRoutes);
 app.use("/auth", authRoutes);
