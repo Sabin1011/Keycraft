@@ -103,6 +103,7 @@ const loadDashboard = async (req, res) => {
     ]);
 
     res.render("dashboard", {
+      activePage: "dashboard",
       salesChartData,
       bestProducts,
       bestCategories,

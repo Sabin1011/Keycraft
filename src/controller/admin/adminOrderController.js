@@ -22,6 +22,7 @@ const loadOrders = async (req, res) => {
     const orders = await Order.find(query).sort({ createdAt: -1 }).skip((page - 1)*limit ).limit(limit  );
 
     res.render("adminOrderDetails", { 
+      activePage: "orders",
       orders,
       statusOptions,
       search,

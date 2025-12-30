@@ -8,12 +8,62 @@
   .page-title-box {
     margin-top: 20px;
   }
-  .search-container {
-    max-width: 400px;
-  }
-  .search-input {
-    height: 38px;
-  }
+.search-box {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #6c757d;
+  pointer-events: none;
+}
+
+.search-input {
+  padding-left: 42px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+  font-size: 14px;
+  transition: all 0.25s ease;
+}
+
+.search-input::placeholder {
+  color: #adb5bd;
+}
+
+.search-input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  outline: none;
+}
+
+.search-btn {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 10px;
+  background-color: #4f46e5;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.search-btn:hover {
+  background-color: #4338ca;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+.search-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
   .add-button {
     background: #000;
     color: white;
@@ -43,27 +93,34 @@
           </div>
         </div>
 
-        <!-- Search -->
-        <div class="row mb-3">
+        <div class="row mb-4">
           <div class="col-sm-12 col-md-6">
-            <div class="search-container">
-              <form action="/admin/couponManage" method="GET" class="search-form" id="searchForm">
-                <div class="search-input-wrapper position-relative">
-                  <i class="bx bx-search search-icon" style="left:10px; position:absolute; top:50%; transform:translateY(-50%);"></i>
-                  <input 
-                    type="text" 
-                    class="search-input form-control"
-                    placeholder="Search coupons..."
-                    name="search"
-                    value="<%= locals.search || '' %>"
-                    autocomplete="off"
-                  />
-                </div>
-                <button type="submit" class="search-button">Search</button>
-              </form>
-            </div>
+            <form
+              action="/admin/couponManage"
+              method="GET"
+              class="search-form d-flex align-items-center gap-2"
+              id="searchForm"
+            >
+              <div class="search-box flex-grow-1">
+                <i class="bx bx-search search-icon"></i>
+
+                <input
+                  type="text"
+                  class="form-control search-input"
+                  placeholder="Search coupons..."
+                  name="search"
+                  value="<%= locals.search || '' %>"
+                  autocomplete="off"
+                />
+              </div>
+
+              <button type="submit" class="btn search-btn">
+                Search
+              </button>
+            </form>
           </div>
         </div>
+
 
         <div class="row">
           <div class="col-12">

@@ -1,8 +1,6 @@
 const User = require("../../models/userSchema");
 const bcrypt = require("bcrypt");
 
-// LOAD ADMIN LOGIN PAGE
-
 const loadLogin = async (req, res) => {
   try {
 
@@ -16,7 +14,6 @@ const loadLogin = async (req, res) => {
   }
 };
 
-// ADMIN LOGIN HANDLER
 
 const adminlogin = async (req, res) => {
   try {
@@ -62,12 +59,13 @@ const adminlogin = async (req, res) => {
 
     req.session.admin = admin._id;
 
-    res.redirect("/admin/category");
+    res.redirect("/admin/dashboard");
   } catch (error) {
     console.log("Admin login error:", error);
     res.redirect("/admin/login");
   }
 };
+
 const logout = async (req, res) => {
   req.session.destroy(() => {
     res.redirect("/admin/login");

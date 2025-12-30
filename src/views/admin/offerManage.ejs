@@ -8,12 +8,41 @@
   .page-title-box {
     margin-top: 20px;
   }
-  .search-container {
-    max-width: 400px;
+  .search-box {
+    position: relative;
+    width: 100%;
   }
+
+  .search-box .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #6c757d;
+    pointer-events: none;
+  }
+
   .search-input {
-    height: 38px;
+    padding-left: 42px;
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    font-size: 14px;
+    transition: all 0.25s ease;
+    background-color: #fff;
   }
+
+  .search-input::placeholder {
+    color: #adb5bd;
+  }
+
+  .search-input:focus {
+    border-color: #4f46e5; 
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    outline: none;
+  }
+
   .add-button {
     background: #000;
     color: white;
@@ -31,7 +60,6 @@
   <div class="page-content">
     <div class="container-fluid">
 
-      <!-- PAGE TITLE -->
       <div class="row">
         <div class="col-12">
           <div class="page-title-box d-sm-flex align-items-center justify-content-between">
@@ -43,31 +71,26 @@
         </div>
       </div>
 
-      <!-- Search -->
-      <div class="row mb-3">
-        <div class="col-sm-12 col-md-6">
-          <div class="search-container">
-            <form action="/admin/offerManage" method="GET" class="search-form">
+      <div class="row mb-4">
+  <div class="col-sm-12 col-md-6">
+    <form action="/admin/offerManage" method="GET" class="search-form">
+      <div class="search-box">
+        <i class="bx bx-search search-icon"></i>
 
-              <div class="search-input-wrapper position-relative">
-                <i class="bx bx-search search-icon"
-                   style="left:10px; position:absolute; top:50%; transform:translateY(-50%);"></i>
-
-                <input 
-                  type="text" 
-                  class="search-input form-control"
-                  placeholder="Search offers..."
-                  name="search"
-                  value="<%= search || '' %>"
-                  autocomplete="off"
-                />
-              </div>
-            </form>
-          </div>
-        </div>
+        <input
+          type="text"
+          class="form-control search-input"
+          placeholder="Search offers..."
+          name="search"
+          value="<%= search || '' %>"
+          autocomplete="off"
+        />
       </div>
+    </form>
+  </div>
+</div>
 
-      <!-- TABLE -->
+
       <div class="row">
         <div class="col-12">
           <div class="card">
@@ -165,7 +188,6 @@
                 </table>
               </div>
 
-              <!-- Pagination -->
               <% if(totalOffers > 0) { %>
               <div class="pagination-container d-flex justify-content-between mt-3">
                 <div class="pagination-info">
@@ -203,7 +225,6 @@
 
 <%- include('../partials/admin/footer') %>
 
-<!-- ADD OFFER MODAL -->
 <div class="modal fade" id="addOfferModal" tabindex="-1">
   <div class="modal-dialog modal-lg">
     <form action="/admin/offer/add" method="POST" class="modal-content">
@@ -226,14 +247,12 @@
           <option value="cart">Cart Offer</option>
         </select>
 
-        <!-- Product Select -->
         <select class="form-control mb-2 d-none" id="productSelectAdd" name="productIds" multiple>
           <% allProducts.forEach(p => { %>
             <option value="<%= p._id %>"><%= p.name %></option>
           <% }) %>
         </select>
 
-        <!-- Category Select -->
         <select class="form-control mb-2 d-none" id="categorySelectAdd" name="categoryIds" multiple>
           <% allCategories.forEach(c => { %>
             <option value="<%= c._id %>"><%= c.name %></option>
@@ -266,7 +285,6 @@
   </div>
 </div>
 
-<!-- EDIT OFFER MODAL -->
 <div class="modal fade" id="editOfferModal" tabindex="-1">
   <div class="modal-dialog modal-lg">
     <form action="/admin/offer/edit" method="POST" class="modal-content">
@@ -290,14 +308,12 @@
           <option value="cart">Cart Offer</option>
         </select>
 
-        <!-- Product Select -->
         <select class="form-control mb-2 d-none" id="productSelectEdit" name="productIds" multiple>
           <% allProducts.forEach(p => { %>
             <option value="<%= p._id %>"><%= p.name %></option>
           <% }) %>
         </select>
 
-        <!-- Category Select -->
         <select class="form-control mb-2 d-none" id="categorySelectEdit" name="categoryIds" multiple>
           <% allCategories.forEach(c => { %>
             <option value="<%= c._id %>"><%= c.name %></option>
@@ -330,13 +346,9 @@
   </div>
 </div>
 
-<!-- SweetAlert + JS Functions -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-/* ---------------------------------------------
-  ENABLE / DISABLE OFFER (Soft Delete)
---------------------------------------------- */
 function toggleOffer(id, disable) {
   Swal.fire({
     title: disable ? "Disable this offer?" : "Enable this offer?",
@@ -356,9 +368,6 @@ function toggleOffer(id, disable) {
   });
 }
 
-/* ---------------------------------------------
-  ADD MODAL — Show/Hide Fields by Type
---------------------------------------------- */
 document.getElementById("offerTypeAdd").addEventListener("change", function () {
   const type = this.value;
 
@@ -366,9 +375,6 @@ document.getElementById("offerTypeAdd").addEventListener("change", function () {
   document.getElementById("categorySelectAdd").classList.toggle("d-none", type !== "category");
 });
 
-/* ---------------------------------------------
-  OPEN EDIT MODAL
---------------------------------------------- */
 function openEditOffer(offer) {
   document.getElementById("editOfferId").value = offer._id;
   document.getElementById("editTitle").value = offer.title;
@@ -383,12 +389,10 @@ function openEditOffer(offer) {
   document.getElementById("editStartDate").value = offer.startDate.split("T")[0];
   document.getElementById("editExpiryDate").value = offer.expiryDate.split("T")[0];
 
-  // Show/hide selects
   const type = offer.offerType;
   document.getElementById("productSelectEdit").classList.toggle("d-none", type !== "product");
   document.getElementById("categorySelectEdit").classList.toggle("d-none", type !== "category");
 
-  // Pre-fill product/category selections
   if (type === "product" && offer.productIds) {
     const prodSelect = document.getElementById("productSelectEdit");
     [...prodSelect.options].forEach(opt => {

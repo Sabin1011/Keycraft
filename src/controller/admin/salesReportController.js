@@ -41,6 +41,7 @@ const loadSalesReport = async (req, res) => {
     }
 
     res.render("salesReport", {
+      activePage: "salesReport",
       orders,
       startDate: req.query.startDate || "",
       endDate: req.query.endDate || "",

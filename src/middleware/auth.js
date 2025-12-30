@@ -53,12 +53,11 @@ const isLoggedIn = async (req, res, next) => {
 
 // adminAuth
 
-const isAdminLoggedIn = (req, res, next) => {
-  if (req.session && req.session.admin) {
-    return next();
-  } else {
-    res.redirect("/admin/login");
+const adminAuth = (req, res, next) => {
+  if(!req.session.admin){
+    return res.redirect("/admin/login");
   }
+  next();
 };
 
-module.exports = { isAdminLoggedIn, isLogged, isLoggedIn, adminLogoutCheck };
+module.exports = { adminAuth, isLogged, isLoggedIn, adminLogoutCheck };
