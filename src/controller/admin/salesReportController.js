@@ -39,9 +39,9 @@ const loadSalesReport = async (req, res) => {
         paymentStats[order.paymentMethod]++;
       }
     }
-
+    
     res.render("salesReport", {
-      activePage: "salesReport",
+
       orders,
       startDate: req.query.startDate || "",
       endDate: req.query.endDate || "",

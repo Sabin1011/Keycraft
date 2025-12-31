@@ -34,7 +34,7 @@ const loadAdminProduct = async (req, res) => {
     const allCategories = await Category.find({});
 
     res.render("adminProduct", {
-      activePage: "products",
+   
       products,
       allCategories,
       searchQuery,
@@ -204,6 +204,7 @@ const loadEditProduct = async (req, res) => {
     const categories = await Category.find({ status: true });
 
     res.render("adminEditProduct", {
+      
       product,
       categories,
     });

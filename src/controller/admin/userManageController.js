@@ -28,7 +28,6 @@ const loadUserManage = async (req, res) => {
       .limit(limit);
 
     res.render("userManage", {
-      activePage: "users",
       users,
       currentPage: page,
       totalUsers,

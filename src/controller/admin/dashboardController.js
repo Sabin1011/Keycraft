@@ -49,7 +49,6 @@ const loadDashboard = async (req, res) => {
       };
     });
 
-
     const bestCategories = await Order.aggregate([
       { $unwind: "$items" },
       {
@@ -103,7 +102,7 @@ const loadDashboard = async (req, res) => {
     ]);
 
     res.render("dashboard", {
-      activePage: "dashboard",
+      // activePage: "dashboard",
       salesChartData,
       bestProducts,
       bestCategories,

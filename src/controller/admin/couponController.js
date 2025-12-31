@@ -20,7 +20,7 @@ const loadCouponList = async (req, res) => {
       .limit(limit);
 
     return res.render("couponManage", {
-      activePage: "coupons",
+      // activePage: "coupons",
       coupons,
       currentPage,
       limit,

@@ -24,7 +24,7 @@ const loadOfferManage = async (req, res) => {
     const allCategories = await Category.find({}).lean();
 
     return res.render("offerManage", {
-      activePage: "offers",
+      // activePage: "offers",
       offers,
       allProducts,
       allCategories,

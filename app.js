@@ -61,10 +61,10 @@ app.use("/admin",(req,res,next)=>{
     next();
 });
 
-app.use("/", userRoutes);
 app.use("/admin", adminRoutes);
 app.use("/auth", authRoutes);
 
+app.use("/", userRoutes);
 connectDB();
 
 app.listen(3000, () => {
