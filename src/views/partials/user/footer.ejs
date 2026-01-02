@@ -1,95 +1,167 @@
 <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>about keycraft</h3>
-                    <p style="color: rgba(255,255,255,0.7); font-size: 13px;">Your premium destination for mechanical keyboards, switches, and accessories. Quality products curated for enthusiasts.</p>
-                </div>
-                <div class="footer-section">
-                    <h3>quick links</h3>
-                    <ul class="footer-links">
-                        <li><a href="/keyboards">keyboards</a></li>
-                        <li><a href="/switches">switches</a></li>
-                        <li><a href="/keycaps">keycaps</a></li>
-                        <li><a href="/accessories">accessories</a></li>
-                        <li><a href="/brands">brands</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>customer service</h3>
-                    <ul class="footer-links">
-                        <li><a href="/about">about us</a></li>
-                        <li><a href="/contact">contact</a></li>
-                        <li><a href="/shipping">shipping info</a></li>
-                        <li><a href="/returns">returns</a></li>
-                        <li><a href="/faq">faq</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>my account</h3>
-                    <ul class="footer-links">
-                        <li><a href="/login">login</a></li>
-                        <li><a href="/register">register</a></li>
-                        <li><a href="/orders">order history</a></li>
-                        <li><a href="/wishlist">wishlist</a></li>
-                        <li><a href="/account">account settings</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; <%= new Date().getFullYear() %> KeyCraft. all rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+<footer class="kc-footer">
+  <div class="container">
 
-    <style>
-        /* Footer Styles */
-        footer {
-            background: #222;
-            color: #fff;
-            padding: 50px 0 30px;
-        }
+    <div class="footer-content">
 
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
-        }
+      <div class="footer-section brand">
+        <h2 class="logo">KEY<span>CRAFT</span></h2>
+        <p>
+          Your premium destination for mechanical keyboards, switches,
+          and accessories. Quality products curated for enthusiasts.
+        </p>
+      </div>
 
-        .footer-section h3 {
-            font-size: 16px;
-            margin-bottom: 20px;
-            text-transform: lowercase;
-        }
+      <div class="footer-section">
+        <h3>quick links</h3>
+        <ul class="footer-links">
+          <li><a href="/keyboards">keyboards</a></li>
+          <li><a href="/switches">switches</a></li>
+          <li><a href="/keycaps">keycaps</a></li>
+          <li><a href="/accessories">accessories</a></li>
+          <li><a href="/brands">brands</a></li>
+        </ul>
+      </div>
 
-        .footer-links {
-            list-style: none;
-        }
+      <div class="footer-section">
+        <h3>customer service</h3>
+        <ul class="footer-links">
+          <li><a href="/about">about us</a></li>
+          <li><a href="/contact">contact</a></li>
+          <li><a href="/shipping">shipping info</a></li>
+          <li><a href="/returns">returns</a></li>
+          <li><a href="/faq">faq</a></li>
+        </ul>
+      </div>
 
-        .footer-links li {
-            margin-bottom: 10px;
-        }
+      <div class="footer-section">
+        <h3>my account</h3>
+        <ul class="footer-links">
+          <li><a href="/login">login</a></li>
+          <li><a href="/register">register</a></li>
+          <li><a href="/orders">order history</a></li>
+          <li><a href="/wishlist">wishlist</a></li>
+          <li><a href="/account">account settings</a></li>
+        </ul>
+      </div>
 
-        .footer-links a {
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            font-size: 13px;
-            transition: color 0.3s;
-        }
+    </div>
 
-        .footer-links a:hover {
-            color: #ccc;
-        }
+    <div class="footer-bottom">
+      <p>
+        &copy; <%= new Date().getFullYear() %> <strong>KeyCraft</strong>.
+        Crafted with precision. All rights reserved.
+      </p>
+    </div>
 
-        .footer-bottom {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 13px;
-            color: rgba(255,255,255,0.5);
-        }
-    </style>
+  </div>
+</footer>
+
+<style>
+  /* ===== KEYCRAFT FOOTER ===== */
+
+  .kc-footer {
+    background: linear-gradient(180deg, #0f0f12, #0b0b0e);
+    color: #e5e7eb;
+    padding: 70px 0 30px;
+    border-top: 1px solid #1f1f25;
+  }
+
+  .footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 50px;
+    margin-bottom: 50px;
+  }
+
+  /* Brand */
+  .footer-section.brand p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.65);
+    margin-top: 12px;
+  }
+
+  .logo {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #fbbf24;
+  }
+
+  .logo span {
+    color: #fff;
+  }
+
+  /* Section titles */
+  .footer-section h3 {
+    font-size: 14px;
+    margin-bottom: 18px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #fbbf24;
+  }
+
+  /* Links */
+  .footer-links {
+    list-style: none;
+    padding: 0;
+  }
+
+  .footer-links li {
+    margin-bottom: 12px;
+  }
+
+  .footer-links a {
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    font-size: 14px;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .footer-links a::before {
+    content: "▸";
+    position: absolute;
+    left: -14px;
+    opacity: 0;
+    color: #fbbf24;
+    transition: all 0.3s ease;
+  }
+
+  .footer-links a:hover {
+    color: #fbbf24;
+    padding-left: 6px;
+  }
+
+  .footer-links a:hover::before {
+    opacity: 1;
+  }
+
+  /* Bottom bar */
+  .footer-bottom {
+    text-align: center;
+    padding-top: 25px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .footer-bottom strong {
+    color: #fbbf24;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .footer-content {
+      gap: 35px;
+    }
+
+    .logo {
+      font-size: 22px;
+    }
+  }
+</style>
+
 </body>
 </html>

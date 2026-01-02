@@ -65,6 +65,11 @@ app.use("/admin", adminRoutes);
 app.use("/auth", authRoutes);
 
 app.use("/", userRoutes);
+
+app.use((req, res)=>{
+    res.status(404).render("404");
+});
+
 connectDB();
 
 app.listen(3000, () => {

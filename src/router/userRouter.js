@@ -9,7 +9,8 @@ const cartController = require('../controller/user/cartController');
 const orderController = require('../controller/user/orderController')
 const checkoutController = require('../controller/user/checkoutController');
 const couponController = require("../controller/admin/couponController.js");
-const walletController = require("../controller/user/walletController.js") 
+const walletController = require("../controller/user/walletController.js");
+const aboutController = require("../controller/user/aboutController.js")
 const auth = require("../middleware/auth");
 const multer = require('multer');
 const { profileUpload } = require("../middleware/multer");
@@ -128,5 +129,6 @@ router.get("/wallet", auth.isLoggedIn, walletController.loadWalletPage);
 
 router.post("/cart/validate-stock", auth.isLoggedIn,checkoutController.validateCartStock);
 
+router.get("/about", auth.isLoggedIn, aboutController.loadAbout)
   
 module.exports = router;

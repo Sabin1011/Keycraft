@@ -12,269 +12,259 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<style>
+  :root {
+    --yellow: #fbbf24;
+    --black: #0b0b0e;
+    --dark-gray: #1a1a1f;
+    --gray: #9ca3af;
+  }
 
-        body {
-            font-family: 'Questrial', sans-serif;
-            background: #f5f5f5;
-            color: #222;
-        }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+  body {
+    font-family: 'Questrial', sans-serif;
+    background: #0b0b0e;
+    color: #e5e7eb;
+  }
 
-        header {
-            background: #ffffffd3;
-            border-bottom: 1px solid #e5e5e551;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
 
-        .header-wrapper {
-            padding: 20px 0;
-        }
+  /* ===== HEADER ===== */
+  header {
+    background: linear-gradient(180deg, #0f0f12, #0b0b0e);
+    border-bottom: 1px solid #1f1f25;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
 
-        .header-wrapper .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 40px;
-        }
+  .header-wrapper {
+    padding: 18px 0;
+  }
 
-        /* Logo */
-        .logo {
-            font-size: 32px;
-            font-weight: 900;
-            font-family: 'Raleway', sans-serif;
-            color: #222;
-            text-decoration: none;
-            white-space: nowrap;
-        }
+  .header-wrapper .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+  }
 
-        .logo span {
-            color: #666;
-        }
+  /* ===== LOGO ===== */
+  .logo {
+    font-size: 32px;
+    font-weight: 900;
+    font-family: 'Raleway', sans-serif;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
 
-        /* Navigation */
-        nav {
-            flex: 1;
-        }
+  .logo span {
+    color: var(--yellow);
+  }
 
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 35px;
-            justify-content: center;
-        }
+  /* ===== NAVIGATION ===== */
+  nav {
+    flex: 1;
+  }
 
-        nav a {
-            color: #222;
-            text-decoration: none;
-            font-size: 15px;
-            text-transform: lowercase;
-            font-weight: 500;
-            transition: color 0.3s;
-            position: relative;
-        }
+  nav ul {
+    display: flex;
+    list-style: none;
+    gap: 34px;
+    justify-content: center;
+  }
 
-        nav a:hover {
-            color: #666;
-        }
+  nav a {
+    color: #e5e7eb;
+    text-decoration: none;
+    font-size: 14px;
+    text-transform: lowercase;
+    font-weight: 600;
+    letter-spacing: .4px;
+    position: relative;
+    padding-bottom: 6px;
+    transition: color .3s ease;
+  }
 
-        nav a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #222;
-            transition: width 0.3s;
-        }
+  nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background: var(--yellow);
+    transition: width .3s ease;
+  }
 
-        nav a:hover::after {
-            width: 100%;
-        }
+  nav a:hover {
+    color: var(--yellow);
+  }
 
-        /* Header Actions */
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
+  nav a:hover::after {
+    width: 100%;
+  }
 
-        /* Cart Icon Button */
-        .cart-btn {
-            position: relative;
-            background: #f8f9fa;
-            color: #222;
-            border: 2px solid #e5e5e5;
-            padding: 10px 18px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
+  /* ===== HEADER ACTIONS ===== */
+  .header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
 
-        .cart-btn:hover {
-            background: #222;
-            color: #fff;
-            border-color: #222;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
+  /* ===== CART ===== */
+  .cart-btn {
+    background: var(--dark-gray);
+    color: #fff;
+    border: 1px solid #2a2a2f;
+    padding: 10px 18px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .3s ease;
+  }
 
-        .cart-badge {
-            background: #222;
-            color: #fff;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
-        }
+  .cart-btn:hover {
+    background: #000;
+    border-color: var(--yellow);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(251,191,36,.15);
+  }
 
-        .cart-btn:hover .cart-badge {
-            background: #fff;
-            color: #222;
-        }
+  .cart-badge {
+    background: var(--yellow);
+    color: #000;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
 
-        /* Login Button */
-        .login-btn {
-            background: #fff;
-            color: #222;
-            border: 2px solid #222;
-            padding: 10px 24px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: lowercase;
-            transition: all 0.3s;
-            display: inline-block;
-        }
+  /* ===== LOGIN ===== */
+  .login-btn {
+    background: transparent;
+    color: var(--yellow);
+    border: 1px solid var(--yellow);
+    padding: 10px 22px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all .3s ease;
+  }
 
-        .login-btn:hover {
-            background: #222;
-            color: #fff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
+  .login-btn:hover {
+    background: var(--yellow);
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(251,191,36,.25);
+  }
 
-        /* Register Button */
-        .register-btn {
-            background: #222;
-            color: #fff;
-            border: 2px solid #222;
-            padding: 10px 24px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: lowercase;
-            transition: all 0.3s;
-            display: inline-block;
-        }
+  /* ===== REGISTER ===== */
+  .register-btn {
+    background: var(--yellow);
+    color: #000;
+    border: 1px solid var(--yellow);
+    padding: 10px 22px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all .3s ease;
+  }
 
-        .register-btn:hover {
-            background: #000;
-            border-color: #000;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
+  .register-btn:hover {
+    background: #ffd166;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(251,191,36,.35);
+  }
 
-        /* Logout Button */
-        .logout-btn {
-            background: #dc3545;
-            color: #fff;
-            border: 2px solid #dc3545;
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: lowercase;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+  /* ===== LOGOUT ===== */
+  .logout-btn {
+    background: #dc3545;
+    color: #fff;
+    border: 1px solid #dc3545;
+    padding: 10px 20px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .3s ease;
+  }
 
-        .logout-btn:hover {
-            background: #c82333;
-            border-color: #c82333;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-        }
-        .profile-btn{
-            padding-left: 50px;
-        }
+  .logout-btn:hover {
+    background: #c82333;
+    border-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(220,53,69,.35);
+  }
 
-        /* Responsive */
-        @media (max-width: 992px) {
-            .header-wrapper .container {
-                gap: 20px;
-            }
+  .profile-btn {
+    padding-left: 8px;
+    color: #fff;
+    transition: transform .3s ease, color .3s ease;
+  }
 
-            nav ul {
-                gap: 20px;
-            }
+  .profile-btn:hover {
+    transform: scale(1.15);
+    color: var(--yellow);
+  }
 
-            nav a {
-                font-size: 14px;
-            }
-        }
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .header-wrapper .container {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
 
-        @media (max-width: 768px) {
-            .header-wrapper .container {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
+    .logo {
+      width: 100%;
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
 
-            .logo {
-                font-size: 28px;
-                order: 1;
-                width: 100%;
-                text-align: center;
-                margin-bottom: 15px;
-            }
+    nav {
+      width: 100%;
+      order: 3;
+    }
 
-            nav {
-                order: 3;
-                width: 100%;
-            }
+    nav ul {
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 18px;
+    }
 
-            nav ul {
-                justify-content: center;
-                gap: 15px;
-                flex-wrap: wrap;
-            }
+    .header-actions {
+      order: 2;
+      margin-bottom: 12px;
+    }
+  }
+</style>
 
-            .header-actions {
-                order: 2;
-                margin-bottom: 15px;
-            }
 
-            .cart-btn, .login-btn, .register-btn, .logout-btn {
-                padding: 8px 16px;
-                font-size: 13px;
-            }
-        }
-    </style>
 </head>
 <body>
  
