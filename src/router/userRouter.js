@@ -51,22 +51,23 @@ router.get("/profile", userProfileController.loadprofile);
 
 router.get("/profile/address/add", userProfileController.loadAddAddress);
 router.post("/profile/address/add", userProfileController.saveAddress);
-router.post(
+router.patch(
   "/profile/address/:id/set-default",
   userProfileController.setDefaultAddress
 );
 router.get("/profile/address/:id/edit", userProfileController.loadEditAddress);
-router.post("/profile/address/:id/edit", userProfileController.editAddressPost);
-router.post("/profile/address/:id/delete", userProfileController.deleteAddress);
+
+router.patch("/profile/address/:id/edit", userProfileController.editAddressPatch);
+router.delete("/profile/address/:id/delete", userProfileController.deleteAddress);
   
 router.get(
   "/profile/change-password",
   userProfileController.loadChangePassword
 );
-router.post("/profile/change-password", userProfileController.changePassword);
+router.patch("/profile/change-password", userProfileController.changePassword);
 
 router.get("/profile/edit", editProfileController.loadEditProfilePage);
-router.post(
+router.patch(
   "/profile/edit",
   profileUpload.single("profileImage"),
   editProfileController.updateProfile
@@ -83,16 +84,16 @@ router.post(
 
 router.get("/wishlist", wishlistController.loadWishlist);
 router.post("/wishlist/add/:id", wishlistController.addToWishlist);
-router.post("/wishlist/remove/:id", wishlistController.removeFromWishlist);
+router.delete("/wishlist/remove/:id", wishlistController.removeFromWishlist);
 router.post("/wishlist/add-all-to-cart", wishlistController.addAllToCart);
 
 router.get("/cart", cartController.loadCart);
 router.post("/cart/add/:id", cartController.addToCart);
-router.post("/cart/increase/:id", cartController.increaseQuantity);
-router.post("/cart/decrease/:id", cartController.decreaseQuantity);
-router.post("/cart/remove/:id", cartController.removeFromCart);
+router.patch("/cart/increase/:id", cartController.increaseQuantity);
+router.patch("/cart/decrease/:id", cartController.decreaseQuantity);
+router.delete("/cart/remove/:id", cartController.removeFromCart);
 
-router.post("/checkout/select-address", userProfileController.selectAddress);
+router.patch("/checkout/select-address", userProfileController.selectAddress);
 router.get("/checkout", checkoutController.loadCheckout);
 
 router.post("/proceedToCheckout", checkoutController.placeOrder);

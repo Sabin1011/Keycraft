@@ -43,7 +43,6 @@
         enctype="multipart/form-data"
         id="editProfileForm"
       >
-        <!-- Profile Image Section -->
         <div class="form-section">
           <h2 class="section-title">
             <i class="fa fa-camera"></i> profile picture
@@ -70,7 +69,6 @@
           </div>
         </div>
 
-        <!-- Personal Information -->
         <div class="form-section">
           <h2 class="section-title">
             <i class="fa fa-user"></i> personal information
@@ -164,23 +162,20 @@
   const profilePreview = document.getElementById("profilePreview");
   const croppedImageInput = document.getElementById("croppedImage");
 
-  // Handle image selection
   imageInput.addEventListener("change", function (e) {
     const file = e.target.files[0];
 
     if (!file) return;
 
-    // Simple user feedback - doesn't prevent submission
     if (!file.type.startsWith("image/")) {
       alert("Please select an image file");
       imageInput.value = "";
       return;
     }
 
-    // Check file size (5MB limit) - user feedback only
     if (file.size > 5 * 1024 * 1024) {
       alert("Image size should be less than 5MB for better performance");
-      // Don't prevent - let server handle it
+
     }
 
     const reader = new FileReader();
@@ -189,7 +184,6 @@
       cropImage.src = event.target.result;
       cropModal.classList.add("active");
 
-      // Initialize cropper
       if (cropper) {
         cropper.destroy();
       }
@@ -212,7 +206,6 @@
     reader.readAsDataURL(file);
   });
 
-  // Close crop modal
   function closeCropModal() {
     cropModal.classList.remove("active");
     if (cropper) {
@@ -222,7 +215,6 @@
     imageInput.value = "";
   }
 
-  // Apply crop
   function applyCrop() {
     if (!cropper) return;
 
@@ -249,33 +241,50 @@
     );
   }
 
-  // Simple UX feedback on form submission - doesn't prevent submission
-  document
-    .getElementById("editProfileForm")
-    .addEventListener("submit", function (e) {
-      const username = document.getElementById("username").value.trim();
-      const email = document.getElementById("email").value.trim();
+document
+  .getElementById("editProfileForm")
+  .addEventListener("submit", async function (e) {
+    e.preventDefault(); 
 
-      // Show visual feedback for better UX
-      const submitBtn = document.getElementById("submitBtn");
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> saving...';
+    const form = e.target;
+    const submitBtn = document.getElementById("submitBtn");
 
-      // Simple client-side hints (doesn't prevent submission)
-      if (!username || !email) {
-        // Show brief warning but let form submit for server validation
-        console.log("Name and email appear empty - server will validate");
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> saving...';
+
+    try {
+      const formData = new FormData(form);
+
+      const response = await fetch(form.action, {
+        method: "PATCH",
+        body: formData,
+      });
+
+      if (response.redirected) {
+        window.location.href = response.url;
+        return;
       }
-    });
 
-  // Close modal on outside click
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Update failed");
+      }
+
+    } catch (err) {
+      alert(err.message || "Something went wrong");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa fa-save"></i> save changes';
+    }
+  });
+
   cropModal.addEventListener("click", function (e) {
     if (e.target === cropModal) {
       closeCropModal();
     }
   });
 
-  // Auto-hide success/error messages after 5 seconds
   window.addEventListener("DOMContentLoaded", function () {
     const errorMsg = document.querySelector(".error-message");
     const successMsg = document.querySelector(".success-message");

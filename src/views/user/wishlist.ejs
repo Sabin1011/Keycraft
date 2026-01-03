@@ -148,8 +148,8 @@
   async function removeFromWishlist(productId, button) {
     try {
         const res = await fetch(`/wishlist/remove/${productId}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            method: 'DELETE',
+            
         });
         const data = await res.json();
 

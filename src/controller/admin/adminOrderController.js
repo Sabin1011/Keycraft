@@ -106,40 +106,94 @@ const acceptReturn = async (req, res) => {
       await product.save();
     }
 
-
-    await Order.findOneAndUpdate(
-      { orderId },
-      { status: "Returned" },
-      { new: true }
-    );
-
-    const wallet = await Wallet.findOne({userId: order.userId});
-
-    const alreadyCredited = wallet?.transaction?.some(
-      tx => 
-        tx.orderId?.toString() === order._id.toString() &&
-        tx.reason === "Refund for returned order"
-    );
-
-    if(!alreadyCredited){
-      const refundAmount = order.finalAmount;
-
-      await Wallet.findOneAndUpdate(
-        { userId: order.userId },
-        {
-          $inc: { balance: refundAmount },
-          $push: {
-            transactions: {
-              amount: refundAmount,
-              type: "credit",
-              reason: "Refund for returned order",
-              orderId: order._id
-            }
-          }
-        },
-        { upsert: true }
-      );
+    if (
+      order.paymentStatus !== "Paid" ||
+      (order.paymentMethod !== "razorpay" && order.paymentMethod !== "wallet")
+    ) {
+      return res.redirect("/admin/orders/");
     }
+
+
+    // await Order.findOneAndUpdate(
+    //   { orderId },
+    //   { status: "Returned" },
+    //   { new: true }
+    // );
+
+    const allReturned = order.items.every(
+      (item) => item.status === "Returned"
+    );
+
+    if (allReturned) {
+      order.status = "Returned";
+      order.orderStatus = "Refunded";
+    }
+
+    await order.save();
+
+
+    // const alreadyCredited = wallet?.transactions?.some(
+    //   tx => 
+    //     tx.orderId?.toString() === order._id.toString() &&
+    //     tx.reason === "Refund for returned order"
+    // );
+
+    // if(!alreadyCredited){
+    //   const refundAmount = order.finalAmount;
+
+    //   await Wallet.findOneAndUpdate(
+    //     { userId: order.userId },
+    //     {
+    //       $inc: { balance: refundAmount },
+    //       $push: {
+    //         transactions: {
+    //           amount: refundAmount,
+    //           type: "credit",
+    //           reason: "Refund for returned order",
+    //           orderId: order._id
+    //         }
+    //       }
+    //     },
+    //     { upsert: true }
+    //   );
+    // }
+
+    let wallet = await Wallet.findOne({ userId: order.userId });
+
+if (!wallet) {
+  wallet = new Wallet({
+    userId: order.userId,
+    balance: 0,
+    transactions: [],
+  });
+}
+
+for (const item of order.items) {
+  if (item.status !== "Returned") continue;
+
+  const refundAmount = item.price * item.quantity;
+
+  const alreadyRefunded = wallet.transactions.some(
+    (tx) =>
+      tx.orderId?.toString() === order._id.toString() &&
+      tx.reason === "Refund for returned item" &&
+      tx.amount === refundAmount
+  );
+
+  if (alreadyRefunded) continue;
+
+  wallet.balance += refundAmount;
+
+  wallet.transactions.push({
+    amount: refundAmount,
+    type: "credit",
+    reason: "Refund for returned item",
+    orderId: order._id,
+  });
+}
+
+await wallet.save();
+
     return res.redirect("/admin/orders/"); 
   } catch (error) {
     console.log("Accept return error:", error);

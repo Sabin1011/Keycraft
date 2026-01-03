@@ -52,7 +52,7 @@
                         name="selectedAddress" 
                         value="<%= address._id %>"
                         <%= selectedAddressId === address._id.toString() ? 'checked' : '' %>
-                        onchange="document.getElementById('selectAddressForm_<%= address._id %>').submit()">
+                        >
                       <div class="address-content">
                         <div class="address-type">
                           <% if (address.isDefault) { %>
@@ -77,13 +77,6 @@
                     </div>
                   </label>
 
-                  <form 
-                    id="selectAddressForm_<%= address._id %>" 
-                    action="/checkout/select-address" 
-                    method="POST" 
-                    style="display: none;">
-                    <input type="hidden" name="addressId" value="<%= address._id %>">
-                  </form>
                 <% }) %>
               </div>
             </form>
@@ -345,14 +338,40 @@
 
 
 
-  const addressRadios = document.querySelectorAll('input[name="selectedAddress"]');
-  const mainAddressInput = document.querySelector('input[name="addressId"]');
+const addressRadios = document.querySelectorAll(
+  'input[name="selectedAddress"]'
+);
+const mainAddressInput = document.querySelector('input[name="addressId"]');
 
-  addressRadios.forEach(radio => {
-    radio.addEventListener('change', () => {
-      mainAddressInput.value = radio.value;
-    });
+addressRadios.forEach((radio) => {
+  radio.addEventListener("change", async () => {
+    const addressId = radio.value;
+    
+    try {
+      const res = await fetch("/checkout/select-address", {
+        method: "PATCH", // ✅ PATCH
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ addressId }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        Swal.fire("Error", data.message || "Failed to select address", "error");
+        return;
+      }
+
+      mainAddressInput.value = addressId;
+
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Something went wrong", "error");
+    }
   });
+});
+
   
   document.querySelectorAll(".delete-address-form").forEach((form) => {
     form.addEventListener("submit", async function (e) {

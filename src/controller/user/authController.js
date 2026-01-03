@@ -427,8 +427,6 @@ const loadforgototp = async (req, res) => {
   }
 };
 
-// FORGOT ENTER NEW PASSWORD
-
 const loadEnterNewPassword = async (req, res) => {
   try {
     res.render("forgotNewPassword");
