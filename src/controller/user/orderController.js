@@ -279,12 +279,14 @@ const cancelOrderItem = async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
     const { redirectTo } = req.body;
+    const userId = req.session.userId; 
 
     const order = await Order.findOne({ orderId }).populate("couponId");
 
     if (!order) return res.redirect(redirectTo);
 
     const item = order.items.id(itemId);
+
     if (!item) return res.redirect(redirectTo);
 
     const product = await Product.findById(item.product);
@@ -300,6 +302,33 @@ const cancelOrderItem = async (req, res) => {
       await product.save();
     }
 
+    if (
+  order.paymentStatus === "Paid" &&
+  (order.paymentMethod === "razorpay" || order.paymentMethod === "wallet")
+) {
+  const refundAmount = item.price * item.quantity;
+
+  let wallet = await Wallet.findOne({ userId });
+
+  if (!wallet) {
+    wallet = new Wallet({
+      userId,
+      balance: 0,
+      transactions: [],
+    });
+  }
+
+  wallet.balance += refundAmount;
+
+  wallet.transactions.push({
+    amount: refundAmount,
+    type: "credit",
+    reason: "Order item cancelled",
+    orderId: order._id,
+  });
+
+  await wallet.save();
+}
     order.items.pull(itemId);
     await order.save();
 

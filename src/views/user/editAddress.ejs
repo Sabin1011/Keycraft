@@ -54,7 +54,6 @@
     <form
       id="editAddressForm"
       action="/profile/address/<%= address._id %>/edit"
-      method="POST"
     >
       <input type="hidden" name="returnUrl" value="<%= returnUrl %>" />
       <%- include('../partials/addressForm', { address, mode: 'edit', returnUrl
@@ -115,7 +114,7 @@
           }
 
           const response = await fetch(form.action, {
-            method: "POST",
+            method: "PATCH",
             headers: {
               "Content-Type": "application/json",
             },
