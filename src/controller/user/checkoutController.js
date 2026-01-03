@@ -5,7 +5,7 @@ const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
 const Coupon = require("../../models/couponSchema");
 const Offer = require("../../models/offerSchema");
-const Wallet = require("../../models/walletSchema")
+const Wallet = require("../../models/walletSchema");
 const calculateCartTotals = require("../../utils/cartCalculator");
 const crypto = require("crypto");
 const razorpay = require("../../config/razorpay");
@@ -13,7 +13,7 @@ const razorpay = require("../../config/razorpay");
 const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const wallet = await Wallet.findOne({userId})
+    const wallet = await Wallet.findOne({ userId });
 
     if (!userId) return res.redirect("/login");
 
@@ -212,9 +212,7 @@ const placeOrder = async (req, res) => {
       return sum + item.product.price * item.quantity;
     }, 0);
 
-
     const cartOfferDiscount = cart.cartDiscount || 0;
-
 
     const items = cart.items.map((item) => ({
       product: item.product._id,
@@ -226,43 +224,48 @@ const placeOrder = async (req, res) => {
     await calculateCartTotals(cart);
 
     let finalAmount = cart.grandTotal;
-    const offerDiscount = subtotal- cart.totalPrice;
+    const offerDiscount = subtotal - cart.totalPrice;
 
     let discountAmount = 0;
     let appliedCouponId = null;
 
-    if(couponCode){
+    if (couponCode) {
       const coupon = await Coupon.findOne({
-        code:couponCode,
-        isDeleted:false,
-      })
+        code: couponCode,
+        isDeleted: false,
+      });
 
-      if(!coupon){
-        return res.redirect("/checkout?error=Invalid coupon")
-      };
-
-      if(coupon.expiryDate< new Date()){
-        return res.redirect("/checkout?error = Coupon expired")
-      };
-
-      if(coupon.minPurchaseAmount && finalAmount< coupon.minPurchaseAmount){
-        return res.redirect(`/checkout?error= minimum Purchase ₹${coupon.minPurchaseAmount}`);
+      if (!coupon) {
+        return res.redirect("/checkout?error=Invalid coupon");
       }
 
-      if(coupon.discountType === "percentage") {
+      if (coupon.expiryDate < new Date()) {
+        return res.redirect("/checkout?error = Coupon expired");
+      }
+
+      if (coupon.minPurchaseAmount && finalAmount < coupon.minPurchaseAmount) {
+        return res.redirect(
+          `/checkout?error= minimum Purchase ₹${coupon.minPurchaseAmount}`
+        );
+      }
+
+      if (coupon.discountType === "percentage") {
         discountAmount = (finalAmount * coupon.discountValue) / 100;
 
-        if(coupon.maxDiscountAmount&& discountAmount>coupon.maxDiscountAmount){
+        if (
+          coupon.maxDiscountAmount &&
+          discountAmount > coupon.maxDiscountAmount
+        ) {
           discountAmount = coupon.maxDiscountAmount;
         }
-      }else{
-        discountAmount = coupon.discountValue
+      } else {
+        discountAmount = coupon.discountValue;
       }
       finalAmount = Math.max(finalAmount - discountAmount, 0);
       appliedCouponId = coupon._id;
     }
 
-    finalAmount = Math.round(finalAmount)
+    finalAmount = Math.round(finalAmount);
 
     if (paymentMethod === "razorpay") {
       const razorpayOrder = await razorpay.orders.create({
@@ -274,7 +277,7 @@ const placeOrder = async (req, res) => {
       req.session.pendingOrder = {
         userId,
         items,
-        totalAmount:cart.totalPrice,
+        totalAmount: cart.totalPrice,
         offerDiscount,
         discountAmount,
         finalAmount,
@@ -291,22 +294,20 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    if(paymentMethod === "wallet"){
+    if (paymentMethod === "wallet") {
       const wallet = await Wallet.findOne({ userId });
 
-      if(!wallet || wallet.balance < finalAmount) {
-        return res.redirect(
-          "/checkout?error=Insufficient wallet balance"
-        );
+      if (!wallet || wallet.balance < finalAmount) {
+        return res.redirect("/checkout?error=Insufficient wallet balance");
       }
 
       await Wallet.findOneAndUpdate(
         { userId },
         {
-          $inc:{balance: -finalAmount},
-          $push:{
-            transactions:{
-              amount:finalAmount,
+          $inc: { balance: -finalAmount },
+          $push: {
+            transactions: {
+              amount: finalAmount,
               type: "debit",
               reason: "Order payment via wallet",
             },
@@ -315,7 +316,7 @@ const placeOrder = async (req, res) => {
       );
 
       const newOrder = new Order({
-        userId, 
+        userId,
         items,
         subtotal,
         totalAmount: cart.totalPrice,
@@ -330,10 +331,9 @@ const placeOrder = async (req, res) => {
       });
 
       await newOrder.save();
-      await Cart.findOneAndUpdate({userId}, {$set: {items: []}});
+      await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } });
 
       return res.redirect(`/order-success?orderId=${newOrder._id}`);
-
     }
 
     const newOrder = new Order({
@@ -451,19 +451,16 @@ const validateCoupon = async (req, res) => {
 
     const finalAmount = Math.max(cartTotal - discountAmount, 0);
 
-
     req.session.coupon = {
       code: coupon.code,
       discountAmount,
-      finalAmount
+      finalAmount,
     };
-
 
     return res.json({
       success: true,
       discountAmount,
       finalAmount,
-
     });
   } catch (err) {
     console.error(err);
@@ -488,48 +485,52 @@ const createRazorpayOrder = async (req, res) => {
 
     const cart = await Cart.findOne({ userId }).populate("items.product");
 
-    const subtotal = cart.items.reduce((sum, item)=>{
-      const price = typeof item.originalPrice === "number" ? item.originalPrice: item.product.price;
+    const subtotal = cart.items.reduce((sum, item) => {
+      const price =
+        typeof item.originalPrice === "number"
+          ? item.originalPrice
+          : item.product.price;
 
       return sum + price * item.quantity;
-    },0);
+    }, 0);
 
     await calculateCartTotals(cart);
     let finalAmount = cart.grandTotal;
-    const offerDiscount = subtotal  - cart.totalPrice;
+    const offerDiscount = subtotal - cart.totalPrice;
 
     let discountAmount = 0;
     let appliedCouponId = null;
 
-    if(couponCode) {
+    if (couponCode) {
       const coupon = await Coupon.findOne({
         code: couponCode.toUpperCase(),
         isDeleted: false,
       });
 
-      if(!coupon) {
-        return res.json({success:false, message:"Invalid coupon"})
+      if (!coupon) {
+        return res.json({ success: false, message: "Invalid coupon" });
       }
 
-      if(coupon.expiryDate < new Date()){
-        return res.json({success:false, message: "Coupon expired"});
+      if (coupon.expiryDate < new Date()) {
+        return res.json({ success: false, message: "Coupon expired" });
       }
 
-      if(coupon.discountType === "percentage") {
+      if (coupon.discountType === "percentage") {
         discountAmount = (finalAmount * coupon.discountValue) / 100;
 
-        if(coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount){
+        if (
+          coupon.maxDiscountAmount &&
+          discountAmount > coupon.maxDiscountAmount
+        ) {
           discountAmount = coupon.maxDiscountAmount;
         }
-      }
-      else{
+      } else {
         discountAmount = coupon.discountValue;
       }
       finalAmount = Math.max(finalAmount - discountAmount, 0);
       appliedCouponId = coupon._id;
     }
     finalAmount = Math.round(finalAmount);
-
 
     if (!finalAmount || isNaN(finalAmount) || finalAmount <= 0) {
       console.error("Invalid finalAmount:", finalAmount);
@@ -556,12 +557,12 @@ const createRazorpayOrder = async (req, res) => {
             ? item.discountedPrice
             : item.product.price,
       })),
-      priceAfterOffers : cart.totalPrice,
+      priceAfterOffers: cart.totalPrice,
       offerDiscount,
       discountAmount,
       finalAmount,
       subtotal,
-      couponId:appliedCouponId,
+      couponId: appliedCouponId,
       address: user.addresses.id(addressId),
       paymentMethod: "razorpay",
     };
@@ -579,7 +580,7 @@ const createRazorpayOrder = async (req, res) => {
 };
 
 const verifyRazorpayPayment = async (req, res) => {
-  try { 
+  try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       req.body;
 
@@ -608,15 +609,15 @@ const verifyRazorpayPayment = async (req, res) => {
       couponId: pendingOrder.couponId,
       address: pendingOrder.address,
       paymentMethod: "razorpay",
-      subtotal:pendingOrder.subtotal,
+      subtotal: pendingOrder.subtotal,
       paymentStatus: "Paid",
-      offerDiscount:pendingOrder.offerDiscount,
+      offerDiscount: pendingOrder.offerDiscount,
       status: "Confirmed",
       razorpayPaymentId: razorpay_payment_id,
     });
 
     await newOrder.save();
-    
+
     delete req.session.coupon;
 
     await Cart.findOneAndUpdate(
@@ -635,7 +636,6 @@ const verifyRazorpayPayment = async (req, res) => {
     return res.json({ success: false });
   }
 };
-
 
 const loadPaymentFailed = async (req, res) => {
   try {
@@ -677,7 +677,6 @@ const retryPayment = async (req, res) => {
   }
 };
 
-
 const validateCartStock = async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -692,7 +691,7 @@ const validateCartStock = async (req, res) => {
         success: false,
         message: "Your cart is empty",
       });
-    } 
+    }
 
     const stockErrors = [];
 
@@ -742,7 +741,6 @@ const validateCartStock = async (req, res) => {
     }
 
     return res.json({ success: true });
-
   } catch (err) {
     console.error("Stock validation error:", err);
     return res.json({
@@ -751,7 +749,6 @@ const validateCartStock = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   loadCheckout,
@@ -762,5 +759,5 @@ module.exports = {
   verifyRazorpayPayment,
   loadPaymentFailed,
   retryPayment,
-  validateCartStock
+  validateCartStock,
 };

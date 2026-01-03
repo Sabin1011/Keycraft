@@ -1,161 +1,173 @@
 <%- include('../partials/user/header') %>
 
-<link rel="stylesheet" href="/css/addressForm.css">
+<link rel="stylesheet" href="/css/addressForm.css" />
 
 <section class="breadcrumb">
   <div class="container">
     <a href="/home">home</a>
     <span>/</span>
     <% if (returnUrl === '/checkout') { %>
-      <a href="/checkout">checkout</a>
+    <a href="/checkout">checkout</a>
     <% } else { %>
-      <a href="/profile">my profile</a>
+    <a href="/profile">my profile</a>
     <% } %>
     <span>/</span>
-    <span style="color: #222;">add address</span>
+    <span style="color: #222">add address</span>
   </div>
 </section>
 
 <section class="address-section">
   <div class="container">
     <% if (success) { %>
-    <div style="padding: 15px 20px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 10px; margin-bottom: 25px;">
+    <div
+      style="
+        padding: 15px 20px;
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        border-radius: 10px;
+        margin-bottom: 25px;
+      "
+    >
       <i class="fa fa-check-circle"></i> <%= success %>
     </div>
-    <% } %>
-    <% if (error) { %>
-    <div style="padding: 15px 20px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 10px; margin-bottom: 25px;">
+    <% } %> <% if (error) { %>
+    <div
+      style="
+        padding: 15px 20px;
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        border-radius: 10px;
+        margin-bottom: 25px;
+      "
+    >
       <i class="fa fa-exclamation-circle"></i> <%= error %>
     </div>
     <% } %>
 
     <div class="page-header">
       <div class="page-title">add new address</div>
-      <div class="page-subtitle">save a new delivery address to your profile</div>
+      <div class="page-subtitle">
+        save a new delivery address to your profile
+      </div>
     </div>
 
     <form id="addressForm" action="/profile/address/add" method="POST">
-      <input type="hidden" name="returnUrl" value="<%= returnUrl %>">
-      <%- include('../partials/addressForm', { address: null, mode: 'add', returnUrl }) %>
+      <input type="hidden" name="returnUrl" value="<%= returnUrl %>" />
+      <%- include('../partials/addressForm', { address: null, mode: 'add',
+      returnUrl }) %>
     </form>
   </div>
 </section>
 
 <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("addressForm");
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById('addressForm');
-        
-        // Find the input fields used in the form (assuming standard IDs/names matching validation keys)
-        const fields = ['type', 'street', 'city', 'state', 'zipCode', 'country'];
-        
-        // Function to clear previous errors
-        function clearErrors() {
-            document.querySelectorAll('.error-message').forEach(el => el.remove());
-            document.querySelectorAll('.form-group input').forEach(el => el.classList.remove('is-invalid'));
+    const fields = ["type", "street", "city", "state", "zipCode", "country"];
+
+    function clearErrors() {
+      document.querySelectorAll(".error-message").forEach((el) => el.remove());
+      document
+        .querySelectorAll(".form-group input")
+        .forEach((el) => el.classList.remove("is-invalid"));
+    }
+
+    function displayErrors(errors) {
+      clearErrors();
+      for (const key in errors) {
+        const input = form.querySelector(`[name="${key}"]`);
+        if (input) {
+          input.classList.add("is-invalid");
+          const errorDiv = document.createElement("div");
+          errorDiv.className = "error-message";
+          errorDiv.style.color = "#dc3545";
+          errorDiv.style.fontSize = "0.85em";
+          errorDiv.style.marginTop = "5px";
+          errorDiv.textContent = errors[key];
+
+          input.parentNode.appendChild(errorDiv);
         }
+      }
+    }
 
-        // Function to display new errors
-        function displayErrors(errors) {
-            clearErrors();
-            for (const key in errors) {
-                const input = form.querySelector(`[name="${key}"]`);
-                if (input) {
-                    input.classList.add('is-invalid');
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'error-message'; // You need CSS for this
-                    errorDiv.style.color = '#dc3545';
-                    errorDiv.style.fontSize = '0.85em';
-                    errorDiv.style.marginTop = '5px';
-                    errorDiv.textContent = errors[key];
-                    
-                    // Assuming the input is wrapped in a structure where we can place the error message next to it
-                    input.parentNode.appendChild(errorDiv);
-                }
-            }
-        }
+    if (form) {
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-        if (form) {
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault(); // Stop the default form submission (page reload)
-                
-                const submitButton = form.querySelector('button[type="submit"]');
-                const originalButtonText = submitButton ? submitButton.textContent : 'Submit';
-                
-                // Collect form data
-                const formData = new FormData(form);
-                const data = Object.fromEntries(formData.entries());
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton
+          ? submitButton.textContent
+          : "Submit";
 
-                clearErrors(); // Clear existing errors before submission
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
 
-                try {
-                    // Show loading state
-                    if (submitButton) {
-                        submitButton.disabled = true;
-                        submitButton.textContent = 'Saving...';
-                    }
+        clearErrors(); 
 
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    });
+        try {
 
-                    const responseData = await response.json();
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = "Saving...";
+          }
 
-                    if (response.ok && responseData.success) {
-                        // Success: Show SWAL and redirect
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: responseData.message,
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-                            window.location.href = responseData.redirectUrl;
-                        });
+          const response = await fetch(form.action, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
 
-                    } else if (response.status === 400 && responseData.errors) {
-                        // Validation Error (400 Bad Request)
-                        displayErrors(responseData.errors);
-                        
-                        // Show a general error message
-                         Swal.fire({
-                            icon: 'warning',
-                            title: 'Validation Failed',
-                            text: 'Please correct the highlighted errors in the form.',
-                            confirmButtonColor: '#222'
-                        });
+          const responseData = await response.json();
 
-                    } else {
-                        // Other Errors (401 Unauthorized, 500 Server Error)
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: responseData.message || 'An unexpected error occurred.',
-                            confirmButtonColor: '#dc3545'
-                        });
-                    }
+          if (response.ok && responseData.success) {
 
-                } catch (error) {
-                    console.error('AJAX Submission Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Network Error',
-                        text: 'Could not connect to the server. Please check your internet connection.',
-                        confirmButtonColor: '#dc3545'
-                    });
-                } finally {
-                    // Restore button state
-                    if (submitButton) {
-                        submitButton.disabled = false;
-                        submitButton.textContent = originalButtonText;
-                    }
-                }
+            Swal.fire({
+              icon: "success",
+              title: "Success!",
+              text: responseData.message,
+              timer: 2000,
+              showConfirmButton: false,
+            }).then(() => {
+              window.location.href = responseData.redirectUrl;
             });
+          } else if (response.status === 400 && responseData.errors) {
+      
+            displayErrors(responseData.errors);
+
+            Swal.fire({
+              icon: "warning",
+              title: "Validation Failed",
+              text: "Please correct the highlighted errors in the form.",
+              confirmButtonColor: "#222",
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Error!",
+              text: responseData.message || "An unexpected error occurred.",
+              confirmButtonColor: "#dc3545",
+            });
+          }
+        } catch (error) {
+          console.error("AJAX Submission Error:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Network Error",
+            text: "Could not connect to the server. Please check your internet connection.",
+            confirmButtonColor: "#dc3545",
+          });
+        } finally {
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+          }
         }
-    });
+      });
+    }
+  });
 </script>
 <%- include('../partials/user/footer') %>

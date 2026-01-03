@@ -1,7 +1,7 @@
 const Wallet = require("../../models/walletSchema");
 const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
-const Cart = require('../../models/cartModel');
+const Cart = require("../../models/cartModel");
 const Product = require("../../models/productSchema");
 
 const loadWalletPage = async (req, res) => {
@@ -13,15 +13,14 @@ const loadWalletPage = async (req, res) => {
     if (!wallet) {
       wallet = {
         balance: 0,
-        transactions: []
+        transactions: [],
       };
     }
 
     res.render("wallet", {
       wallet,
-      user
+      user,
     });
-
   } catch (error) {
     console.error("Load Wallet Error:", error);
     res.redirect("/");
@@ -29,5 +28,5 @@ const loadWalletPage = async (req, res) => {
 };
 
 module.exports = {
-    loadWalletPage
-}
+  loadWalletPage,
+};
