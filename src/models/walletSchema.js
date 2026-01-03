@@ -5,31 +5,31 @@ const walletSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
-    unique: true
+    unique: true,
   },
   balance: {
     type: Number,
-    default: 0
+    default: 0,
   },
   transactions: [
     {
       amount: Number,
       type: {
         type: String, // credit | debit
-        enum: ["credit", "debit"]
+        enum: ["credit", "debit"],
       },
       reason: String,
       orderId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Order",
-        default: null
+        default: null,
       },
       createdAt: {
         type: Date,
-        default: Date.now
-      }
-    }
-  ]
+        default: Date.now,
+      },
+    },
+  ],
 });
 
 module.exports = mongoose.model("Wallet", walletSchema);

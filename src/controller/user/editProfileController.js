@@ -8,8 +8,6 @@ const sendEmail = require("../../utils/sendEmail");
 
 const bcrypt = require("bcrypt");
 
-
-
 const loadEditProfilePage = async (req, res) => {
   try {
     const userId = req.session.user?._id || req.user?._id;
@@ -33,15 +31,13 @@ const loadEditProfilePage = async (req, res) => {
   }
 };
 
-
 const sendEmailOTP = async (req, newEmail) => {
   try {
- 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     req.session.emailChangeOTP = otp;
     req.session.newEmail = newEmail;
-    req.session.otpExpiry = Date.now() + 10 * 60 * 1000; 
+    req.session.otpExpiry = Date.now() + 10 * 60 * 1000;
 
     const emailSent = await sendEmail({
       to: newEmail,
@@ -145,7 +141,10 @@ const updateProfile = async (req, res) => {
           return res.redirect("/profile/edit");
         }
 
-        const uploadsDir = path.join(__dirname, "../../../public/uploads/profiles");
+        const uploadsDir = path.join(
+          __dirname,
+          "../../../public/uploads/profiles"
+        );
         if (!fs.existsSync(uploadsDir)) {
           fs.mkdirSync(uploadsDir, { recursive: true });
         }
@@ -207,16 +206,15 @@ const updateProfile = async (req, res) => {
 };
 
 const loadEmailOTPPage = (req, res) => {
-    const otp = req.session.emailChangeOTP;
-    console.log("Generated OTP:", otp);
+  const otp = req.session.emailChangeOTP;
+  console.log("Generated OTP:", otp);
   if (!req.session.newEmail) return res.redirect("/profile/edit");
 
   res.render("changeEmailOtp", {
     error: req.session.errorMessage,
     newEmail: req.session.newEmail,
-    otp: req.session.emailChangeOTP
+    otp: req.session.emailChangeOTP,
   });
-  
 
   delete req.session.errorMessage;
 };
@@ -266,13 +264,10 @@ const verifyEmailOTP = async (req, res) => {
   res.redirect("/profile");
 };
 
-
-
-
-module.exports ={
-    loadEditProfilePage,
-    updateProfile,
-    loadEmailOTPPage,
-    verifyEmailOTP,
-    sendEmailOTP,
-}
+module.exports = {
+  loadEditProfilePage,
+  updateProfile,
+  loadEmailOTPPage,
+  verifyEmailOTP,
+  sendEmailOTP,
+};

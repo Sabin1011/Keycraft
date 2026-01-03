@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
@@ -9,17 +8,16 @@ const wishlistSchema = new Schema(
       ref: "User",
       required: true,
     },
-    products: [ 
+    products: [
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "product",
           required: true,
         },
-        variantId:{
-          
+        variantId: {
           type: mongoose.Schema.Types.ObjectId,
-          required:false,
+          required: false,
         },
         addedAt: {
           type: Date,
@@ -33,11 +31,11 @@ const wishlistSchema = new Schema(
 
 wishlistSchema.index({ userId: 1 }, { unique: true });
 
-wishlistSchema.pre('save', function(next) {
+wishlistSchema.pre("save", function (next) {
   if (this.products && this.products.length > 0) {
     const uniqueProducts = [];
     const seenIds = new Set();
-    
+
     for (const item of this.products) {
       const idString = item.productId.toString();
       if (!seenIds.has(idString)) {
@@ -45,7 +43,7 @@ wishlistSchema.pre('save', function(next) {
         uniqueProducts.push(item);
       }
     }
-    
+
     this.products = uniqueProducts;
   }
   next();

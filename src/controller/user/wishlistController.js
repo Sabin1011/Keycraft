@@ -3,7 +3,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Wishlist = require("../../models/wishlistModel");
 const mongoose = require("mongoose");
-const Cart = require("../../models/cartModel")
+const Cart = require("../../models/cartModel");
 const path = require("path");
 const fs = require("fs");
 const sendEmail = require("../../utils/sendEmail");
@@ -13,18 +13,17 @@ const bcrypt = require("bcrypt");
 const loadWishlist = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const user = await User.findById( userId )
-     
-    
-    const cart = await  Cart.findOne({userId: req.session.userId});
-      let cartCount = 0;
+    const user = await User.findById(userId);
 
-      if (userId) {
-        const cart = await Cart.findOne({ userId });
-        if (cart && cart.items) {
-          cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-        }
+    const cart = await Cart.findOne({ userId: req.session.userId });
+    let cartCount = 0;
+
+    if (userId) {
+      const cart = await Cart.findOne({ userId });
+      if (cart && cart.items) {
+        cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
       }
+    }
 
     const wishlist = await Wishlist.findOne({
       userId: req.session.userId,
@@ -35,10 +34,10 @@ const loadWishlist = async (req, res) => {
 
     let products = wishlist?.products || [];
 
-    res.render("wishlist", { products, user,cartCount});
+    res.render("wishlist", { products, user, cartCount });
   } catch (error) {
     console.error("Error loading wishlist:", error);
-    res.render("wishlist", { products: [], user,  cartCount });
+    res.render("wishlist", { products: [], user, cartCount });
   }
 };
 
@@ -48,7 +47,6 @@ const addToWishlist = async (req, res) => {
     const productId = req.params.id;
     const variantId = req.body.variantId || null;
 
-
     let wishlist = await Wishlist.findOne({ userId });
 
     if (!wishlist) {
@@ -56,17 +54,17 @@ const addToWishlist = async (req, res) => {
     }
 
     const exists = wishlist.products.some(
-      (item) => item.productId.toString() === productId &&
-      item.variantId?.toString() === variantId
-
+      (item) =>
+        item.productId.toString() === productId &&
+        item.variantId?.toString() === variantId
     );
 
     if (!exists) {
-      wishlist.products.push({ productId,variantId, addedAt: new Date(), });
+      wishlist.products.push({ productId, variantId, addedAt: new Date() });
       await wishlist.save();
     }
 
-    return res.json({ success: true, message: "Added to wishlist", variantId, });
+    return res.json({ success: true, message: "Added to wishlist", variantId });
   } catch (error) {
     console.error(error);
     return res.json({ success: false, message: "Failed to add" });
@@ -134,7 +132,7 @@ const addAllToCart = async (req, res) => {
     for (const item of wishlist.products) {
       const productId = item.productId;
       const variantId = item.variantId || null;
-      const quantity = 1; 
+      const quantity = 1;
 
       const product = await Product.findById(productId).populate("category");
       if (!product) continue;
@@ -200,5 +198,5 @@ module.exports = {
   addToWishlist,
   removeFromWishlist,
   clearWishlist,
-  addAllToCart  
+  addAllToCart,
 };

@@ -1,0 +1,156 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Questrial", sans-serif;
+  background: #f5f5f5;
+}
+
+.container {
+  width: 100%;
+  max-width: 420px;
+  margin: 60px auto;
+  background: #fff;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  font-size: 32px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #000;
+}
+
+.logo span {
+  color: #222;
+}
+
+h2 {
+  text-align: center;
+  margin: 12px 0 25px;
+  font-size: 26px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  outline: none;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: #222;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.divider {
+  text-align: center;
+  margin: 18px 0;
+  font-size: 14px;
+  color: #777;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  position: absolute;
+  width: 30%;
+  height: 1px;
+  background: #ccc;
+  top: 50%;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.google-btn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: black;
+  align-items: center;
+}
+
+.google-btn img {
+  width: 20px;
+}
+
+.footer-text {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 15px;
+}
+
+.footer-text a {
+  color: #222;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.alert-box {
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  margin-bottom: 15px;
+  color: #d00;
+  font-size: 15px;
+}
+.password-wrapper {
+  position: relative;
+}
+
+.eye-toggle {
+  position: absolute;
+  top: 70%;
+  right: 15px;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #777;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.eye-toggle:hover {
+  color: #222;
+}
