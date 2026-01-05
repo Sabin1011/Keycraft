@@ -12,8 +12,10 @@
     <div class="alert-message alert-<%= messageType %>"><%= message %></div>
     <% } %> <% if (cart && cart.items && cart.items.length > 0) { %>
     <div class="cart-content">
+
       <!-- Cart Items -->
       <div class="cart-items">
+
         <% cart.items.forEach(item => { %>
         <div class="cart-item">
           <div class="item-image">
@@ -34,17 +36,19 @@
             </div>
             <div class="item-name"><%= item.product.name %></div>
 
+            <% if (!item.isAvailable) { %>
+              <div style="color:#dc3545;font-size:13px;font-weight:600;margin-top:6px;">
+                <%= item.outOfStockMessage %>
+              </div>
+            <% } %>
+
             <% if (item.selectedVariant) { %> Variant:
             <strong><%= item.selectedVariant.name %></strong>
             <% } else { %>
             <span style="color: red; font-size: 13px">
               Variant unavailable
             </span>
-            <% } %> <% if (!item.isAvailable) { %>
-            <div style="color: red; font-size: 13px; font-weight: 600">
-              <%= item.outOfStockMessage %>
-            </div>
-            <% } %>
+            <% } %> 
 
             <div class="item-price">
               <% if (item.discountedPrice < item.originalPrice) { %>
@@ -119,6 +123,7 @@
                 class="quantity-btn increase-btn"
                 data-product="<%= item.product._id %>"
                 data-variant="<%=item.variantId%>"
+                <%if(!item.isAvailable) {%> disabled <%} %>
               >
                 +
               </button>

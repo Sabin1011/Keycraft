@@ -47,6 +47,13 @@ const validateCartStock = (cart) => {
       item.outOfStockMessage = `Only ${item.product.totalStock} left`;
       item.quantity = item.product.totalStock;
     }
+
+    else if(item.variantId) {
+      const variant = item.product.variants.id(item.variantId);
+      if(!variant || item.quantity > variant.quantity){
+        return true;
+      };
+    };
   }
 
   return invalidItemExists;
