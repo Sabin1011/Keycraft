@@ -45,7 +45,7 @@ body {
 }
 
 .profile-header {
-  background: linear-gradient(135deg, #401f75 0%, #000000 100%);
+  background: linear-gradient(135deg, #2a2a2a 0%, #000000 100%);
   border-radius: 15px;
   padding: 40px;
   margin-bottom: 30px;
@@ -159,7 +159,8 @@ body {
 
 .btn-primary:hover {
   background: rgba(255, 255, 255, 0.2);
-  border-color: #fff;
+  border-color: #ffffff48;
+  color: #e5e5e5;
   transform: translateY(-2px);
 }
 
@@ -230,13 +231,13 @@ body {
   top: 0;
   height: 100%;
   width: 4px;
-  background: #c90000;
+  background: #888888;
   transform: scaleY(0);
   transition: transform 0.3s;
 }
 
 .address-item:hover {
-  border-color: #ea8566;
+  border-color: #696969;
   background: #fff;
 }
 
@@ -315,20 +316,20 @@ body {
 }
 
 .default-address {
-  border-color: #401f75 !important;
-  background: #eef0ff !important;
+  border-color: #373737 !important;
+  background: #c1c1c1 !important;
 }
 
 .default-address::before {
   transform: scaleY(1) !important;
-  background: #401f75 !important;
+  background: #1c1c1c !important;
 }
 
 .default-badge {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: #401f75;
+  background: #181818;
   color: #fff;
   padding: 5px 12px;
   border-radius: 8px;
@@ -364,8 +365,8 @@ body {
 }
 
 .referral-box button {
-  background: #401f75;
-  color: white;
+  background: #262627;
+  color: rgb(175, 175, 175);
   border: none;
   padding: 6px 12px;
   border-radius: 4px;

@@ -78,7 +78,7 @@ const removeFromWishlist = async (req, res) => {
 
     const result = await Wishlist.updateOne(
       { userId },
-      { $pull: { products: { productId } } }
+      { $pull: { products: { productId: new mongoose.Types.ObjectId(productId) } } }
     );
 
     if (result.modifiedCount === 0) {

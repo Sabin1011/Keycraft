@@ -1,8 +1,8 @@
 :root {
-  --yellow: #fbbf24;
-  --black: #0b0b0e;
-  --dark-gray: #1a1a1f;
+  --black: #000000;
+  --dark-gray: #1a1a1a;
   --gray: #9ca3af;
+  --light-gray: #f5f5f5;
 }
 
 * {
@@ -13,8 +13,8 @@
 
 body {
   font-family: "Questrial", sans-serif;
-  background: #0b0b0e;
-  color: #e5e7eb;
+  background: #f5f5f5;
+  color: #111;
 }
 
 .container {
@@ -24,8 +24,8 @@ body {
 }
 
 header {
-  background: linear-gradient(180deg, #0f0f12, #0b0b0e);
-  border-bottom: 1px solid #1f1f25;
+  background: linear-gradient(180deg, #ffffff, #f0f0f0);
+  border-bottom: 1px solid #e0e0e0;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -46,14 +46,14 @@ header {
   font-size: 32px;
   font-weight: 900;
   font-family: "Raleway", sans-serif;
-  color: #fff;
+  color: #000;
   text-decoration: none;
   letter-spacing: 1px;
   white-space: nowrap;
 }
 
 .logo span {
-  color: var(--yellow);
+  color: #000;
 }
 
 nav {
@@ -68,7 +68,7 @@ nav ul {
 }
 
 nav a {
-  color: #e5e7eb;
+  color: #111;
   text-decoration: none;
   font-size: 14px;
   text-transform: lowercase;
@@ -86,12 +86,12 @@ nav a::after {
   bottom: 0;
   width: 0;
   height: 2px;
-  background: var(--yellow);
+  background: #000;
   transition: width 0.3s ease;
 }
 
 nav a:hover {
-  color: var(--yellow);
+  color: #000;
 }
 
 nav a:hover::after {
@@ -104,11 +104,10 @@ nav a:hover::after {
   align-items: center;
 }
 
-/* ===== CART ===== */
 .cart-btn {
-  background: var(--dark-gray);
-  color: #fff;
-  border: 1px solid #2a2a2f;
+  background: #ffffff;
+  color: #000;
+  border: 2px solid #000;
   padding: 10px 18px;
   border-radius: 999px;
   text-decoration: none;
@@ -122,14 +121,13 @@ nav a:hover::after {
 
 .cart-btn:hover {
   background: #000;
-  border-color: var(--yellow);
+  color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(251, 191, 36, 0.15);
 }
 
 .cart-badge {
-  background: var(--yellow);
-  color: #000;
+  background: #000;
+  color: #ffffff;
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -142,8 +140,8 @@ nav a:hover::after {
 
 .login-btn {
   background: transparent;
-  color: var(--yellow);
-  border: 1px solid var(--yellow);
+  color: #000;
+  border: 2px solid #000;
   padding: 10px 22px;
   border-radius: 999px;
   text-decoration: none;
@@ -153,16 +151,15 @@ nav a:hover::after {
 }
 
 .login-btn:hover {
-  background: var(--yellow);
-  color: #000;
+  background: #000;
+  color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(251, 191, 36, 0.25);
 }
 
 .register-btn {
-  background: var(--yellow);
-  color: #000;
-  border: 1px solid var(--yellow);
+  background: #000;
+  color: #ffffff;
+  border: 2px solid #000;
   padding: 10px 22px;
   border-radius: 999px;
   text-decoration: none;
@@ -172,15 +169,14 @@ nav a:hover::after {
 }
 
 .register-btn:hover {
-  background: #ffd166;
+  background: #222;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(251, 191, 36, 0.35);
 }
 
 .logout-btn {
-  background: #eb0018ad;
-  color: #fff;
-  border: 1px solid #f08000;
+  background: #000;
+  color: #ffffff;
+  border: 2px solid #000;
   padding: 10px 20px;
   border-radius: 999px;
   text-decoration: none;
@@ -193,21 +189,19 @@ nav a:hover::after {
 }
 
 .logout-btn:hover {
-  background: #c82333;
-  border-color: #c82333;
+  background: #222;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(220, 53, 69, 0.35);
 }
 
 .profile-btn {
   padding-left: 8px;
-  color: #fff;
+  color: #000;
   transition: transform 0.3s ease, color 0.3s ease;
 }
 
 .profile-btn:hover {
   transform: scale(1.15);
-  color: var(--yellow);
+  color: #000;
 }
 
 @media (max-width: 768px) {

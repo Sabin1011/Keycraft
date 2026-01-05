@@ -84,7 +84,7 @@ router.post(
 
 router.get("/wishlist", wishlistController.loadWishlist);
 router.post("/wishlist/add/:id", wishlistController.addToWishlist);
-router.delete("/wishlist/remove/:id", wishlistController.removeFromWishlist);
+router.post("/wishlist/remove/:id", wishlistController.removeFromWishlist);
 router.post("/wishlist/add-all-to-cart", wishlistController.addAllToCart);
 
 router.get("/cart", cartController.loadCart);
