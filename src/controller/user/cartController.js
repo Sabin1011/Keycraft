@@ -8,6 +8,7 @@ const User = require("../../models/userSchema");
 const Offer = require("../../models/offerSchema");
 const calculateCartTotals = require("../../utils/cartCalculator");
 const validateCartStock = require("../../utils/cartValidation");
+const { initMetadata } = require("pdfkit");
 
 const loadCart = async (req, res) => {
   try {
@@ -67,35 +68,47 @@ const loadCart = async (req, res) => {
         item.isAvailable = false;
         item.outOfStockMessage = "Product unavailable";
         invalidItemExists = true;
+      } 
+      if (item.variantId) {
+
+        if(!item.selectedVariant) {
+          item.isAvailable = false;
+          item.outOfStockMessage = "Selected variant not available";
+          invalidItemExists = true;
+          continue;
+        }
+
+        if(item.selectedVariant.quantity<=0) {
+          item.isAvailable = false;
+          item.outOfStockMessage = `Variant "${item.selectedVariant.name}" is out of stock`;
+          invalidItemExists = true;
+          continue;
+        }
+
+        if(item.quantity >item.selectedVariant.quantity){
+          item.isAvailable = false;
+          item.outOfStockMessage = `Only ${item.selectedVariant.quantity} left for ${item.selectedVariant.name}`
+          item.quantity = item.selectedVariant.quantity;  
+          invalidItemExists = true;
+          continue;
+        }
       }
-      if (item.selectedVariant && item.selectedVariant.quantity <= 0) {
-        item.isAvailable = false;
-        item.outOfStockMessage = `The selected variant (${item.selectedVariant.name}) is out of stock`;
-        invalidItemExists = true;
-      } else if (
-        item.selectedVariant &&
-        item.quantity > item.selectedVariant.quantity
-      ) {
-        item.isAvailable = false;
-        item.outOfStockMessage = `Only ${item.selectedVariant.quantity} left for ${item.selectedVariant.name}`;
-        item.quantity = item.selectedVariant.quantity;
-        invalidItemExists = true;
-      } else if (
-        !item.product.category ||
-        item.product.category.status !== true
-      ) {
-        item.isAvailable = false;
-        item.outOfStockMessage = "Category unavailable";
-        invalidItemExists = true;
-      } else if (item.product.totalStock <= 0) {
-        item.isAvailable = false;
-        item.outOfStockMessage = "out of stock";
-        invalidItemExists = true;
-      } else if (item.quantity > item.product.totalStock) {
-        item.isAvailable = false;
-        item.outOfStockMessage = `Only ${item.product.totalStock} left in stock`;
-        item.quantity = item.product.totalStock;
-        invalidItemExists = true;
+
+      if(!item.selectedVariant){
+        if(item.product.totalStock <= 0){
+          item.isAvailable = false;
+          item.outOfStockMessage = "Product out of stock";
+          invalidItemExists = true;
+          continue;
+        }
+
+        if(item.quantity > item.product.totalStock) {
+          item.isAvailable = false;
+          item.outOfStockMessage = `Only ${item.product.totalStock} left in stock`;
+          item.quantity = item.product.totalStock;
+          invalidItemExists = true;
+          continue;
+        }
       }
 
       let applicableOffers = [];
@@ -397,13 +410,30 @@ const increaseQuantity = async (req, res) => {
           success: false,
           message: `Maximum quantity limit is ${MAX_LIMIT}`,
         });
-      }
+      }  
+      if(variantId) {
+        const variant = product.variants.id(variantId);
+        
+        if(!variant) {
+          return res.json({
+            success:false,
+            message:"Selected variant not found",
+          });
+        }
 
-      if (newQuantity > product.totalStock) {
-        return res.json({
-          success: false,
-          message: `Only ${product.totalStock} items available`,
-        });
+        if(newQuantity >variant.quantity) {
+          return res.json({
+            success: false,
+            message: `Only ${variant.quantity} left for ${variant.name}`,
+          });
+        }
+      } else {
+        if(newQuantity > product.totalStock) {
+          return res.json({
+            success:false,
+            message:`Only ${product.totalStock} items available`,
+          })
+        }
       }
 
       cart.items[itemIndex].quantity = newQuantity;
