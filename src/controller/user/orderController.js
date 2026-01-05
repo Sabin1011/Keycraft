@@ -4,6 +4,7 @@ const Cart = require("../../models/cartModel");
 const Product = require("../../models/productSchema");
 const PDFDocument = require("pdfkit");
 const Wallet = require("../../models/walletSchema");
+// const { default: orders } = require("razorpay/dist/types/orders");
 
 const loadMyOrders = async (req, res) => {
   try {
@@ -145,24 +146,19 @@ const returnOrder = async (req, res) => {
     const { reason, redirectTo } = req.body;
     const userId = req.session.userId;
 
-    console.log("Return request received for:", orderId);
-    console.log("Reason:", reason);
+    const order = await Order.findOne({orderId});
+    if(!order) return res.redirect("/my-orders");
 
-    const updatedOrder = await Order.findOneAndUpdate(
-      { orderId: orderId },
-      {
-        status: "Return Requested",
-        cancelReason: reason,
-      },
-      { new: true, runValidators: true }
-    );
+    order.items.forEach(item =>{
+      if(item.status === "Delivered") {
+        item.status = "Return Requested";
+      }
+    });
 
-    if (!updatedOrder) {
-      console.log("Order NOT found for return:", orderId);
-      return res.redirect("/my-orders");
-    }
+    order.status = "Return Requested";
+    order.cancelReason = reason;
 
-    console.log("Updated order:", updatedOrder);
+    await order.save();
 
     res.redirect(redirectTo ? redirectTo.trim() : "/my-orders");
   } catch (error) {
@@ -170,6 +166,8 @@ const returnOrder = async (req, res) => {
     res.redirect("/my-orders");
   }
 };
+
+
 const viewInvoice = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -318,8 +316,16 @@ const cancelOrderItem = async (req, res) => {
     });
   }
 
-  wallet.balance += refundAmount;
 
+  const alreadyRefunded = wallet.transactions.some(
+    tx =>
+      tx.orderId?.toString() === order._id.toString() &&
+      tx.reason === "Order item cancelled" &&
+      tx.amount === refundAmount
+  )
+
+  if (!alreadyRefunded) {
+  wallet.balance += refundAmount;
   wallet.transactions.push({
     amount: refundAmount,
     type: "credit",
@@ -377,9 +383,9 @@ const cancelOrderItem = async (req, res) => {
     }
 
     await order.save();
-
+    }
     return res.redirect(redirectTo);
-  } catch (err) {
+    } catch (err) {
     console.log("Cancel item error:", err);
     res.redirect("back");
   }

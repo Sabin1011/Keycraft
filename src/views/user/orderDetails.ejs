@@ -35,29 +35,49 @@
         <% } %>
       </div>
 
-      <% const disabledForStatuses = ['cancelled', "returned", "delivered"] %>
-      <% if(!disabledForStatuses.includes(order.status.toLowerCase())) { %>
-      <form
-        id="cancelForm_<%= item._id %>"
-        action="/order/<%= order.orderId %>/cancel-item/<%= item._id %>"
-        method="POST"
-        onsubmit="return handleCancel(event, '<%= order.orderId %>', '<%= item._id %>')"
-      >
-        <input type="hidden" name="redirectTo" value="<%= currentUrl %>" />
-        <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
-        <button class="btn btn-cancel">Cancel Item</button>
-      </form>
+      <%
+        const canCancelItem =
+          item.status === "Active" &&
+          !["Delivered", "Partially Returned", "Returned"].includes(order.status);
+      %>
 
-      <% } %> <% if(order.status === 'Delivered') { %>
-      <form
-        action="/order/<%= order.orderId %>/return-item/<%= item._id %>"
-        method="POST"
-      >
-        <input type="hidden" name="redirectTo" value="<%= currentUrl %>" />
-        <button class="btn btn-return">Return Item</button>
-      </form>
-
+      <% if (canCancelItem) { %>
+        <form
+          id="cancelForm_<%= item._id %>"
+          action="/order/<%= order.orderId %>/cancel-item/<%= item._id %>"
+          method="POST"
+          onsubmit="return handleCancel(event, '<%= order.orderId %>', '<%= item._id %>')"
+        >
+          <input type="hidden" name="redirectTo" value="<%= currentUrl %>" />
+          <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
+          <button class="btn btn-cancel">Cancel Item</button>
+        </form>
       <% } %>
+
+
+
+      <% 
+        const canReturnItem =
+          (order.status === "Delivered" || order.status === "Partially Returned") &&
+          item.status === "Active";
+      %>
+
+      <% if (canReturnItem) { %>
+        <form
+          action="/order/<%= order.orderId %>/return-item/<%= item._id %>"
+          method="POST"
+        >
+          <input type="hidden" name="redirectTo" value="<%= currentUrl %>" />
+          <button class="btn btn-return">Return Item</button>
+        </form>
+      <% } %>
+
+
+      <% if (item.status === "Return Requested") { %>
+        <span style="color:#856404;font-weight:600;">Return Requested</span>
+      <% } else if (item.status === "Returned") { %>
+        <span style="color:#2e7d32;font-weight:600;">Returned</span>
+      <% } %> 
     </div>
 
     <% }) %>

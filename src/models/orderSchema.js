@@ -97,6 +97,7 @@
           "Delivered",
           "Cancelled",
           "Returned",
+          "Partially Returned",
           "Return Requested",
         ],
         default: "Placed",

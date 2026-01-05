@@ -91,34 +91,44 @@
           >View Details</a
         >
 
-        <% const disabledForStatuses = ['cancelled', "returned", "delivered"] %>
+          <%  
+            const canCancelOrder =
+              !["Delivered", "Returned", "Cancelled", "Partially Returned"]
+                .includes(order.status);
+          %>
 
-        <% if(!disabledForStatuses.includes(order.status.toLowerCase())) { %>
-        <form
-          id="cancelForm_<%= order.orderId %>"
-          action="/order/<%= order.orderId %>/cancel"
-          method="post"
-          style="display: inline"
-          onsubmit="return handleCancel(event, '<%= order.orderId %>')"
-        >
-        <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
-          <button type="submit" class="btn btn-cancel">Cancel</button>
-        </form>
-          
-        <% } %> 
-        <% if(order.status === 'Delivered') { %>
-        <form 
-          id="returnForm_<%= order.orderId %>"
-          action="/order/<%= order.orderId %>/return"
-          method="POST"
-          onsubmit="return handleReturn(event, '<%= order.orderId %>')"
-        >
-            <input type="hidden" name="reason" id="returnReason_<%= order.orderId %>">
-            <input type="hidden" name="redirectTo" value="/my-orders">
-            <button class="btn btn-return">Return</button>
-        </form>
+          <% if (canCancelOrder) { %>
+            <form
+              id="cancelForm_<%= order.orderId %>"
+              action="/order/<%= order.orderId %>/cancel"
+              method="post"
+              onsubmit="return handleCancel(event, '<%= order.orderId %>')"
+            >
+              <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
+              <button type="submit" class="btn btn-cancel">Cancel</button>
+            </form>
+          <% } %>
 
-        <% } %>
+
+          <div class="order-items">
+
+          <%
+            const hasReturnableItem =
+            (order.status === "Delivered" || order.status === "Partially Returned") &&
+            order.items.some(item => item.status === "Active");
+          %>
+
+          <% if (hasReturnableItem) { %>
+            <a
+              href="/orders/<%= order.orderId %>"
+              class="btn btn-return"
+            >
+              Return Order
+            </a>
+          <% } %>
+
+
+        </div>
 
         <a href="/order/<%= order.orderId %>/invoice" class="btn btn-invoice"
           >Invoice</a

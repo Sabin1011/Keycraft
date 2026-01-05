@@ -64,8 +64,8 @@ router.post(
   adminOrderController.updateOrderStatus
 );
 
-router.post("/order/:orderId/accept-return", adminOrderController.acceptReturn);
-router.post("/order/:orderId/reject-return", adminOrderController.rejectReturn);
+router.post("/order/:orderId/accept-return/:itemId", adminOrderController.acceptReturn);
+router.post("/order/:orderId/reject-return/:itemId", adminOrderController.rejectReturn);
 
 router.get("/couponManage", couponController.loadCouponList);
 router.get("/coupon/add", couponController.loadAddCoupon);
@@ -88,5 +88,9 @@ router.get("/dashboard", dashboardController.loadDashboard);
 router.get("/sales-data", dashboardController.getSalesChartDate);
 router.get("/sales-report/excel", salesController.downloadSalesReportExcel);
 router.get("/logout", adminController.logout);
+router.get(
+  "/orders/:orderId",
+  adminOrderController.loadSingleOrder
+);
 
 module.exports = router;
