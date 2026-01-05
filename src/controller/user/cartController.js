@@ -586,7 +586,7 @@ const removeFromCart = async (req, res) => {
 
       const itemOfferDiscount = cart.items.reduce(
         (sum, i) =>
-          sum + (item.originalPrice - item.discountedPrice) * item.quantity,
+          sum + (i.originalPrice - i.discountedPrice) * i.quantity,
         0
       );
       const cartOfferDiscount = cart.discountAmount || 0;

@@ -163,10 +163,10 @@
               <div style="padding: 15px; margin: 10px 0; background: #fff3cd; border-left: 4px solid #ffca2c;">
                 <p style="margin: 0; font-weight: 600; color: #856404;">Return Requested</p>
                 <p style="margin: 3px 0; color:#6c757d; font-size:14px;">
-              Order ID: <%= order.orderId %>
+              Order ID: <%= order.orderId %>  
             </p>
 
-                <form method="post" action="/admin/order/<%= order.orderId %>/accept-return" style="display:inline;">
+                <form method="post" action="/admin/order/<%= order.orderId %>/accept-return/<%= item._id%>" style="display:inline;">
                   <button style=" background: #28a745; color:white; border:none; padding:6px 14px; border-radius:5px; margin-right:5px;">
                     Accept
                   </button>
@@ -181,6 +181,21 @@
 
             <% } %>
           </td>
+          <td>
+  <a
+    href="/admin/orders/<%= order.orderId %>"
+    style="
+      background:#3498db;
+      color:white;
+      padding:6px 12px;
+      border-radius:5px;
+      text-decoration:none;
+    "
+  >
+    View
+  </a>
+</td>
+
 
         </tr>
       <% }) %>

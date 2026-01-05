@@ -15,7 +15,7 @@ const walletSchema = new mongoose.Schema({
     {
       amount: Number,
       type: {
-        type: String, // credit | debit
+        type: String, 
         enum: ["credit", "debit"],
       },
       reason: String,
@@ -27,6 +27,10 @@ const walletSchema = new mongoose.Schema({
       createdAt: {
         type: Date,
         default: Date.now,
+      },
+      itemId:{
+        type:mongoose.Schema.Types.ObjectId,
+        default:null,
       },
     },
   ],

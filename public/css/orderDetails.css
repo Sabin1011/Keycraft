@@ -111,3 +111,21 @@ h4 {
 .btn-success:hover {
   background: #1e8449;
 }
+
+.status-tag {
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-tag.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-tag.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
