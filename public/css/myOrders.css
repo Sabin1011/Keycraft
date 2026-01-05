@@ -41,12 +41,12 @@ body {
 }
 .order-id {
   font-weight: 600;
-  color: #401f75;
+  color: #465a46;
   margin-bottom: 5px;
 }
 .order-date {
   font-size: 14px;
-  color: #555;
+  color: #494949;
 }
 .order-status {
   font-weight: 500;
@@ -66,28 +66,28 @@ body {
   margin-left: 5px;
 }
 .btn-details {
-  background: #401f75;
+  background: #3e3e3e;
 }
 .btn-details:hover {
-  background: #321960;
+  background: rgb(20, 20, 20);
 }
 .btn-cancel {
-  background: #e74c3c;
+  background: #d11803;
 }
 .btn-cancel:hover {
-  background: #c0392b;
+  background: #9e1202;
 }
 .btn-return {
-  background: #f39c12;
+  background: #676767;
 }
 .btn-return:hover {
-  background: #d68910;
+  background: #1a1919;
 }
 .btn-invoice {
-  background: #27ae60;
+  background: #5c5c5c;
 }
 .btn-invoice:hover {
-  background: #1e8449;
+  background: #1f1f1f;
 }
 .button-group {
   display: flex;

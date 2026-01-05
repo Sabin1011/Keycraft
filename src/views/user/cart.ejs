@@ -42,9 +42,9 @@
               </div>
             <% } %>
 
-            <% if (item.selectedVariant) { %> Variant:
-            <strong><%= item.selectedVariant.name %></strong>
-            <% } else { %>
+            <% if (item.selectedVariant) { %> <p style="color: #334d3e;">Variant:</p>
+            <strong style="color: rgb(83, 187, 104);"><%= item.selectedVariant.name %></strong>
+            <% } else { %>  
             <span style="color: red; font-size: 13px">
               Variant unavailable
             </span>

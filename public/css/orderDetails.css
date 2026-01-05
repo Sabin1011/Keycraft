@@ -86,21 +86,21 @@ h4 {
 }
 
 .btn-cancel {
-  background: #e74c3c;
+  background: #434343;
   color: #fff;
 }
 
 .btn-cancel:hover {
-  background: #c0392b;
+  background: #191919;
 }
 
 .btn-return {
-  background: #f39c12;
+  background: #464646;
   color: #fff;
 }
 
 .btn-return:hover {
-  background: #d68910;
+  background: #292929;
 }
 
 .btn-success {
