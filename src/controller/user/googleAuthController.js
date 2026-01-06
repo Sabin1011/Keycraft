@@ -7,7 +7,7 @@ exports.googleLogin = passport.authenticate("google", {
 exports.googleCallback = (req, res) => {
   try {
     req.session.userId = req.user._id;
-    res.redirect("/home");
+    res.redirect("/");
   } catch (error) {
     console.error("Google login error:", error);
     res.redirect("/login");

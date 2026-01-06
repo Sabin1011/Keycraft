@@ -345,7 +345,7 @@ const login = async (req, res) => {
 
     req.session.userId = user._id;
 
-    return res.redirect("/home");
+    return res.redirect("/");
   } catch (error) {
     console.log("Login error:", error);
     res.status(500).send("Internal Server Error");

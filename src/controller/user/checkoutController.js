@@ -416,11 +416,11 @@ const loadSuccessPage = async (req, res) => {
       cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
     }
     const { orderId } = req.query;
-    if (!orderId) return res.redirect("/home");
+    if (!orderId) return res.redirect("/");
 
     const order = await Order.findById(orderId).populate("items.product");
     if (!order) {
-      return res.redirect("/home");
+      return res.redirect("/");
     }
 
     res.render("orderSuccess", {
@@ -430,7 +430,7 @@ const loadSuccessPage = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.redirect("/home");
+    res.redirect("/");
   }
 };
 

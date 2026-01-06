@@ -3,7 +3,7 @@ const User = require("../models/userSchema");
 const isLogged = async (req, res, next) => {
   try {
     if (req.session && req.session.userId) {
-      return res.redirect("/home");
+      return res.redirect("/");
     }
     next();
   } catch (error) {

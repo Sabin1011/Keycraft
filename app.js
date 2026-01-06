@@ -73,5 +73,5 @@ app.use((req, res)=>{
 connectDB();
 
 app.listen(3000, () => {
-    console.log("http://localhost:3000/home");
+    console.log("http://localhost:3000");
 });

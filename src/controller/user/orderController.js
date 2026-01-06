@@ -30,7 +30,7 @@ const loadMyOrders = async (req, res) => {
     });
   } catch (error) {
     console.log("Error loading orders:", error);
-    res.redirect("/home");
+    res.redirect("/");
   }
 };
 

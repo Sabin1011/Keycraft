@@ -26,8 +26,7 @@ router.get("/resend-otp", authController.resendOtp);
 router.get("/login", auth.isLogged, authController.loadLogin);
 router.post("/login", authController.login);
 
-router.get("/", userController.loadHome);
-router.get("/home", userController.loadHome);
+router.get("/", userController.loadHome); 
 
 router.get("/forgot-password", authController.loadForgotPassword);
 router.post("/forgot-password/send-otp", authController.emailVerification);

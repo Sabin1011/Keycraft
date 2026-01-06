@@ -80,7 +80,6 @@ body {
   color: var(--text-secondary);
 }
 
-/* ================= BUTTONS ================= */
 .button {
   background: var(--primary);
   color: #fff;
@@ -230,7 +229,6 @@ body {
   border-color: var(--primary);
 }
 
-/* ================= PRODUCTS ================= */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -310,7 +308,6 @@ body {
   color: var(--text-primary);
 }
 
-/* ================= PRODUCT ACTIONS ================= */
 .product-actions {
   display: flex;
   gap: 10px;
@@ -342,7 +339,6 @@ body {
   background: var(--primary-hover);
 }
 
-/* ================= WISHLIST ================= */
 .wishlist-btn {
   position: absolute;
   top: 12px;
@@ -370,7 +366,6 @@ body {
   color: var(--error);
 }
 
-/* ================= BRANDS ================= */
 .brands-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -413,7 +408,6 @@ body {
 }
 
 
-/* ================= RESPONSIVE ================= */
 
 @media (max-width: 600px) {
   .brands-grid {
