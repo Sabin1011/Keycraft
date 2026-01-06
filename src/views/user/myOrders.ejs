@@ -1,4 +1,5 @@
 <%- include('../partials/user/header') %>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="/css/myOrders.css">
 <section class="orders-section">
@@ -59,20 +60,35 @@
     <p>You haven't placed any orders yet.</p>
     <% } %> 
     <% orders.forEach(order => { %>
+
     <div class="orders-card">
       <div class="order-info">
         <div class="order-id">Order ID: <%= order.orderId %></div>
         <div class="order-date">
           Placed on: <%= new Date(order.createdAt).toDateString() %>
         </div>
-        <div class="order-status">Status: <%= order.status %></div>
+      <div class="order-status">
+        Status:
+        <% if (order.paymentStatus === "Failed") { %>
+          Payment Failed
+        <% } else { %>
+          <%= order.status %>
+        <% } %>
+      </div>
+
         <div class="order-total">
         <%
           const paidAmount = order.finalAmount ??
           (order.totalAmount - (order.discountAmount || 0));
         %>
 
-        Total Paid: ₹<%= paidAmount.toFixed(2) %>
+
+          <% if (order.paymentStatus === "Failed") { %>
+            <span style="color:#c0392b;">Payment not completed</span>
+          <% } else { %>
+            Total Paid: ₹<%= paidAmount.toFixed(2) %>
+          <% } %>
+
           <% if (order.discountAmount > 0) { %>
             <span style="color:green; font-size:12px;">
               (Saved ₹<%= order.discountAmount %>)
@@ -85,55 +101,63 @@
           <% } %>
         </div>
       </div>
+<div class="button-group">
 
-      <div class="button-group">
-        <a href="/order/<%= order.orderId %>" class="btn btn-details"
-          >View Details</a
-        >
+  <% if (order.paymentStatus === "Failed") { %>
 
-          <%  
-            const canCancelOrder =
-              !["Delivered", "Returned", "Cancelled", "Partially Returned"]
-                .includes(order.status);
-          %>
+    <button
+      class="btn btn-primary"
+      onclick="retryPayment('<%= order._id %>')"
+      style="background:#923119; color:#fff;"
+    >
+      Retry Payment
+    </button>
 
-          <% if (canCancelOrder) { %>
-            <form
-              id="cancelForm_<%= order.orderId %>"
-              action="/order/<%= order.orderId %>/cancel"
-              method="post"
-              onsubmit="return handleCancel(event, '<%= order.orderId %>')"
-            >
-              <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
-              <button type="submit" class="btn btn-cancel">Cancel</button>
-            </form>
-          <% } %>
+  <% } else { %>
 
 
-          <div class="order-items">
+    <a href="/order/<%= order.orderId %>" class="btn btn-details">
+      View Details
+    </a>
 
-          <%
-            const hasReturnableItem =
-            (order.status === "Delivered" || order.status === "Partially Returned") &&
-            order.items.some(item => item.status === "Active");
-          %>
+    <%  
+      const canCancelOrder =
+        !["Delivered", "Returned", "Cancelled", "Partially Returned"]
+          .includes(order.status);
+    %>
 
-          <% if (hasReturnableItem) { %>
-            <a
-              href="/orders/<%= order.orderId %>"
-              class="btn btn-return"
-            >
-              Return Order
-            </a>
-          <% } %>
+    <% if (canCancelOrder) { %>
+      <form
+        id="cancelForm_<%= order.orderId %>"
+        action="/order/<%= order.orderId %>/cancel"
+        method="post"
+        onsubmit="return handleCancel(event, '<%= order.orderId %>')"
+      >
+        <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
+        <button type="submit" class="btn btn-cancel">Cancel</button>
+      </form>
+    <% } %>
 
+    <%
+      const hasReturnableItem =
+        (order.status === "Delivered" || order.status === "Partially Returned") &&
+        order.items.some(item => item.status === "Active");
+    %>
 
-        </div>
+    <% if (hasReturnableItem) { %>
+      <a href="/orders/<%= order.orderId %>" class="btn btn-return">
+        Return Order
+      </a>
+    <% } %>
 
-        <a href="/order/<%= order.orderId %>/invoice" class="btn btn-invoice"
-          >Invoice</a
-        >
-      </div>
+    <a href="/order/<%= order.orderId %>/invoice" class="btn btn-invoice">
+      Invoice
+    </a>
+
+  <% } %>
+
+</div>
+
     </div>
     <% }) %>
   </div>
@@ -188,6 +212,70 @@ function handleReturn(event, orderId) {
 
     return false; 
   }
+
+  async function retryPayment(orderId) {
+  try {
+    Swal.fire({
+      title: "Redirecting to payment...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    const res = await fetch(`/retry-payment/${orderId}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      Swal.fire("Error", "Unable to retry payment", "error");
+      return;
+    }
+
+    openRazorpayRetry(data);
+
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error", "Something went wrong", "error");
+  }
+}
+function openRazorpayRetry(data) {
+  const options = {
+    key: data.key,
+    amount: data.amount,
+    currency: "INR",
+    name: "KeyCraft",
+    description: "Retry Payment",
+    order_id: data.razorpayOrderId,
+
+    handler: function (response) {
+      fetch("/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...response,
+          orderId: data.orderId
+        })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          window.location.href = `/order-success?orderId=${data.orderId}`;
+        } else {
+          window.location.href = `/payment-failed?orderId=${data.orderId}`;
+        }
+      });
+    },
+
+    modal: {
+      ondismiss: function () {
+        window.location.href = `/payment-failed?orderId=${data.orderId}`;
+      }
+    },
+
+    theme: { color: "#401f75" }
+  };
+
+  new Razorpay(options).open();
+}
+
 </script>
 
 <%- include('../partials/user/footer') %>

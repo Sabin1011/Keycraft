@@ -98,11 +98,13 @@ router.get("/checkout", checkoutController.loadCheckout);
 
 router.post("/proceedToCheckout", checkoutController.placeOrder);
 router.get("/order-success", checkoutController.loadSuccessPage);
+router.get("/payment-failed", checkoutController.loadPaymentFailed);
+router.get("/retry-payment/:orderId", checkoutController.retryPayment);
+
 
 router.get("/my-orders", orderController.loadMyOrders);
 router.get("/order/:id", orderController.loadOrderDetails);
-router.post("/place-order", checkoutController.createRazorpayOrder);
-
+router.post("/place-order", checkoutController.placeOrder);
 router.post("/verify-payment", checkoutController.verifyRazorpayPayment);
 
 router.post("/order/:orderId/cancel", orderController.cancelOrder);
@@ -126,10 +128,6 @@ router.get(
   "/order/:orderId/cancel-preview/:itemId",
   orderController.cancelPreview
 );
-
-router.get("/payment-failed", checkoutController.loadPaymentFailed);
-
-router.get("/retry-payment", checkoutController.retryPayment);
 
 router.get("/wallet", walletController.loadWalletPage);
 

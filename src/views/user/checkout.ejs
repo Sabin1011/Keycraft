@@ -165,7 +165,6 @@
 
                       </div>
 
-
                   </div>
                   
                   <div style="font-weight: 600; color: #401f75;">
@@ -204,6 +203,16 @@
                 <i class="fa fa-tag"></i> apply coupon
               </h2>
             </div>
+
+            <button
+              type="button"
+              class="btn btn-secondary"
+              style="margin-bottom:10px;width:100%;"
+              onclick="openCouponModal()"
+            >
+              🎁 View Available Coupons
+            </button>
+
 
             <div style="display: flex; gap: 10px;">
               <input 
@@ -303,6 +312,42 @@
   </div>
 </section>
 
+<div id="couponModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;">
+  <div style="background:#fff;max-width:450px;margin:8% auto;padding:20px;border-radius:12px;">
+
+    <h3 style="margin-bottom:15px;">Available Coupons</h3>
+
+    <% if (availableCoupons.length === 0) { %>
+      <p style="color:#888;">No coupons available for this order</p>
+    <% } %>
+
+    <% availableCoupons.forEach(coupon => { %>
+      <div style="border:1px dashed #ccc;padding:12px;border-radius:8px;margin-bottom:10px;">
+        <strong><%= coupon.code %></strong>
+        <p style="font-size:13px;color:#666;"><%= coupon.description %></p>
+
+        <p style="font-size:12px;">
+          Min: ₹<%= coupon.minPurchaseAmount %> |
+          <% if (coupon.discountType === "percentage") { %>
+            <%= coupon.discountValue %>% OFF
+          <% } else { %>
+            ₹<%= coupon.discountValue %> OFF
+          <% } %>
+        </p>
+
+        <button
+          class="btn btn-primary btn-small"
+          onclick="applyCouponFromModal('<%= coupon.code %>')"
+        >
+          Apply
+        </button>
+      </div>
+    <% }) %>
+
+    <button class="btn btn-secondary" style="width:100%;" onclick="closeCouponModal()">Close</button>
+  </div>
+</div>
+
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
@@ -349,7 +394,7 @@ addressRadios.forEach((radio) => {
     
     try {
       const res = await fetch("/checkout/select-address", {
-        method: "PATCH", // ✅ PATCH
+        method: "PATCH", 
         headers: {
           "Content-Type": "application/json",
         },
@@ -477,6 +522,13 @@ async function startRazorpayPayment(addressId, couponCode) {
 
 
 function openRazorpay(data) {
+    console.log("Opening Razorpay with:", data);
+
+  if (!data.orderId) {
+    Swal.fire("Error", "Order ID missing. Please retry.", "error");
+    return;
+  }
+
   const options = {
     key: data.key,
     amount: data.amount,
@@ -486,24 +538,32 @@ function openRazorpay(data) {
     order_id: data.razorpayOrderId,
 
     handler: function (response) {
-      verifyPayment(response);
+      verifyPayment(response,data.orderId);
     },
 
-    theme: {
-      color: "#401f75"
-    }
+
+    modal: {
+      ondismiss: function () {
+        window.location.href = `/payment-failed?orderId=${data.orderId}`;
+      }
+    },
+
+    theme: { color: "#401f75" }
   };
 
-  const rzp = new Razorpay(options);
-  rzp.open();
+
+   new Razorpay(options).open();
 }
 
-async function verifyPayment(response) {
+async function verifyPayment(response, orderId) {
   try {
     const res = await fetch("/verify-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(response),
+      body: JSON.stringify({
+        ...response,
+        orderId
+      }),
     });
 
     const data = await res.json();
@@ -511,14 +571,15 @@ async function verifyPayment(response) {
     if (data.success) {
       window.location.href = `/order-success?orderId=${data.orderId}`;
     } else {
-      Swal.fire("Payment Failed", "Verification failed", "error");
+      window.location.href = `/payment-failed?orderId=${data.orderId}`;
     }
 
   } catch (err) {
     console.error(err);
-    Swal.fire("Error", "Payment verification error", "error");
+    window.location.href = `/payment-failed?orderId=${orderId}`;
   }
 }
+
 
 
 const ORDER_LIMIT_FOR_COD = 1000;
@@ -538,6 +599,21 @@ function updateCODAvailability(Total) {
 }
 
 updateCODAvailability(grandTotal)
+
+function openCouponModal() {
+  document.getElementById("couponModal").style.display = "block";
+}
+
+function closeCouponModal() {
+  document.getElementById("couponModal").style.display = "none";
+}
+
+function applyCouponFromModal(code) {
+  document.getElementById("couponInput").value = code;
+  document.getElementById("applyCouponBtn").click();
+  closeCouponModal();
+}
+
 </script>
 
 <%- include('../partials/user/footer') %>

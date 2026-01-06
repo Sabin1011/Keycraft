@@ -548,6 +548,13 @@ body {
   animation: fadeIn 0.5s;
 }
 
+.switch-option.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -1,6 +1,5 @@
 <%- include('../partials/user/header') %>
-<link rel="stylesheet" href="/css/productDetails.css">
-
+<link rel="stylesheet" href="/css/productDetails.css" />
 
 <section class="breadcrumb">
   <div class="container">
@@ -61,34 +60,58 @@
           <span class="rating-text">4.5 (127 reviews)</span>
         </div>
 
-<div class="product-price">
-  <% if (product.hasOffer) { %>
-    <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
-      <span style="text-decoration:line-through; color:#999; font-size:20px;">
-        ₹<%= product.originalPrice.toFixed(2) %>
-      </span>
+        <div class="product-price">
+          <% if (product.hasOffer) { %>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 15px;
+              flex-wrap: wrap;
+            "
+          >
+            <span
+              style="
+                text-decoration: line-through;
+                color: #999;
+                font-size: 20px;
+              "
+            >
+              ₹<%= product.originalPrice.toFixed(2) %>
+            </span>
 
-      <span style="font-size:42px; font-weight:700;">
-        ₹<%= product.discountedPrice.toFixed(2) %>
-      </span>
+            <span style="font-size: 42px; font-weight: 700">
+              ₹<%= product.discountedPrice.toFixed(2) %>
+            </span>
 
-      <span style="background:#27ae60; color:#fff; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;">
-        <% if (product.offerDetails.discountType === 'percentage') { %>
-          <%= product.discountPercentage %>% OFF
-        <% } else { %>
-          ₹<%= product.discountAmount.toFixed(0) %> OFF
-        <% } %>
-      </span>
-    </div>
+            <span
+              style="
+                background: #27ae60;
+                color: #fff;
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 600;
+              "
+            >
+              <% if (product.offerDetails.discountType === 'percentage') { %>
+              <%= product.discountPercentage %>% OFF <% } else { %> ₹<%=
+              product.discountAmount.toFixed(0) %> OFF <% } %>
+            </span>
+          </div>
 
-    <div style="margin-top:10px; font-size:13px; color:#e67e22; font-weight:600;">
-      🎉 <%= product.offerDetails.title %>
-    </div>
-  <% } else { %>
-    ₹<%= product.originalPrice.toFixed(2) %>
-  <% } %>
-</div>
-
+          <div
+            style="
+              margin-top: 10px;
+              font-size: 13px;
+              color: #e67e22;
+              font-weight: 600;
+            "
+          >
+            🎉 <%= product.offerDetails.title %>
+          </div>
+          <% } else { %> ₹<%= product.originalPrice.toFixed(2) %> <% } %>
+        </div>
 
         <p class="product-description"><%= product.description %></p>
 
@@ -117,10 +140,18 @@
             <% product.variants.forEach((variant, index) => { %>
 
             <div
-              class="switch-option <%= selectedVariantId == variant._id.toString() ? 'active' : (!selectedVariantId && index === 0 ? 'active' : '') %>"
-              onclick="selectSwitch(this, '<%= variant._id %>')"
+              class="switch-option <%= variant.quantity === 0 ? 'disabled' : '' %> <%= selectedVariantId == variant._id.toString() ? 'active' : (!selectedVariantId && index === 0 && variant.quantity > 0 ? 'active' : '') %>"
+              <%
+              if
+              (variant.quantity
             >
-              <%= variant.name %>
+              0) { %> onclick="selectSwitch(this, '<%= variant._id %>', <%=
+              variant.quantity %>)" <% } %> > <%= variant.name %> <% if
+              (variant.quantity === 0) { %>
+              <span style="font-size: 11px; color: #e74c3c"
+                >(out of stock)</span
+              >
+              <% } %>
             </div>
 
             <% }) %>
@@ -150,38 +181,46 @@
                 min="1"
                 max="<%= product.totalStock %>"
               />
-              <button onclick="increaseQty('<%= product.totalStock %>')">
-                +
-              </button>
+              <button onclick="increaseQty()">+</button>
             </div>
             <span style="color: #27ae60; font-size: 13px">
               <% if (product.totalStock > 0) { %> ✓ In Stock (<span
                 id="currentStock"
-                ><%= product.totalStock %></span
               >
+                <%= product.variants.find(v => (selectedVariantId ||
+                product.variants[0]._id.toString()) === v._id.toString()
+                )?.quantity || 0 %>
+              </span>
+
               remaining) <% } else { %> Out of Stock <% } %>
             </span>
           </div>
         </div>
 
         <div class="product-actions">
-        <form action="/cart/add/<%= product._id %>" method="POST">
-            
-            <input type="hidden" name="variantId" id="selectedVariantInput"
-                  value="<%= selectedVariantId || product.variants[0]._id %>">
+          <form action="/cart/add/<%= product._id %>" method="POST">
+            <input
+              type="hidden"
+              name="variantId"
+              id="selectedVariantInput"
+              value="<%= selectedVariantId || product.variants[0]._id %>"
+            />
 
-            <input type="hidden" name="quantity" id="formQuantity" value="1">
+            <input type="hidden" name="quantity" id="formQuantity" value="1" />
 
             <button class="btn btn-primary" type="submit">
-                <i class="fa fa-shopping-cart"></i> add to cart
+              <i class="fa fa-shopping-cart"></i> add to cart
             </button>
+          </form>
 
-        </form>
-
-
-          <input type="hidden" id="selectedVariantInput" name="variantId" value="<%= selectedVariantId || product.variants[0]._id %>">
+          <input
+            type="hidden"
+            id="selectedVariantInput"
+            name="variantId"
+            value="<%= selectedVariantId || product.variants[0]._id %>"
+          />
           <!-- <input type="hidden" id="quantity" value="1" min="1" max="<%= product.totalStock %>" /> -->
-          
+
           <button
             class="btn btn-secondary btn-icon wishlist-btn"
             data-product="<%= product._id %>"
@@ -401,27 +440,51 @@
 <%- include('../partials/user/footer') %>
 
 <script>
+  let selectedVariantStock = Number(
+    document.getElementById("currentStock")?.innerText || 0
+  );
+
   function decreaseQty() {
     let qty = document.getElementById("quantity");
     if (qty.value > 1) qty.value--;
     document.getElementById("formQuantity").value = qty.value;
-}
+  }
+  function increaseQty() {
+    let qtyInput = document.getElementById("quantity");
+    let qty = Number(qtyInput.value);
 
-function increaseQty(maxStock) {
-    let qty = document.getElementById("quantity");
-    if (qty.value < maxStock) qty.value++;
-    document.getElementById("formQuantity").value = qty.value;
-}
-  function selectSwitch(element, variantId) {
+    if (qty >= selectedVariantStock) {
+      Swal.fire({
+        icon: "warning",
+        title: "Stock limit reached",
+        text: `Only ${selectedVariantStock} item(s) available for this variant`,
+        confirmButtonColor: "#401f75",
+      });
+      return;
+    }
+
+    qtyInput.value = qty + 1;
+    document.getElementById("formQuantity").value = qtyInput.value;
+  }
+
+  function selectSwitch(element, variantId, stock) {
     document
       .querySelectorAll(".switch-option")
       .forEach((el) => el.classList.remove("active"));
 
     element.classList.add("active");
 
+    selectedVariantStock = Number(stock);
+
     document.getElementById("wishlistVariant").value = variantId;
     document.getElementById("selectedVariantInput").value = variantId;
+
+    document.getElementById("quantity").value = 1;
+    document.getElementById("formQuantity").value = 1;
+
+    document.getElementById("currentStock").innerText = stock;
   }
+
   function changeImage(element, imageUrl) {
     const mainImage = document.getElementById("mainImage");
     mainImage.src = imageUrl;
