@@ -298,7 +298,7 @@ const login = async (req, res) => {
       });
     }
 
-    if (password.leght < 6) {
+    if (password.length < 6) {
       return res.render("login", {
         passwordError: "Password must be at least 6 characters",
         emailError: "",

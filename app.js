@@ -9,6 +9,7 @@ const session = require("express-session");
 const passport = require("passport");
 require("./src/config/passport");
 const noCache = require("nocache");
+const MongoStore = require("connect-mongo");
 
 const cartCountMiddleware = require("./src/middleware/cartCount");
 
@@ -18,12 +19,22 @@ const authRoutes = require("./src/router/authRouter");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.set("trust proxy", 1);
 
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "yoursecurity",
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: "sessions",
+    }),
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24,
+    },
   })
 );
 
@@ -69,6 +80,7 @@ app.use((req, res) => {
 
 connectDB();
 
-app.listen(3000, () => {
-  console.log("http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`http://localhost:${PORT}`);
 });
