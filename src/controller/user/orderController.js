@@ -336,10 +336,12 @@ const cancelOrderItem = async (req, res) => {
   await wallet.save();
 }
     order.items.pull(itemId);
+
     await order.save();
 
     if (order.items.length === 0) {
       order.status = "Cancelled";
+      order.subtotal = 0;
       order.totalAmount = 0;
       order.discountAmount = 0;
       order.finalAmount = 0;
@@ -353,7 +355,9 @@ const cancelOrderItem = async (req, res) => {
       0
     );
 
+    order.subtotal = newTotal;
     order.totalAmount = newTotal;
+
 
     if (order.couponId) {
       const coupon = order.couponId;

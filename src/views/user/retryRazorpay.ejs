@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Retry Payment</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+<script>
+  const options = {
+    key: "<%= key %>",
+    amount: "<%= amount %>",
+    currency: "INR",
+    name: "KeyCraft",
+    description: "Retry Payment",
+    order_id: "<%= razorpayOrderId %>",
+
+    handler: function (response) {
+      fetch("/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+          orderId: "<%= orderId %>"
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = `/order-success?orderId=<%= orderId %>`;
+        } else {
+          window.location.href = `/payment-failed?orderId=<%= orderId %>`;
+        }
+      });
+    },
+
+    modal: {
+      ondismiss: function () {
+       
+        window.location.href = `/payment-failed?orderId=<%= orderId %>`;
+      }
+    },
+
+    theme: {
+      color: "#401f75"
+    }
+  };
+
+  new Razorpay(options).open();
+</script>
+
+</body>
+</html>
