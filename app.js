@@ -6,12 +6,11 @@ dotenv.config();
 
 const connectDB = require("./src/config/db");
 const session = require("express-session");
-const MongoStore = require("connect-mongo");
 const passport = require("passport");
 require("./src/config/passport");
 const noCache = require("nocache");
 
-const cartCountMiddleware = require("./src/middleware/cartCount")
+const cartCountMiddleware = require("./src/middleware/cartCount");
 
 const userRoutes = require("./src/router/userRouter");
 const adminRoutes = require("./src/router/adminRouter");
@@ -21,30 +20,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(
-    session({
-        secret: process.env.SESSION_SECRET || "yoursecurity",
-        resave: false,
-        saveUninitialized: false,
-        store: MongoStore.create({
-            mongoUrl: process.env.MONGO_URI,
-            ttl: 24 * 60 * 60
-        }),
-        cookie: { maxAge: 24 * 60 * 60 * 1000 }
-    })
+  session({
+    secret: process.env.SESSION_SECRET || "yoursecurity",
+    resave: false,
+    saveUninitialized: false,
+  })
 );
 
 app.use(cartCountMiddleware);
 
 app.set("view engine", "ejs");
 app.set("views", [
-    path.join(__dirname, "src", "views", "user"),
-    path.join(__dirname, "src", "views", "admin")
+  path.join(__dirname, "src", "views", "user"),
+  path.join(__dirname, "src", "views", "admin"),
 ]);
 
 app.use((req, res, next) => {
-    res.locals.user = req.session.user || null;
-    res.locals.admin = req.session.admin || null;
-    next();
+  res.locals.user = req.session.user || null;
+  res.locals.admin = req.session.admin || null;
+  next();
 });
 
 app.use(passport.initialize());
@@ -54,11 +48,14 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use(noCache());
 
-app.use("/admin",(req,res,next)=>{
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
-    res.setHeader("Pragma","no-cache");
-    res.setHeader("Expires","0");
-    next();
+app.use("/admin", (req, res, next) => {
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, private"
+  );
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
 });
 
 app.use("/admin", adminRoutes);
@@ -66,12 +63,12 @@ app.use("/auth", authRoutes);
 
 app.use("/", userRoutes);
 
-app.use((req, res)=>{
-    res.status(404).render("404");
+app.use((req, res) => {
+  res.status(404).render("404");
 });
 
 connectDB();
 
 app.listen(3000, () => {
-    console.log("http://localhost:3000");
+  console.log("http://localhost:3000");
 });
