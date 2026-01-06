@@ -1,0 +1,240 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ================= BASE ================= */
+body {
+  font-family: "Questrial", sans-serif;
+  background: #f3f4f6; /* simple soft background */
+  color: #1a1a1a;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ================= PAGE HEADER ================= */
+.page-header {
+  padding: 70px 20px 50px;
+  text-align: center;
+  background: transparent;
+  margin-bottom: 40px;
+}
+
+.page-header h1 {
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: #111;
+  text-transform: uppercase;
+}
+
+.page-header::after {
+  content: "";
+  display: block;
+  width: 50px;
+  height: 2px;
+  background: #111;
+  margin: 16px auto 0;
+}
+
+/* ================= CONTAINER ================= */
+.container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 32px 100px;
+}
+
+/* ================= GRID ================= */
+.wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 32px;
+}
+
+/* ================= PRODUCT CARD ================= */
+.product-card {
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #e6e6e6;
+  transition: all 0.35s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* ================= IMAGE ================= */
+.product-image {
+  height: 300px;
+  background: #f1f1f1;
+  overflow: hidden;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.06);
+}
+
+/* ================= INFO ================= */
+.product-info {
+  padding: 26px 24px;
+}
+
+.product-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #111;
+  margin-bottom: 10px;
+  min-height: 38px;
+}
+
+.product-price {
+  font-size: 17px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 22px;
+}
+
+/* ================= ACTIONS ================= */
+.product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  padding: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 8px;
+  border: 1px solid #111;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* View */
+.btn-view {
+  background: #111;
+  color: #ffffff;
+}
+
+.btn-view:hover {
+  background: #000;
+}
+
+/* Cart */
+.btn-cart {
+  color: #111;
+}
+
+.btn-cart:hover {
+  background: #111;
+  color: #fff;
+}
+
+/* Remove */
+.btn-remove {
+  border-color: #d0d0d0;
+  color: #666;
+  font-size: 10px;
+}
+
+.btn-remove:hover {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+/* Disabled */
+.btn:disabled {
+  background: #eeeeee;
+  color: #999;
+  border-color: #dddddd;
+  cursor: not-allowed;
+}
+
+/* ================= EMPTY STATE ================= */
+.empty-state {
+  text-align: center;
+  padding: 100px 20px;
+  color: #777;
+}
+
+.empty-state i {
+  font-size: 56px;
+  color: #ccc;
+  margin-bottom: 24px;
+}
+
+.empty-state h3 {
+  font-size: 22px;
+  font-weight: 400;
+  color: #111;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 26px;
+}
+
+.empty-state .btn-view {
+  display: inline-block;
+  padding: 14px 42px;
+  font-size: 12px;
+}
+
+/* ================= ADD ALL ================= */
+.add-all-container {
+  margin-top: 70px;
+  text-align: center;
+}
+
+.btn-add-all {
+  padding: 15px 48px;
+  font-size: 12px;
+  background: #111;
+  color: #ffffff;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  transition: background 0.3s ease;
+}
+
+.btn-add-all:hover {
+  background: #000;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 20px 80px;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+  }
+
+  .wishlist-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-image {
+    height: 260px;
+  }
+}

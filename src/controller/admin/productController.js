@@ -1,9 +1,8 @@
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const cloudinary = require("../../config/cloudinary");
+const uploadToCloudinary = require("../../utils/cloudinaryUpload")
 const fs = require("fs");
-
-// LOAD PRODUCT PAGE
 
 const loadAdminProduct = async (req, res) => {
   try {
@@ -35,6 +34,7 @@ const loadAdminProduct = async (req, res) => {
     const allCategories = await Category.find({});
 
     res.render("adminProduct", {
+   
       products,
       allCategories,
       searchQuery,
@@ -129,20 +129,24 @@ const AddProduct = async (req, res) => {
       });
     }
 
-
     let cloudinaryImages = [];
 
-    if(req.files && req.files.length>0){
-      for(const file of req.files){
-        const uploadResult = await cloudinary.uploader.upload(file.path,{
-          folder:"products",
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { folder: "products" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          ).end(file.buffer);
         });
 
-        cloudinaryImages.push(uploadResult.secure_url);
-
-          fs.unlinkSync(file.path);
+        cloudinaryImages.push(result.secure_url);
       }
     }
+
 
     const variants = [];
     if (variantName && variantQty) {
@@ -159,10 +163,6 @@ const AddProduct = async (req, res) => {
       }
     }
 
-    const imagePaths = req.files
-      ? req.files.map((file) => "/uploads/products/" + file.filename)
-      : [];
-
     const product = new Product({
       name: productName.trim(),
       price: parseFloat(price),
@@ -174,7 +174,7 @@ const AddProduct = async (req, res) => {
 
     await product.save();
 
-    console.log("FILES:", req.files);
+    // console.log("FILES:", req.files);
     return res.status(200).json({
       success: true,
       message: "Product added successfully!",
@@ -197,16 +197,14 @@ const loadEditProduct = async (req, res) => {
       select: "name",
     });
 
-    console.log("product:", product);
-
     if (!product) {
       return res.status(404).render("error", { message: "Product not found" });
     }
 
     const categories = await Category.find({ status: true });
-    console.log("categories in load edit product:", categories);
 
     res.render("adminEditProduct", {
+      
       product,
       categories,
     });
@@ -219,7 +217,6 @@ const loadEditProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    console.log("this is update product controller");
     const productId = req.params.id;
 
     const {
@@ -260,17 +257,28 @@ const updateProduct = async (req, res) => {
 
     const totalStock = variants.reduce((s, v) => s + v.quantity, 0);
 
-    let finalImages = product.images;
+    let finalImages = [];
+
 
     if(existingImages.length > 0){
       finalImages = [...existingImages];
     }
 
-    if (req.files && req.files.length > 0) {
-      const uploaded = req.files.map(
-        (file) => `/uploads/products/${file.filename}`
-      );
-      finalImages = [...finalImages, ...uploaded];
+
+    if(req.files && req.files.length > 0){
+      for(const files of req.files) {
+        const result = await new Promise((resolve, reject) =>{
+          cloudinary.uploader.upload_stream(
+            {folder:"products"},
+            (error, result)=>{
+              if(error) reject(error);
+              else resolve(result)
+            }
+          ).end(files.buffer)
+        });
+
+        finalImages.push(result.secure_url);
+      }
     }
 
     product.name = productName;

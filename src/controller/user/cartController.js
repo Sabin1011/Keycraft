@@ -7,7 +7,8 @@ const Cart = require("../../models/cartModel");
 const User = require("../../models/userSchema");
 const Offer = require("../../models/offerSchema");
 const calculateCartTotals = require("../../utils/cartCalculator");
-const validateCartStock = require("../../utils/cartValidation")
+const validateCartStock = require("../../utils/cartValidation");
+const { initMetadata } = require("pdfkit");
 
 const loadCart = async (req, res) => {
   try {
@@ -67,35 +68,47 @@ const loadCart = async (req, res) => {
         item.isAvailable = false;
         item.outOfStockMessage = "Product unavailable";
         invalidItemExists = true;
+      } 
+      if (item.variantId) {
+
+        if(!item.selectedVariant) {
+          item.isAvailable = false;
+          item.outOfStockMessage = "Selected variant not available";
+          invalidItemExists = true;
+          continue;
+        }
+
+        if(item.selectedVariant.quantity<=0) {
+          item.isAvailable = false;
+          item.outOfStockMessage = `Variant "${item.selectedVariant.name}" is out of stock`;
+          invalidItemExists = true;
+          continue;
+        }
+
+        if(item.quantity >item.selectedVariant.quantity){
+          item.isAvailable = false;
+          item.outOfStockMessage = `Only ${item.selectedVariant.quantity} left for ${item.selectedVariant.name}`
+          item.quantity = item.selectedVariant.quantity;  
+          invalidItemExists = true;
+          continue;
+        }
       }
-      if (item.selectedVariant && item.selectedVariant.quantity <= 0) {
-        item.isAvailable = false;
-        item.outOfStockMessage = `The selected variant (${item.selectedVariant.name}) is out of stock`;
-        invalidItemExists = true;
-      } else if (
-        item.selectedVariant &&
-        item.quantity > item.selectedVariant.quantity
-      ) {
-        item.isAvailable = false;
-        item.outOfStockMessage = `Only ${item.selectedVariant.quantity} left for ${item.selectedVariant.name}`;
-        item.quantity = item.selectedVariant.quantity;
-        invalidItemExists = true;
-      } else if (
-        !item.product.category ||
-        item.product.category.status !== true
-      ) {
-        item.isAvailable = false;
-        item.outOfStockMessage = "Category unavailable";
-        invalidItemExists = true;
-      } else if (item.product.totalStock <= 0) {
-        item.isAvailable = false;
-        item.outOfStockMessage = "out of stock";
-        invalidItemExists = true;
-      } else if (item.quantity > item.product.totalStock) {
-        item.isAvailable = false;
-        item.outOfStockMessage = `Only ${item.product.totalStock} left in stock`;
-        item.quantity = item.product.totalStock;
-        invalidItemExists = true;
+
+      if(!item.selectedVariant){
+        if(item.product.totalStock <= 0){
+          item.isAvailable = false;
+          item.outOfStockMessage = "Product out of stock";
+          invalidItemExists = true;
+          continue;
+        }
+
+        if(item.quantity > item.product.totalStock) {
+          item.isAvailable = false;
+          item.outOfStockMessage = `Only ${item.product.totalStock} left in stock`;
+          item.quantity = item.product.totalStock;
+          invalidItemExists = true;
+          continue;
+        }
       }
 
       let applicableOffers = [];
@@ -358,7 +371,7 @@ const increaseQuantity = async (req, res) => {
     }
 
     let cart = await Cart.findOne({ userId });
-    const  product = await Product.findById(productId);
+    const product = await Product.findById(productId);
 
     if (!cart || !product) {
       if (req.xhr) {
@@ -397,13 +410,30 @@ const increaseQuantity = async (req, res) => {
           success: false,
           message: `Maximum quantity limit is ${MAX_LIMIT}`,
         });
-      }
+      }  
+      if(variantId) {
+        const variant = product.variants.id(variantId);
+        
+        if(!variant) {
+          return res.json({
+            success:false,
+            message:"Selected variant not found",
+          });
+        }
 
-      if (newQuantity > product.totalStock) {
-        return res.json({
-          success: false,
-          message: `Only ${product.totalStock} items available`,
-        });
+        if(newQuantity >variant.quantity) {
+          return res.json({
+            success: false,
+            message: `Only ${variant.quantity} left for ${variant.name}`,
+          });
+        }
+      } else {
+        if(newQuantity > product.totalStock) {
+          return res.json({
+            success:false,
+            message:`Only ${product.totalStock} items available`,
+          })
+        }
       }
 
       cart.items[itemIndex].quantity = newQuantity;
@@ -412,10 +442,10 @@ const increaseQuantity = async (req, res) => {
         path: "items.product",
         populate: { path: "category" },
       });
-         
-    cart = await calculateCartTotals(cart);
-    
-    invalidItemExists = validateCartStock(cart);
+
+      cart = await calculateCartTotals(cart);
+
+      invalidItemExists = validateCartStock(cart);
 
       await cart.save();
     }
@@ -425,17 +455,19 @@ const increaseQuantity = async (req, res) => {
         return res.json({ success: false, message: "Item not found" });
       }
 
-
       const totalItems = cart.items.reduce(
         (sum, item) => sum + item.quantity,
         0
       );
 
       const item = cart.items[itemIndex];
-      const itemOfferDiscount = cart.items.reduce((sum, item)=> sum +(item.originalPrice - item.discountedPrice)*item.quantity,0);
+      const itemOfferDiscount = cart.items.reduce(
+        (sum, item) =>
+          sum + (item.originalPrice - item.discountedPrice) * item.quantity,
+        0
+      );
       const cartOfferDiscount = cart.cartDiscount || 0;
       const totalDiscount = itemOfferDiscount + cartOfferDiscount;
-
 
       return res.json({
         totalDiscount,
@@ -444,8 +476,8 @@ const increaseQuantity = async (req, res) => {
         unitPrice: item.discountedPrice,
         totalPrice: cart.grandTotal,
         totalItems,
-        baseTotal:cart.baseTotal,
-        invalidItemExists
+        baseTotal: cart.baseTotal,
+        invalidItemExists,
       });
     }
   } catch (error) {
@@ -474,8 +506,7 @@ const decreaseQuantity = async (req, res) => {
       const itemVariant = item.variantId ? item.variantId.toString() : null;
       const targetVariant = variantId ? variantId.toString() : null;
       return (
-        item.product.toString() === productId &&
-        itemVariant === targetVariant
+        item.product.toString() === productId && itemVariant === targetVariant
       );
     });
 
@@ -493,46 +524,43 @@ const decreaseQuantity = async (req, res) => {
       path: "items.product",
       populate: { path: "category" },
     });
-    
+
     cart = await calculateCartTotals(cart);
 
     invalidItemExists = validateCartStock(cart);
     await cart.save();
 
-    const totalItems = cart.items.reduce(
-      (sum, item) => sum + item.quantity,
-      0
-    );
+    const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
 
     const item = cart.items[itemIndex] || null;
 
-    const itemTotal = item
-      ? item.discountedPrice * item.quantity
-      : 0;
-      
-      const itemOfferDiscount = cart.items.reduce((sum, item)=> sum +(item.originalPrice - item.discountedPrice)*item.quantity,0);
-      const cartOfferDiscount = cart.cartDiscount  || 0;
-      const totalDiscount = itemOfferDiscount + cartOfferDiscount;
-      
+    const itemTotal = item ? item.discountedPrice * item.quantity : 0;
+
+    const itemOfferDiscount = cart.items.reduce(
+      (sum, item) =>
+        sum + (item.originalPrice - item.discountedPrice) * item.quantity,
+      0
+    );
+    const cartOfferDiscount = cart.cartDiscount || 0;
+    const totalDiscount = itemOfferDiscount + cartOfferDiscount;
+
     return res.json({
       success: true,
       quantity: item ? item.quantity : 0,
 
-      unitPrice: item? item.discountedPrice : 0,
-      totalPrice: cart.grandTotal, 
+      unitPrice: item ? item.discountedPrice : 0,
+      totalPrice: cart.grandTotal,
       totalItems,
       totalDiscount,
       baseTotal: cart.baseTotal,
       removed: !item,
-      invalidItemExists
+      invalidItemExists,
     });
-
   } catch (error) {
     console.log("An error occurred in decreaseQuantity: ", error);
     return res.redirect("/cart");
   }
 };
-
 
 const removeFromCart = async (req, res) => {
   try {
@@ -585,11 +613,15 @@ const removeFromCart = async (req, res) => {
         (sum, item) => sum + item.quantity,
         0
       );
-            
-      const itemOfferDiscount = cart.items.reduce((sum, i)=> sum +(item.originalPrice - item.discountedPrice)*item.quantity,0);
+
+      const itemOfferDiscount = cart.items.reduce(
+        (sum, i) =>
+          sum + (i.originalPrice - i.discountedPrice) * i.quantity,
+        0
+      );
       const cartOfferDiscount = cart.discountAmount || 0;
       const totalDiscount = itemOfferDiscount + cartOfferDiscount;
-      
+
       return res.json({
         success: true,
         totalPrice: cart.totalPrice,

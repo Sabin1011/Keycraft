@@ -10,8 +10,7 @@ const Cart = require("../../models/cartModel");
 const bcrypt = require("bcrypt");
 
 const loadprofile = async (req, res) => {
-  
-    let cartCount = 0;
+  let cartCount = 0;
   try {
     const userId = req.session.userId;
 
@@ -19,28 +18,26 @@ const loadprofile = async (req, res) => {
       return res.redirect("/login");
     }
 
-
     const user = await User.findById(userId).lean();
 
     if (!user) {
       return res.redirect("/login");
-    } 
+    }
 
     if (!user.referralCode) {
       const code = generateReferralCode();
       await User.findByIdAndUpdate(userId, { referralCode: code });
-      user.referralCode = code; 
+      user.referralCode = code;
     }
-
 
     //     if (userId) {
     //   const cart = await Cart.findOne({ userId });
     //   cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
     // }
 
-    const cart = await Cart.findOne({userId});
-    if(cart && cart.items){
-      cartCount = cart.items.reduce((sum, item)=>sum+item.quantity,0);
+    const cart = await Cart.findOne({ userId });
+    if (cart && cart.items) {
+      cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
     }
 
     const returnUrl = "/profile";
@@ -55,7 +52,7 @@ const loadprofile = async (req, res) => {
     delete req.session.successMessage;
     delete req.session.errorMessage;
   } catch (error) {
-    console.log("error in the loading of user log", error)
+    console.log("error in the loading of user log", error);
   }
 };
 
@@ -319,7 +316,7 @@ const loadEditAddress = async (req, res) => {
   }
 };
 
-const editAddressPost = async (req, res) => {
+const editAddressPatch = async (req, res) => {
   try {
     const addressId = req.params.id;
 
@@ -402,41 +399,49 @@ const editAddressPost = async (req, res) => {
 
 const deleteAddress = async (req, res) => {
   try {
-    const addressId = req.params.id;
-    const userId = req.session.userId || req.user._id;
+    const { id: addressId } = req.params;
+    const userId = req.session.userId;
     const returnUrl = req.query.returnUrl || "/profile";
 
     const user = await User.findById(userId);
-
     if (!user) {
-      req.session.errorMessage = "User not found";
-      return res.redirect(returnUrl);
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
-    const addressIndex = user.addresses.findIndex(
-      (addr) => addr._id.toString() === addressId
+    const index = user.addresses.findIndex(
+      (a) => a._id.toString() === addressId
     );
 
-    if (addressIndex === -1) {
-      req.session.errorMessage = "Address not found";
-      return res.redirect(returnUrl);
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Address not found",
+      });
     }
 
-    const deletedAddress = user.addresses[addressIndex];
-    user.addresses.splice(addressIndex, 1);
+    const deleted = user.addresses[index];
+    user.addresses.splice(index, 1);
 
-    if (deletedAddress.isDefault && user.addresses.length > 0) {
+    if (deleted.isDefault && user.addresses.length > 0) {
       user.addresses[0].isDefault = true;
     }
+
     await user.save();
 
-    req.session.successMessage = "Address deleted successfully";
-    res.redirect(returnUrl);
+    return res.json({
+      success: true,
+      message: "Address deleted successfully",
+      redirectUrl: returnUrl,
+    });
   } catch (error) {
-    console.error("Error deleting address:", error);
-    req.session.errorMessage = "Failed to delete address";
-    const returnUrl = req.query.returnUrl || "/profile";
-    res.redirect(returnUrl);
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete address",
+    });
   }
 };
 
@@ -486,11 +491,17 @@ const selectAddress = async (req, res) => {
   try {
     const { addressId } = req.body;
     req.session.selectedAddressId = addressId;
-    res.redirect("/checkout");
+
+    return res.json({
+      success: true,
+      message:"Address selected Successfully"
+    })
   } catch (error) {
     console.error("Error selecting address:", error);
-    req.session.errorMessage = "Failed to select address";
-    res.redirect("/checkout");
+    return res.status(500).json({
+      success: false,
+      message: "Failed to select address",
+    });
   }
 };
 
@@ -503,6 +514,6 @@ module.exports = {
   changePassword,
   deleteAddress,
   loadEditAddress,
-  editAddressPost,
+  editAddressPatch,
   selectAddress,
 };

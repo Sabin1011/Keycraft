@@ -1,35 +1,32 @@
 const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
-const Cart = require('../../models/cartModel');
+const Cart = require("../../models/cartModel");
 const Product = require("../../models/productSchema");
 const PDFDocument = require("pdfkit");
 const Wallet = require("../../models/walletSchema");
+// const { default: orders } = require("razorpay/dist/types/orders");
 
 const loadMyOrders = async (req, res) => {
   try {
-
     const userId = req.session.userId;
 
     const user = await User.findById(userId);
-    const search =  req.query.search || "";
+    const search = req.query.search || "";
 
-    let query = {userId}
+    let query = { userId };
 
-    if(search.trim() !== ""){
-      query.orderId = {$regex: search, $options: "i" }
+    if (search.trim() !== "") {
+      query.orderId = { $regex: search, $options: "i" };
     }
 
-  
     const orders = await Order.find({ userId })
-    .populate("couponId")
-    .sort({ createdAt: -1 });
-
+      .populate("couponId")
+      .sort({ createdAt: -1 });
 
     res.render("myOrders", {
       orders,
       user,
       search,
-
     });
   } catch (error) {
     console.log("Error loading orders:", error);
@@ -42,15 +39,15 @@ const loadOrderDetails = async (req, res) => {
     const userId = req.session.userId;
     const user = await User.findById(userId);
 
-          let cartCount = 0;  
-          if(userId){
-            const cart = await Cart.findOne({userId})
-            cartCount = cart.items.reduce((sum, item)=>sum + item.quantity, 0)
-          }
+    let cartCount = 0;
+    if (userId) {
+      const cart = await Cart.findOne({ userId });
+      cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    }
     const orderId = req.params.id;
-    const order = await Order.findOne({orderId}).populate({
-      path:"items.product", 
-    })
+    const order = await Order.findOne({ orderId }).populate({
+      path: "items.product",
+    });
 
     if (!order) return res.redirect("/my-orders");
 
@@ -58,7 +55,7 @@ const loadOrderDetails = async (req, res) => {
       order,
       user,
       cartCount,
-        currentUrl: req.originalUrl  
+      currentUrl: req.originalUrl,
     });
   } catch (error) {
     console.log("Error loading order details:", error);
@@ -82,7 +79,6 @@ const cancelOrder = async (req, res) => {
     }
 
     for (const item of order.items) {
-
       const product = await Product.findById(item.product._id);
 
       if (!product) continue;
@@ -91,11 +87,14 @@ const cancelOrder = async (req, res) => {
         const variant = product.variants.id(item.variantId);
 
         if (variant) {
-          variant.quantity += item.quantity; 
+          variant.quantity += item.quantity;
         }
       }
 
-      product.totalStock = product.variants.reduce((sum, v) => sum + v.quantity, 0);
+      product.totalStock = product.variants.reduce(
+        (sum, v) => sum + v.quantity,
+        0
+      );
 
       await product.save();
     }
@@ -104,24 +103,24 @@ const cancelOrder = async (req, res) => {
     order.cancelReason = reason;
     await order.save();
 
-    if(order.paymentMethod !== "cod"){
-      const wallet = await Wallet.findOne({userId: order.userId});
+    if (order.paymentMethod !== "cod") {
+      const wallet = await Wallet.findOne({ userId: order.userId });
 
       const alreadyCredited = wallet?.transactions?.some(
-        tx=>
+        (tx) =>
           tx.orderId?.toString() === order._id.toString() &&
-        tx.reason === "Refund for cancelled order"
+          tx.reason === "Refund for cancelled order"
       );
 
-      if(!alreadyCredited){
+      if (!alreadyCredited) {
         const refundAmount = order.finalAmount;
-        
+
         await Wallet.findOneAndUpdate(
           { userId: order.userId },
           {
-            $inc:{balance: refundAmount },
-            $push:{
-              transactions:{
+            $inc: { balance: refundAmount },
+            $push: {
+              transactions: {
                 amount: refundAmount,
                 type: "credit",
                 reason: "Refund for cancelled order",
@@ -129,67 +128,60 @@ const cancelOrder = async (req, res) => {
               },
             },
           },
-          {upsert:true}
+          { upsert: true }
         );
       }
     }
 
     return res.redirect("/my-orders?success=Order cancelled successfully");
-
   } catch (error) {
     console.log("Error cancelling order:", error);
     return res.redirect("/my-orders?error=Something went wrong");
   }
 };
-  
+
 const returnOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { reason,redirectTo } = req.body;
+    const { reason, redirectTo } = req.body;
     const userId = req.session.userId;
 
-    console.log("Return request received for:", orderId);
-    console.log("Reason:", reason);
+    const order = await Order.findOne({orderId});
+    if(!order) return res.redirect("/my-orders");
 
-    const updatedOrder = await Order.findOneAndUpdate(
-      { orderId: orderId },
-      {
-        status: "Return Requested",
-        cancelReason: reason    
-      },
-      { new: true, runValidators: true }
-    );
+    order.items.forEach(item =>{
+      if(item.status === "Delivered") {
+        item.status = "Return Requested";
+      }
+    });
 
-    if (!updatedOrder) {
-      console.log("Order NOT found for return:", orderId);
-      return res.redirect("/my-orders");
-    }
+    order.status = "Return Requested";
+    order.cancelReason = reason;
 
-    console.log("Updated order:", updatedOrder);
+    await order.save();
 
-    res.redirect(redirectTo? redirectTo.trim() : "/my-orders");
+    res.redirect(redirectTo ? redirectTo.trim() : "/my-orders");
   } catch (error) {
     console.log("Error processing return request:", error);
     res.redirect("/my-orders");
   }
 };
+
+
 const viewInvoice = async (req, res) => {
   try {
     const { orderId } = req.params;
     const user = req.session.userId;
 
-
-
     const order = await Order.findOne({ orderId })
       .populate("items.product")
-      .populate("userId")
+      .populate("userId");
 
     if (!order) {
       return res.status(404).send("Order not found");
     }
 
-    res.render("invoice", { order,user });
-
+    res.render("invoice", { order, user });
   } catch (error) {
     console.log("Invoice view error:", error);
     res.status(500).send("Server error");
@@ -229,9 +221,11 @@ const downloadInvoice = async (req, res) => {
     doc.moveDown();
 
     doc.fontSize(14).text("Shipping Address", { underline: true });
-    doc.fontSize(12).text(
-      `${order.address.street}, ${order.address.city}, ${order.address.state} - ${order.address.zipCode}, ${order.address.country}`
-    );
+    doc
+      .fontSize(12)
+      .text(
+        `${order.address.street}, ${order.address.city}, ${order.address.state} - ${order.address.zipCode}, ${order.address.country}`
+      );
     doc.moveDown();
 
     doc.fontSize(14).text("Order Items", { underline: true });
@@ -272,7 +266,7 @@ const downloadInvoice = async (req, res) => {
       bold: true,
     });
 
-    doc.end(); 
+    doc.end();
   } catch (err) {
     console.log("Invoice error:", err);
     return res.status(500).send("Could not generate invoice");
@@ -283,12 +277,14 @@ const cancelOrderItem = async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
     const { redirectTo } = req.body;
+    const userId = req.session.userId; 
 
     const order = await Order.findOne({ orderId }).populate("couponId");
 
     if (!order) return res.redirect(redirectTo);
 
     const item = order.items.id(itemId);
+
     if (!item) return res.redirect(redirectTo);
 
     const product = await Product.findById(item.product);
@@ -297,16 +293,56 @@ const cancelOrderItem = async (req, res) => {
         const variant = product.variants.id(item.variantId);
         if (variant) variant.quantity += item.quantity;
       }
-      product.totalStock = product.variants.reduce((sum, v) => sum + v.quantity, 0);
+      product.totalStock = product.variants.reduce(
+        (sum, v) => sum + v.quantity,
+        0
+      );
       await product.save();
     }
 
+    if (
+  order.paymentStatus === "Paid" &&
+  (order.paymentMethod === "razorpay" || order.paymentMethod === "wallet")
+) {
+  const refundAmount = item.price * item.quantity;
+
+  let wallet = await Wallet.findOne({ userId });
+
+  if (!wallet) {
+    wallet = new Wallet({
+      userId,
+      balance: 0,
+      transactions: [],
+    });
+  }
+
+
+  const alreadyRefunded = wallet.transactions.some(
+    tx =>
+      tx.orderId?.toString() === order._id.toString() &&
+      tx.reason === "Order item cancelled" &&
+      tx.amount === refundAmount
+  )
+
+  if (!alreadyRefunded) {
+  wallet.balance += refundAmount;
+  wallet.transactions.push({
+    amount: refundAmount,
+    type: "credit",
+    reason: "Order item cancelled",
+    orderId: order._id,
+  });
+
+  await wallet.save();
+}
     order.items.pull(itemId);
-    await order.save()
-    
+
+    await order.save();
+
     if (order.items.length === 0) {
       order.status = "Cancelled";
-       order.totalAmount = 0;
+      order.subtotal = 0;
+      order.totalAmount = 0;
       order.discountAmount = 0;
       order.finalAmount = 0;
       order.couponId = null;
@@ -319,40 +355,41 @@ const cancelOrderItem = async (req, res) => {
       0
     );
 
+    order.subtotal = newTotal;
     order.totalAmount = newTotal;
 
-    if(order.couponId) {
+
+    if (order.couponId) {
       const coupon = order.couponId;
 
       let discount = 0;
 
-      if(newTotal < coupon.minPurchaseAmount) {
+      if (newTotal < coupon.minPurchaseAmount) {
         order.couponId = null;
-        order.discountAmount =0;
+        order.discountAmount = 0;
         order.finalAmount = newTotal;
       } else {
-          if (coupon.discountType === "percentage") {
-    discount = (newTotal * coupon.discountValue) / 100;
+        if (coupon.discountType === "percentage") {
+          discount = (newTotal * coupon.discountValue) / 100;
 
-    if (coupon.maxDiscountAmount && discount > coupon.maxDiscountAmount) {
-        discount = coupon.maxDiscountAmount;
-    }
-} else{
-            discount = coupon.discountValue;
+          if (coupon.maxDiscountAmount && discount > coupon.maxDiscountAmount) {
+            discount = coupon.maxDiscountAmount;
           }
-          order.discountAmount = discount;
+        } else {
+          discount = coupon.discountValue;
+        }
+        order.discountAmount = discount;
         order.finalAmount = newTotal - discount;
       }
-    }else{
+    } else {
       order.discountAmount = 0;
       order.finalAmount = newTotal;
     }
 
     await order.save();
-
+    }
     return res.redirect(redirectTo);
-
-  } catch (err) {
+    } catch (err) {
     console.log("Cancel item error:", err);
     res.redirect("back");
   }
@@ -372,13 +409,14 @@ const returnOrderItem = async (req, res) => {
 
     item.status = "Return Requested";
 
-    const allReturned = order.items.every(i => i.status === "Return Requested");
+    const allReturned = order.items.every(
+      (i) => i.status === "Return Requested"
+    );
     if (allReturned) order.status = "Return Requested";
 
     await order.save();
 
     return res.redirect(redirectTo);
-
   } catch (err) {
     console.log("Return item error:", err);
     res.redirect("back");
@@ -396,7 +434,7 @@ const cancelPreview = async (req, res) => {
     if (!item) return res.json({ success: false });
 
     const newTotal = order.items.reduce((sum, i) => {
-      if (i._id.toString() === itemId) return sum; 
+      if (i._id.toString() === itemId) return sum;
       return sum + i.price * i.quantity;
     }, 0);
 
@@ -404,7 +442,7 @@ const cancelPreview = async (req, res) => {
       return res.json({
         success: true,
         couponWillBreak: false,
-        newTotal
+        newTotal,
       });
     }
 
@@ -417,9 +455,8 @@ const cancelPreview = async (req, res) => {
       success: true,
       couponWillBreak,
       newTotal,
-      minRequired
+      minRequired,
     });
-
   } catch (err) {
     console.log("Preview error:", err);
     res.json({ success: false });
@@ -435,6 +472,5 @@ module.exports = {
   downloadInvoice,
   returnOrderItem,
   cancelOrderItem,
-  cancelPreview
-  
+  cancelPreview,
 };

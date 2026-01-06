@@ -54,9 +54,21 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use(noCache());
 
-app.use("/", userRoutes);
+app.use("/admin",(req,res,next)=>{
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.setHeader("Pragma","no-cache");
+    res.setHeader("Expires","0");
+    next();
+});
+
 app.use("/admin", adminRoutes);
 app.use("/auth", authRoutes);
+
+app.use("/", userRoutes);
+
+app.use((req, res)=>{
+    res.status(404).render("404");
+});
 
 connectDB();
 

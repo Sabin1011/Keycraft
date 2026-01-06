@@ -1,0 +1,107 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Questrial", sans-serif;
+  background: #fafafa;
+  color: #222;
+  min-height: 100vh;
+}
+
+.orders-section {
+  padding: 50px 20px;
+  display: flex;
+  justify-content: center;
+}
+.orders-container {
+  max-width: 900px;
+  width: 100%;
+}
+.orders-card {
+  background: #fff;
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+.orders-card:hover {
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  cursor: pointer;
+}
+.order-info {
+  display: flex;
+  flex-direction: column;
+}
+.order-id {
+  font-weight: 600;
+  color: #465a46;
+  margin-bottom: 5px;
+}
+.order-date {
+  font-size: 14px;
+  color: #494949;
+}
+.order-status {
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+.order-total {
+  font-weight: 500;
+  color: #333;
+}
+.btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 5px;
+}
+.btn-details {
+  background: #3e3e3e;
+}
+.btn-details:hover {
+  background: rgb(20, 20, 20);
+}
+.btn-cancel {
+  background: #d11803;
+}
+.btn-cancel:hover {
+  background: #9e1202;
+}
+.btn-return {
+  background: #676767;
+}
+.btn-return:hover {
+  background: #1a1919;
+}
+.btn-invoice {
+  background: #5c5c5c;
+}
+.btn-invoice:hover {
+  background: #1f1f1f;
+}
+.button-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .orders-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .btn {
+    margin-top: 5px;
+  }
+}

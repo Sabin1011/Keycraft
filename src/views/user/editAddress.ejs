@@ -1,15 +1,15 @@
 <%- include('../partials/user/header') %>
 
-<link rel="stylesheet" href="/css/addressForm.css">
+<link rel="stylesheet" href="/css/addressForm.css" />
 
 <section class="breadcrumb">
   <div class="container">
     <a href="/home">home</a>
     <span>/</span>
     <% if (returnUrl === '/checkout') { %>
-      <a href="/checkout">checkout</a>
+    <a href="/checkout">checkout</a>
     <% } else { %>
-      <a href="/profile">my profile</a>
+    <a href="/profile">my profile</a>
     <% } %>
     <span>/</span>
     <span style="color: #222">edit address</span>
@@ -19,12 +19,29 @@
 <section class="address-section">
   <div class="container">
     <% if (success) { %>
-    <div style="padding: 15px 20px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 10px; margin-bottom: 25px;">
+    <div
+      style="
+        padding: 15px 20px;
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        border-radius: 10px;
+        margin-bottom: 25px;
+      "
+    >
       <i class="fa fa-check-circle"></i> <%= success %>
     </div>
-    <% } %>
-    <% if (error) { %>
-    <div style="padding: 15px 20px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 10px; margin-bottom: 25px;">
+    <% } %> <% if (error) { %>
+    <div
+      style="
+        padding: 15px 20px;
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        border-radius: 10px;
+        margin-bottom: 25px;
+      "
+    >
       <i class="fa fa-exclamation-circle"></i> <%= error %>
     </div>
     <% } %>
@@ -34,122 +51,122 @@
       <div class="page-subtitle">update your address details below</div>
     </div>
 
-    <form id="editAddressForm" action="/profile/address/<%= address._id %>/edit" method="POST">
-      <input type="hidden" name="returnUrl" value="<%= returnUrl %>">
-      <%- include('../partials/addressForm', { address, mode: 'edit', returnUrl }) %>
+    <form
+      id="editAddressForm"
+      action="/profile/address/<%= address._id %>/edit"
+    >
+      <input type="hidden" name="returnUrl" value="<%= returnUrl %>" />
+      <%- include('../partials/addressForm', { address, mode: 'edit', returnUrl
+      }) %>
     </form>
   </div>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById('editAddressForm');
-        
-        function clearErrors() {
-            document.querySelectorAll('.error-message').forEach(el => el.remove());
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("editAddressForm");
 
-            document.querySelectorAll('input, select, textarea').forEach(el => el.classList.remove('is-invalid'));
+    function clearErrors() {
+      document.querySelectorAll(".error-message").forEach((el) => el.remove());
+
+      document
+        .querySelectorAll("input, select, textarea")
+        .forEach((el) => el.classList.remove("is-invalid"));
+    }
+
+    function displayErrors(errors) {
+      clearErrors();
+      for (const key in errors) {
+        const input = form.querySelector(`[name="${key}"]`);
+        if (input) {
+          input.classList.add("is-invalid");
+          const errorDiv = document.createElement("div");
+          errorDiv.className = "error-message";
+          errorDiv.style.color = "#dc3545";
+          errorDiv.style.fontSize = "0.85em";
+          errorDiv.style.marginTop = "5px";
+          errorDiv.textContent = errors[key];
+
+          input.parentNode.appendChild(errorDiv);
         }
+      }
+    }
 
-        function displayErrors(errors) {
-            clearErrors();
-            for (const key in errors) {
-                const input = form.querySelector(`[name="${key}"]`);
-                if (input) {
-                    input.classList.add('is-invalid');
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'error-message'; 
-                    errorDiv.style.color = '#dc3545';
-                    errorDiv.style.fontSize = '0.85em';
-                    errorDiv.style.marginTop = '5px';
-                    errorDiv.textContent = errors[key];
-                    
-                    input.parentNode.appendChild(errorDiv);
-                }
-            }
-        }
+    if (form) {
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-        if (form) {
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault(); 
-                
-                const submitButton = form.querySelector('button[type="submit"]');
-                const originalButtonText = submitButton ? submitButton.textContent : 'Update';
-                
-                const formData = new FormData(form);
-                const data = Object.fromEntries(formData.entries());
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton
+          ? submitButton.textContent
+          : "Update";
 
-                clearErrors(); 
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
 
-                try {
-                   
-                    if (submitButton) {
-                        submitButton.disabled = true;
-                        submitButton.textContent = 'Updating...';
-                    }
+        clearErrors();
 
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    });
+        try {
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = "Updating...";
+          }
 
-                    const responseData = await response.json();
+          const response = await fetch(form.action, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
 
-                    if (response.ok && responseData.success) {
-                 
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Updated!',
-                            text: responseData.message,
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-                            window.location.href = responseData.redirectUrl;
-                        });
+          const responseData = await response.json();
 
-                    } else if (response.status === 400 && responseData.errors) {
-  
-                        displayErrors(responseData.errors);
-                        
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Validation Failed',
-                            text: 'Please correct the highlighted errors.',
-                            confirmButtonColor: '#222'
-                        });
-
-                    } else {
-    
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: responseData.message || 'An unexpected error occurred.',
-                            confirmButtonColor: '#dc3545'
-                        });
-                    }
-
-                } catch (error) {
-                    console.error('AJAX Submission Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Network Error',
-                        text: 'Could not connect to the server.',
-                        confirmButtonColor: '#dc3545'
-                    });
-                } finally {
-                 
-                    if (submitButton) {
-                        submitButton.disabled = false;
-                        submitButton.textContent = originalButtonText;
-                    }
-                }
+          if (response.ok && responseData.success) {
+            Swal.fire({
+              icon: "success",
+              title: "Updated!",
+              text: responseData.message,
+              timer: 2000,
+              showConfirmButton: false,
+            }).then(() => {
+              window.location.href = responseData.redirectUrl;
             });
+          } else if (response.status === 400 && responseData.errors) {
+            displayErrors(responseData.errors);
+
+            Swal.fire({
+              icon: "warning",
+              title: "Validation Failed",
+              text: "Please correct the highlighted errors.",
+              confirmButtonColor: "#222",
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Error!",
+              text: responseData.message || "An unexpected error occurred.",
+              confirmButtonColor: "#dc3545",
+            });
+          }
+        } catch (error) {
+          console.error("AJAX Submission Error:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Network Error",
+            text: "Could not connect to the server.",
+            confirmButtonColor: "#dc3545",
+          });
+        } finally {
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+          }
         }
-    });
+      });
+    }
+  });
 </script>
 
 <%- include('../partials/user/footer') %>

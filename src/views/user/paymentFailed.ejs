@@ -1,69 +1,8 @@
 <%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/paymentFailed.css">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<style>
-  .failure-container {
-    min-height: 80vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #fafafa;
-  }
-
-  .failure-card {
-    background: #fff;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    text-align: center;
-    max-width: 450px;
-    width: 100%;
-  }
-
-  .failure-icon {
-    font-size: 60px;
-    color: #e74c3c;
-    margin-bottom: 15px;
-  }
-
-  .failure-card h2 {
-    color: #333;
-    margin-bottom: 10px;
-  }
-
-  .failure-card p {
-    color: #666;
-    margin-bottom: 25px;
-    font-size: 15px;
-  }
-
-  .btn {
-    display: inline-block;
-    margin: 8px;
-    padding: 12px 25px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-  }
-
-  .btn-retry {
-    background: #401f75;
-    color: #fff;
-  }
-
-  .btn-orders {
-    background: #e0e0e0;
-    color: #333;
-  }
-
-  .btn-retry:hover {
-    background: #2f1557;
-  }
-
-  .btn-orders:hover {
-    background: #ccc;
-  }
-</style>
 
 <section class="failure-container">
   <div class="failure-card">
@@ -75,20 +14,87 @@
       No amount has been deducted.
     </p>
 
-    <a href="/retry-payment" class="btn btn-retry">
-      Retry Payment
-    </a>
+    <button
+  class="btn btn-retry"
+  onclick="retryPayment('<%= order._id %>')"
+>
+  Retry Payment
+</button>
+
 
     <a href="/my-orders" class="btn btn-orders">
       Go to My Orders
     </a>
+
   </div>
 </section>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
+async function retryPayment(orderId) {
+  try {
+    Swal.fire({
+      title: "Redirecting to payment...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
 
+    const res = await fetch(`/retry-payment/${orderId}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      Swal.fire("Error", "Unable to retry payment", "error");
+      return;
+    }
+
+    openRazorpayRetry(data);
+
+  } catch (err) {
+    console.error("Retry payment error:", err);
+    Swal.fire("Error", "Something went wrong", "error");
+  }
+}
+
+function openRazorpayRetry(data) {
+  const options = {
+    key: data.key,
+    amount: data.amount,
+    currency: "INR",
+    name: "KeyCraft",
+    description: "Retry Payment",
+    order_id: data.razorpayOrderId,
+
+    handler: function (response) {
+      fetch("/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...response,
+          orderId: data.orderId
+        })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          window.location.href = `/order-success?orderId=${data.orderId}`;
+        } else {
+          window.location.href = `/payment-failed?orderId=${data.orderId}`;
+        }
+      });
+    },
+
+    modal: {
+      ondismiss: function () {
+        window.location.href = `/payment-failed?orderId=${data.orderId}`;
+      }
+    },
+
+    theme: { color: "#401f75" }
+  };
+
+  new Razorpay(options).open();
+}
 
 </script>
 

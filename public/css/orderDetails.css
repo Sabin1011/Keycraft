@@ -1,0 +1,131 @@
+body {
+  font-family: "Questrial", sans-serif;
+  background: #f5f5f5;
+  color: #111;
+}
+
+.page-wrapper {
+  max-width: 950px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  padding: 30px 40px;
+}
+
+h2,
+h3,
+h4 {
+  color: #111;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.section-box {
+  background: #fafafa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  border: 1px solid #e6e6e6;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.divider {
+  height: 1px;
+  background: #e4e4e4;
+  margin: 20px 0;
+}
+
+/* Item list */
+.item-row {
+  display: flex;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.item-row img {
+  width: 85px;
+  height: 85px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-info h4 {
+  margin-bottom: 6px;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.btn-secondary {
+  background: #ddd;
+  color: #222;
+}
+
+.btn-secondary:hover {
+  background: #c7c7c7;
+}
+
+.btn-cancel {
+  background: #434343;
+  color: #fff;
+}
+
+.btn-cancel:hover {
+  background: #191919;
+}
+
+.btn-return {
+  background: #464646;
+  color: #fff;
+}
+
+.btn-return:hover {
+  background: #292929;
+}
+
+.btn-success {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #1e8449;
+}
+
+.status-tag {
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-tag.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-tag.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+

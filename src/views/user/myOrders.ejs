@@ -1,116 +1,7 @@
 <%- include('../partials/user/header') %>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  body {
-    font-family: "Questrial", sans-serif;
-    background: #fafafa;
-    color: #222;
-    min-height: 100vh;
-  }
-
-  .orders-section {
-    padding: 50px 20px;
-    display: flex;
-    justify-content: center;
-  }
-  .orders-container {
-    max-width: 900px;
-    width: 100%;
-  }
-  .orders-card {
-    background: #fff;
-    padding: 25px 30px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.3s ease;
-  }
-  .orders-card:hover {
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-    cursor: pointer;
-  }
-  .order-info {
-    display: flex;
-    flex-direction: column;
-  }
-  .order-id {
-    font-weight: 600;
-    color: #401f75;
-    margin-bottom: 5px;
-  }
-  .order-date {
-    font-size: 14px;
-    color: #555;
-  }
-  .order-status {
-    font-weight: 500;
-    margin-bottom: 5px;
-  }
-  .order-total {
-    font-weight: 500;
-    color: #333;
-  }
-  .btn {
-    padding: 6px 14px;
-    border: none;
-    border-radius: 6px;
-    color: #fff;
-    text-decoration: none;
-    font-weight: 500;
-    margin-left: 5px;
-  }
-  .btn-details {
-    background: #401f75;
-  }
-  .btn-details:hover {
-    background: #321960;
-  }
-  .btn-cancel {
-    background: #e74c3c;
-  }
-  .btn-cancel:hover {
-    background: #c0392b;
-  }
-  .btn-return {
-    background: #f39c12;
-  }
-  .btn-return:hover {
-    background: #d68910;
-  }
-  .btn-invoice {
-    background: #27ae60;
-  }
-  .btn-invoice:hover {
-    background: #1e8449;
-  }
-  .button-group {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-  
-
-  @media (max-width: 768px) {
-    .orders-card {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .btn {
-      margin-top: 5px;
-    }
-  }
-</style>
-
+<link rel="stylesheet" href="/css/myOrders.css">
 <section class="orders-section">
   
   <div class="orders-container">
@@ -134,7 +25,7 @@
       type="submit" 
       class="btn" 
       style="
-        background: #401f75; 
+        background: #575757; 
         padding: 10px 18px;
         border-radius: 6px;
         color: #fff;
@@ -149,7 +40,7 @@
         href="/my-orders" 
         class="btn"
         style="
-          background: #e74c3c; 
+          background: #6d6d6d; 
           padding: 10px 18px;
           border-radius: 6px;
           color: #fff;
@@ -163,26 +54,41 @@
   </form>
 </div>
 
-    <h2 style="margin-bottom: 20px; color: #401f75">My Orders</h2>
+    <h2 style="margin-bottom: 20px; color: #000000">My Orders</h2>
 
     <% if (orders.length === 0) { %>
     <p>You haven't placed any orders yet.</p>
     <% } %> 
     <% orders.forEach(order => { %>
+
     <div class="orders-card">
       <div class="order-info">
         <div class="order-id">Order ID: <%= order.orderId %></div>
         <div class="order-date">
           Placed on: <%= new Date(order.createdAt).toDateString() %>
         </div>
-        <div class="order-status">Status: <%= order.status %></div>
+      <div class="order-status">
+        Status:
+        <% if (order.paymentStatus === "Failed") { %>
+          Payment Failed
+        <% } else { %>
+          <%= order.status %>
+        <% } %>
+      </div>
+
         <div class="order-total">
         <%
           const paidAmount = order.finalAmount ??
           (order.totalAmount - (order.discountAmount || 0));
         %>
 
-        Total Paid: ₹<%= paidAmount.toFixed(2) %>
+
+          <% if (order.paymentStatus === "Failed") { %>
+            <span style="color:#c0392b;">Payment not completed</span>
+          <% } else { %>
+            Total Paid: ₹<%= paidAmount.toFixed(2) %>
+          <% } %>
+
           <% if (order.discountAmount > 0) { %>
             <span style="color:green; font-size:12px;">
               (Saved ₹<%= order.discountAmount %>)
@@ -195,45 +101,63 @@
           <% } %>
         </div>
       </div>
+<div class="button-group">
 
-      <div class="button-group">
-        <a href="/order/<%= order.orderId %>" class="btn btn-details"
-          >View Details</a
-        >
+  <% if (order.paymentStatus === "Failed") { %>
 
-        <% const disabledForStatuses = ['cancelled', "returned", "delivered"] %>
+    <button
+      class="btn btn-primary"
+      onclick="retryPayment('<%= order._id %>')"
+      style="background:#923119; color:#fff;"
+    >
+      Retry Payment
+    </button>
 
-        <% if(!disabledForStatuses.includes(order.status.toLowerCase())) { %>
-        <form
-          id="cancelForm_<%= order.orderId %>"
-          action="/order/<%= order.orderId %>/cancel"
-          method="post"
-          style="display: inline"
-          onsubmit="return handleCancel(event, '<%= order.orderId %>')"
-        >
+  <% } else { %>
+
+
+    <a href="/order/<%= order.orderId %>" class="btn btn-details">
+      View Details
+    </a>
+
+    <%  
+      const canCancelOrder =
+        !["Delivered", "Returned", "Cancelled", "Partially Returned"]
+          .includes(order.status);
+    %>
+
+    <% if (canCancelOrder) { %>
+      <form
+        id="cancelForm_<%= order.orderId %>"
+        action="/order/<%= order.orderId %>/cancel"
+        method="post"
+        onsubmit="return handleCancel(event, '<%= order.orderId %>')"
+      >
         <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
-          <button type="submit" class="btn btn-cancel">Cancel</button>
-        </form>
-          
-        <% } %> 
-        <% if(order.status === 'Delivered') { %>
-        <form 
-          id="returnForm_<%= order.orderId %>"
-          action="/order/<%= order.orderId %>/return"
-          method="POST"
-          onsubmit="return handleReturn(event, '<%= order.orderId %>')"
-        >
-            <input type="hidden" name="reason" id="returnReason_<%= order.orderId %>">
-            <input type="hidden" name="redirectTo" value="/my-orders">
-            <button class="btn btn-return">Return</button>
-        </form>
+        <button type="submit" class="btn btn-cancel">Cancel</button>
+      </form>
+    <% } %>
 
-        <% } %>
+    <%
+      const hasReturnableItem =
+        (order.status === "Delivered" || order.status === "Partially Returned") &&
+        order.items.some(item => item.status === "Active");
+    %>
 
-        <a href="/order/<%= order.orderId %>/invoice" class="btn btn-invoice"
-          >Invoice</a
-        >
-      </div>
+    <% if (hasReturnableItem) { %>
+      <a href="/orders/<%= order.orderId %>" class="btn btn-return">
+        Return Order
+      </a>
+    <% } %>
+
+    <a href="/order/<%= order.orderId %>/invoice" class="btn btn-invoice">
+      Invoice
+    </a>
+
+  <% } %>
+
+</div>
+
     </div>
     <% }) %>
   </div>
@@ -288,6 +212,70 @@ function handleReturn(event, orderId) {
 
     return false; 
   }
+
+  async function retryPayment(orderId) {
+  try {
+    Swal.fire({
+      title: "Redirecting to payment...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    const res = await fetch(`/retry-payment/${orderId}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      Swal.fire("Error", "Unable to retry payment", "error");
+      return;
+    }
+
+    openRazorpayRetry(data);
+
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error", "Something went wrong", "error");
+  }
+}
+function openRazorpayRetry(data) {
+  const options = {
+    key: data.key,
+    amount: data.amount,
+    currency: "INR",
+    name: "KeyCraft",
+    description: "Retry Payment",
+    order_id: data.razorpayOrderId,
+
+    handler: function (response) {
+      fetch("/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...response,
+          orderId: data.orderId
+        })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          window.location.href = `/order-success?orderId=${data.orderId}`;
+        } else {
+          window.location.href = `/payment-failed?orderId=${data.orderId}`;
+        }
+      });
+    },
+
+    modal: {
+      ondismiss: function () {
+        window.location.href = `/payment-failed?orderId=${data.orderId}`;
+      }
+    },
+
+    theme: { color: "#401f75" }
+  };
+
+  new Razorpay(options).open();
+}
+
 </script>
 
 <%- include('../partials/user/footer') %>

@@ -23,10 +23,17 @@ const loadRegister = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { username, email, phone, password, confirm_password, agree, referralCode} =
-      req.body;
+    const {
+      username,
+      email,
+      phone,
+      password,
+      confirm_password,
+      agree,
+      referralCode,
+    } = req.body;
 
-      req.session.referralCode = referralCode?.trim().toUpperCase() || null;
+    req.session.referralCode = referralCode?.trim().toUpperCase() || null;
     let errors = {};
 
     if (!agree) {
@@ -160,16 +167,16 @@ const verifyOtp = async (req, res) => {
       email: regUser.email,
       phone: regUser.phone,
       password: regUser.password,
-      referralCode: generateReferralCode()
+      referralCode: generateReferralCode(),
     });
 
     let referrer = null;
-    if(req.session.referralCode) {
+    if (req.session.referralCode) {
       referrer = await User.findOne({
         referralCode: req.session.referralCode,
       });
-      if(referrer){
-        newUser.referredBy= referrer._id;
+      if (referrer) {
+        newUser.referredBy = referrer._id;
       }
     }
 
@@ -177,8 +184,8 @@ const verifyOtp = async (req, res) => {
 
     await Wallet.create({
       userId: newUser._id,
-      balance:0,
-      transactions: []
+      balance: 0,
+      transactions: [],
     });
 
     if (referrer) {
@@ -190,9 +197,9 @@ const verifyOtp = async (req, res) => {
             transactions: {
               amount: 200,
               type: "credit",
-              reason: "Referral reward"
-            }
-          }
+              reason: "Referral reward",
+            },
+          },
         },
         { upsert: true }
       );
@@ -205,9 +212,9 @@ const verifyOtp = async (req, res) => {
             transactions: {
               amount: 50,
               type: "credit",
-              reason: "Signup referral bonus"
-            }
-          }
+              reason: "Signup referral bonus",
+            },
+          },
         }
       );
 
@@ -419,8 +426,6 @@ const loadforgototp = async (req, res) => {
     res.redirect("/forgot-password");
   }
 };
-
-// FORGOT ENTER NEW PASSWORD
 
 const loadEnterNewPassword = async (req, res) => {
   try {

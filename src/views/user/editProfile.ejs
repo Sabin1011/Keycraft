@@ -6,354 +6,7 @@
 />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: "Questrial", sans-serif;
-    background: #fafafa;
-    color: #222;
-    min-height: 100vh;
-  }
-
-  .breadcrumb {
-    padding: 15px 0;
-    background: #fff;
-    border-bottom: 1px solid #e5e5e5;
-  }
-
-  .breadcrumb a {
-    color: #666;
-    text-decoration: none;
-    font-size: 13px;
-    transition: color 0.3s;
-  }
-
-  .breadcrumb a:hover {
-    color: #222;
-  }
-
-  .breadcrumb span {
-    color: #999;
-    margin: 0 8px;
-  }
-
-  .edit-profile-section {
-    padding: 40px 0;
-    min-height: calc(100vh - 200px);
-  }
-
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 40px;
-  }
-
-  .page-header {
-    background: linear-gradient(135deg, #401f75 0%, #000000 100%);
-    border-radius: 15px;
-    padding: 30px 40px;
-    margin-bottom: 30px;
-    color: #fff;
-    text-align: center;
-  }
-
-  .page-title {
-    font-size: 28px;
-    font-weight: 700;
-    text-transform: lowercase;
-    margin-bottom: 8px;
-  }
-
-  .page-description {
-    font-size: 14px;
-    opacity: 0.9;
-  }
-
-  .edit-form-card {
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid #e5e5e5;
-    padding: 40px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  }
-
-  .form-section {
-    margin-bottom: 35px;
-  }
-
-  .section-title {
-    font-size: 18px;
-    font-weight: 700;
-    text-transform: lowercase;
-    color: #222;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #f5f5f5;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .section-title i {
-    color: #401f75;
-  }
-
-  .profile-image-section {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .current-profile-image {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 5px solid #f5f5f5;
-    margin-bottom: 20px;
-    display: inline-block;
-  }
-
-  .image-upload-btn {
-    padding: 12px 24px;
-    background: #401f75;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: "Questrial", sans-serif;
-    font-weight: 600;
-    font-size: 13px;
-    text-transform: lowercase;
-    transition: all 0.3s;
-    display: inline-block;
-  }
-
-  .image-upload-btn:hover {
-    background: #401f75;
-    transform: translateY(-2px);
-  }
-
-  .image-upload-btn i {
-    margin-right: 5px;
-  }
-
-  #imageInput {
-    display: none;
-  }
-
-  .form-group {
-    margin-bottom: 20px;
-  }
-
-  .form-label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: lowercase;
-    margin-bottom: 8px;
-    color: #222;
-  }
-
-  .form-input {
-    width: 100%;
-    padding: 14px 18px;
-    border: 2px solid #e5e5e5;
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: "Questrial", sans-serif;
-    transition: all 0.3s;
-  }
-
-  .form-input:focus {
-    outline: none;
-    border-color: #401f75;
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-
-  .btn {
-    padding: 14px 28px;
-    border: none;
-    font-size: 14px;
-    text-transform: lowercase;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.3s;
-    font-family: "Questrial", sans-serif;
-    font-weight: 600;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .btn-primary {
-    background: #401f75;
-    color: #fff;
-  }
-
-  .btn-primary:hover:not(:disabled) {
-    background: #6d45ad;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-  }
-
-  .btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .btn-secondary {
-    background: #f8f9fa;
-    color: #222;
-    border: 2px solid #e5e5e5;
-  }
-
-  .btn-secondary:hover {
-    background: #222;
-    color: #fff;
-    border-color: #222;
-    transform: translateY(-2px);
-  }
-
-  .form-actions {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-  }
-
-  .error-message {
-    background: #fee;
-    border: 1px solid #fcc;
-    color: #c33;
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 13px;
-    text-align: center;
-  }
-
-  /* Crop Modal */
-  .crop-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .crop-modal.active {
-    display: flex;
-  }
-
-  .crop-container {
-    background: #fff;
-    border-radius: 12px;
-    padding: 30px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow: auto;
-  }
-
-  .crop-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-
-  .crop-title {
-    font-size: 20px;
-    font-weight: 700;
-    text-transform: lowercase;
-    color: #222;
-  }
-
-  .close-crop {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #999;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.3s;
-  }
-
-  .close-crop:hover {
-    color: #222;
-  }
-
-  .crop-area {
-    max-height: 400px;
-    margin-bottom: 20px;
-  }
-
-  .crop-area img {
-    max-width: 100%;
-    display: block;
-  }
-
-  .crop-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-  }
-  .success-message {
-    background: #d4edda;
-    border: 1px solid #c3e6cb;
-    color: #155724;
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 13px;
-    text-align: center;
-  }
-
-  .success-message i {
-    margin-right: 8px;
-  }
-
-  @media (max-width: 768px) {
-    .container {
-      padding: 0 20px;
-    }
-
-    .edit-form-card {
-      padding: 25px;
-    }
-
-    .form-row {
-      grid-template-columns: 1fr;
-    }
-
-    .form-actions {
-      flex-direction: column;
-    }
-
-    .btn {
-      width: 100%;
-    }
-  }
-</style>
-
+<link rel="stylesheet" href="/css/editProfile.css">
 <section class="breadcrumb">
   <div class="container">
     <a href="/home">home</a>
@@ -383,14 +36,13 @@
         <i class="fa fa-check-circle"></i> <%= success %>
       </div>
       <% } %>
-      
+
       <form
         action="/profile/edit"
         method="POST"
         enctype="multipart/form-data"
         id="editProfileForm"
       >
-        <!-- Profile Image Section -->
         <div class="form-section">
           <h2 class="section-title">
             <i class="fa fa-camera"></i> profile picture
@@ -417,7 +69,6 @@
           </div>
         </div>
 
-        <!-- Personal Information -->
         <div class="form-section">
           <h2 class="section-title">
             <i class="fa fa-user"></i> personal information
@@ -511,23 +162,20 @@
   const profilePreview = document.getElementById("profilePreview");
   const croppedImageInput = document.getElementById("croppedImage");
 
-  // Handle image selection
   imageInput.addEventListener("change", function (e) {
     const file = e.target.files[0];
 
     if (!file) return;
 
-    // Simple user feedback - doesn't prevent submission
     if (!file.type.startsWith("image/")) {
       alert("Please select an image file");
       imageInput.value = "";
       return;
     }
 
-    // Check file size (5MB limit) - user feedback only
     if (file.size > 5 * 1024 * 1024) {
       alert("Image size should be less than 5MB for better performance");
-      // Don't prevent - let server handle it
+
     }
 
     const reader = new FileReader();
@@ -536,7 +184,6 @@
       cropImage.src = event.target.result;
       cropModal.classList.add("active");
 
-      // Initialize cropper
       if (cropper) {
         cropper.destroy();
       }
@@ -559,7 +206,6 @@
     reader.readAsDataURL(file);
   });
 
-  // Close crop modal
   function closeCropModal() {
     cropModal.classList.remove("active");
     if (cropper) {
@@ -569,7 +215,6 @@
     imageInput.value = "";
   }
 
-  // Apply crop
   function applyCrop() {
     if (!cropper) return;
 
@@ -596,33 +241,50 @@
     );
   }
 
-  // Simple UX feedback on form submission - doesn't prevent submission
-  document
-    .getElementById("editProfileForm")
-    .addEventListener("submit", function (e) {
-      const username = document.getElementById("username").value.trim();
-      const email = document.getElementById("email").value.trim();
+document
+  .getElementById("editProfileForm")
+  .addEventListener("submit", async function (e) {
+    e.preventDefault(); 
 
-      // Show visual feedback for better UX
-      const submitBtn = document.getElementById("submitBtn");
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> saving...';
+    const form = e.target;
+    const submitBtn = document.getElementById("submitBtn");
 
-      // Simple client-side hints (doesn't prevent submission)
-      if (!username || !email) {
-        // Show brief warning but let form submit for server validation
-        console.log("Name and email appear empty - server will validate");
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> saving...';
+
+    try {
+      const formData = new FormData(form);
+
+      const response = await fetch(form.action, {
+        method: "PATCH",
+        body: formData,
+      });
+
+      if (response.redirected) {
+        window.location.href = response.url;
+        return;
       }
-    });
 
-  // Close modal on outside click
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Update failed");
+      }
+
+    } catch (err) {
+      alert(err.message || "Something went wrong");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa fa-save"></i> save changes';
+    }
+  });
+
   cropModal.addEventListener("click", function (e) {
     if (e.target === cropModal) {
       closeCropModal();
     }
   });
 
-  // Auto-hide success/error messages after 5 seconds
   window.addEventListener("DOMContentLoaded", function () {
     const errorMsg = document.querySelector(".error-message");
     const successMsg = document.querySelector(".success-message");

@@ -28,6 +28,7 @@ const loadCategory = async (req, res) => {
       .limit(limit);
 
     res.render("category", {
+      // activePage: "categories",
       categories,
       currentPage: page,
       totalCategories,
