@@ -25,13 +25,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      default: null,
     },
     phone: {
       type: String,
       requierd: false,
-      unique: false,
-      default: null,
     },
     password: {
       type: String,
@@ -39,7 +36,6 @@ const userSchema = new Schema(
     },
     referralCode: {
       type: String,
-      unique: true,
     },
 
     referredBy: {

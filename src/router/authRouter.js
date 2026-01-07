@@ -7,6 +7,7 @@ router.get("/google", authController.googleLogin);
 
 router.get(
   "/google/callback",
+  
   passport.authenticate("google", { failureRedirect: "/login" }),
   authController.googleCallback
 );
