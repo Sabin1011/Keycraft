@@ -116,12 +116,10 @@
                                     <a href="/singleProduct/<%= p._id %>" class="btn-small btn-primary">details</a>
 
                                     <% if (p.totalStock <= 0) { %>
-                                        <!-- OUT OF STOCK -->
                                         <button class="btn-small" disabled style="background:#ccc; cursor:not-allowed; opacity:0.7;">
                                             out of stock
                                         </button>
                                     <% } else { %>
-                                        <!-- IN STOCK -->
                                         <form action="/cart/add/<%= p._id %>" method="POST" style="display:inline;">
                                             <button type="submit" class="btn-small btn-primary">
                                                 add to cart
@@ -213,7 +211,6 @@
         applyFilters();
     }
 
-    // Toggle Wishlist Function
     async function toggleWishlist(event, button, productId) {
         event.preventDefault();
         event.stopPropagation();
@@ -236,7 +233,6 @@
             const data = await response.json();
 
             if (response.status === 401) {
-                // User not logged in
                 Swal.fire({
                     icon: 'warning',
                     title: 'Login Required',
@@ -255,19 +251,16 @@
             }
 
             if (data.success) {
-                // Toggle icon state
+
                 icon.classList.toggle("fas");
                 icon.classList.toggle("far");
 
-                // Update button title
                 button.title = icon.classList.contains('fas') 
                     ? 'Remove from wishlist' 
                     : 'Add to wishlist';
 
-                // Update wishlist count
                 updateWishlistCount();
 
-                // Show toast notification
                 const message = icon.classList.contains('fas') 
                     ? 'Added to wishlist' 
                     : 'Removed from wishlist';
@@ -294,7 +287,6 @@
         }
     }
 
-    // Update wishlist count badge in header
     async function updateWishlistCount() {
         try {
             const res = await fetch('/api/wishlist/count');
@@ -309,7 +301,6 @@
         }
     }
 
-    // Initialize on page load
     document.addEventListener('DOMContentLoaded', () => {
         updateWishlistCount();
     });

@@ -35,8 +35,6 @@ const loadCouponList = async (req, res) => {
 
 const loadAddCoupon = async (req, res) => {
   try {
-    
-
     res.render("addCoupon");
   } catch (error) {}
 };
