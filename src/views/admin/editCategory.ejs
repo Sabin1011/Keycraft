@@ -1,118 +1,7 @@
 <%- include('../partials/admin/header') %>
-<style>
-  body {
-    background-color: #f8f9fa;
-    font-family: "Poppins", sans-serif;
-    margin: 0;
-  }
-
-  .page-title-box {
-    margin-top: 20px;
-    margin-bottom: 20px;
-  }
-
-  .card {
-    border: none;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  }
-
-  .form-label {
-    font-weight: 500;
-    font-size: 14px;
-    color: #000;
-    margin-bottom: 8px;
-  }
-
-  .form-control {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 10px 15px;
-    font-size: 14px;
-    transition: all 0.3s;
-  }
-
-  .form-control:focus {
-    border-color: #556ee6;
-    box-shadow: 0 0 0 2px rgba(85, 110, 230, 0.1);
-    outline: none;
-  }
-
-  .form-control::placeholder {
-    color: #adb5bd;
-  }
-
-  textarea.form-control {
-    resize: vertical;
-    min-height: 100px;
-  }
-
-  .btn-container {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-top: 20px;
-  }
-
-  .cancel-btn {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-weight: 500;
-  }
-
-  .cancel-btn:hover {
-    background-color: #5a6268;
-  }
-
-  .submit-btn {
-    background-color: #000;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .submit-btn:hover {
-    background-color: #333;
-  }
-
-  .required {
-    color: #dc3545;
-  }
-
-  .form-text {
-    font-size: 12px;
-    color: #6c757d;
-    margin-top: 5px;
-  }
-
-  @media (max-width: 768px) {
-    .btn-container {
-      flex-direction: column-reverse;
-    }
-
-    .cancel-btn, .submit-btn {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-</style>
-
+<link rel="stylesheet" href="/css/admin/editCategory.css">
 <body>
   <div class="container-fluid">
-    <!-- Page Title -->
     <div class="row">
       <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
@@ -128,14 +17,12 @@
       </div>
     </div>
 
-    <!-- Edit Category Form -->
     <div class="row">
       <div class="col-lg-8 col-xl-6 mx-auto">
         <div class="card">
           <div class="card-body">
             <form id="EditCategoryForm" method="POST" action="/admin/updateCategory/<%= category._id %>">
               
-              <!-- Category Name -->
               <div class="mb-4">
                 <label for="categoryName" class="form-label">
                   Category Name <span class="required">*</span>
@@ -152,7 +39,6 @@
                 <div class="form-text">Edit category name</div>
               </div>
 
-              <!-- Category Description -->
               <div class="mb-4">
                 <label for="categoryDescription" class="form-label">
                   Category Description <span class="required">*</span>
@@ -168,7 +54,6 @@
                 <div class="form-text">Edit the description of the category</div>
               </div>
 
-              <!-- Buttons -->
               <div class="btn-container">
                 <button type="button" class="cancel-btn" onclick="goBack()">
                   Cancel
@@ -195,7 +80,6 @@
       window.location.href = '/admin/category';
     }
 
-    // Optional: add client-side validation or sweetalert success handling if using AJAX later
   </script>
 </body>
 </html>

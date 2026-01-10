@@ -4,16 +4,14 @@
   box-sizing: border-box;
 }
 
-/* ================= BASE ================= */
 body {
   font-family: "Questrial", sans-serif;
-  background: #f3f4f6; /* simple soft background */
+  background: #f3f4f6; 
   color: #1a1a1a;
   line-height: 1.6;
   min-height: 100vh;
 }
 
-/* ================= PAGE HEADER ================= */
 .page-header {
   padding: 70px 20px 50px;
   text-align: center;
@@ -37,22 +35,18 @@ body {
   background: #111;
   margin: 16px auto 0;
 }
-
-/* ================= CONTAINER ================= */
 .container {
   max-width: 1240px;
   margin: 0 auto;
   padding: 0 32px 100px;
 }
 
-/* ================= GRID ================= */
 .wishlist-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 32px;
 }
 
-/* ================= PRODUCT CARD ================= */
 .product-card {
   background: #ffffff;
   border-radius: 14px;
@@ -66,7 +60,6 @@ body {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
 
-/* ================= IMAGE ================= */
 .product-image {
   height: 300px;
   background: #f1f1f1;
@@ -84,7 +77,6 @@ body {
   transform: scale(1.06);
 }
 
-/* ================= INFO ================= */
 .product-info {
   padding: 26px 24px;
 }
@@ -104,7 +96,6 @@ body {
   margin-bottom: 22px;
 }
 
-/* ================= ACTIONS ================= */
 .product-actions {
   display: flex;
   flex-direction: column;
@@ -124,7 +115,6 @@ body {
   transition: all 0.25s ease;
 }
 
-/* View */
 .btn-view {
   background: #111;
   color: #ffffff;
@@ -134,7 +124,6 @@ body {
   background: #000;
 }
 
-/* Cart */
 .btn-cart {
   color: #111;
 }
@@ -144,7 +133,6 @@ body {
   color: #fff;
 }
 
-/* Remove */
 .btn-remove {
   border-color: #d0d0d0;
   color: #666;
@@ -157,7 +145,6 @@ body {
   border-color: #111;
 }
 
-/* Disabled */
 .btn:disabled {
   background: #eeeeee;
   color: #999;
@@ -165,7 +152,6 @@ body {
   cursor: not-allowed;
 }
 
-/* ================= EMPTY STATE ================= */
 .empty-state {
   text-align: center;
   padding: 100px 20px;
@@ -197,7 +183,6 @@ body {
   font-size: 12px;
 }
 
-/* ================= ADD ALL ================= */
 .add-all-container {
   margin-top: 70px;
   text-align: center;
@@ -220,7 +205,6 @@ body {
   background: #000;
 }
 
-/* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
   .container {
     padding: 0 20px 80px;

@@ -19,7 +19,7 @@
  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
-    <link rel="stylesheet" href="/css/adminHeader.css">
+    <link rel="stylesheet" href="/css/user/adminHeader.css">
 
 </head>
 
@@ -33,49 +33,49 @@
         <!-- Navigation -->
         <nav class="sidebar-nav">
             <div class="nav-item">
-                <a href="/admin/dashboard" class="nav-link active">
+                <a href="/admin/dashboard" class="nav-link <%= activePage === "dashboard"? 'active':''%>">
                     <i class="nav-icon fas fa-th-large"></i>
                     <span>Dashboard</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="/admin/adminProduct" class="nav-link active">
+                <a href="/admin/adminProduct" class="nav-link <%= activePage === "product"? 'active':''%>">
                     <i class="nav-icon fas fa-box"></i>
                     <span>Products</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="/admin/category" class="nav-link active"  >
+                <a href="/admin/category" class="nav-link <%= activePage === "category"? 'active' : ''%>" >
                     <i class="nav-icon fas fa-th"></i>
                     <span>Category</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="/admin/orders" class="nav-link active">
+                <a href="/admin/orders" class="nav-link <%= activePage === "orders"? 'active' : ''%>">
                     <i class="nav-icon fas fa-shopping-cart"></i>
                     <span>Orders</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="/admin/userManage" class="nav-link active">
+                <a href="/admin/userManage" class="nav-link <%= activePage === "users"? 'active' : ''%>">
                     <i class="nav-icon fas fa-users"></i>
                     <span>Users</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="/admin/sales-report" class="nav-link active">
+                <a href="/admin/sales-report" class="nav-link <%= activePage === "sales-report"? 'active' : ''%> ">
                     <i class="nav-icon fas fa-chart-bar"></i>
                     <span>Sales Report</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="/admin/couponManage" class="nav-link active">
+                <a href="/admin/couponManage" class="nav-link <%= activePage === "coupons"? 'active' : ''%> ">
                     <i class="nav-icon fas fa-ticket-alt"></i>
                     <span>Coupon</span>
                 </a>
             </div>
             <div class="nav-item">
-                <a href="/admin/offerManage" class="nav-link active">
+                <a href="/admin/offerManage" class="nav-link <%= activePage === "offers"? 'active' : ''%> ">
                     <i class="nav-icon fas fa-gift"></i>
                     <span>Offer</span>
                 </a>

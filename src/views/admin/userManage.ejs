@@ -1,159 +1,11 @@
 <%- include('../partials/admin/header') %>
-
-<style>
-  body {
-    background-color: #f8f9fa;
-    font-family: "Poppins", sans-serif;
-  }
-
-  .page-title-box {
-    margin-top: 20px;
-  }
-
-  .search-container {
-    position: relative;
-    margin-bottom: 20px;
-    max-width: 400px;
-  }
-
-  .search-form {
-    display: flex;
-    align-items: center;
-  }
-
-  .search-input-wrapper {
-    position: relative;
-    flex-grow: 1;
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 8px 35px 8px 35px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: all 0.3s;
-    outline: none;
-    height: 38px;
-  }
-
-  .search-input:focus {
-    border-color: #556ee6;
-    box-shadow: 0 0 0 2px rgba(85, 110, 230, 0.1);
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #6c757d;
-    font-size: 16px;
-    pointer-events: none;
-  }
-
-  .cancel-icon {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #6c757d;
-    font-size: 16px;
-    cursor: pointer;
-    display: none;
-  }
-
-  .search-input:not(:placeholder-shown) ~ .cancel-icon {
-    display: block;
-  }
-
-  .search-button {
-    margin-left: 8px;
-    padding: 8px 15px;
-    background-color: #000;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    height: 38px;
-  }
-
-  .search-button:hover {
-    background-color: #333;
-  }
-
-  .pagination-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
-    padding: 15px 0;
-    border-top: 1px solid #e9ecef;
-  }
-
-  .pagination-info {
-    color: #6c757d;
-    font-size: 14px;
-  }
-
-  .pagination {
-    margin-bottom: 0;
-  }
-
-  .pagination .page-item .page-link {
-    border: 1px solid #dee2e6;
-    color: #495057;
-    padding: 8px 12px;
-    margin: 0 2px;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: all 0.3s;
-  }
-
-  .pagination .page-item.active .page-link {
-    background-color: #000;
-    border-color: #000;
-    color: #fff;
-    font-weight: 500;
-  }
-
-  .pagination .page-item:not(.active):not(.disabled) .page-link:hover {
-    background-color: #f8f9fa;
-    border-color: #dee2e6;
-    color: #000;
-  }
-
-  .pagination .page-item.disabled .page-link {
-    background-color: #fff;
-    border-color: #dee2e6;
-    color: #6c757d;
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-
-  .pagination .page-item .page-link i {
-    font-size: 14px;
-  }
-
-  @media (max-width: 768px) {
-    .pagination-container {
-      flex-direction: column;
-      gap: 15px;
-    }
-    .pagination-info {
-      order: 2;
-    }
-  }
-</style>
+<link rel="stylesheet" href="/public/css/admin/userManage.css">
 
 <body data-sidebar="dark">
   <div class="main-content">
     <div class="page-content">
       <div class="container-fluid">
 
-        <!-- Page Title -->
         <div class="row">
           <div class="col-12">
             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
@@ -168,7 +20,6 @@
           </div>
         </div>
 
-        <!-- Success/Error Messages -->
         <% if (locals.success) { %>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
           <i class='bx bx-check-circle'></i> <%= success %>
@@ -183,7 +34,6 @@
         </div>
         <% } %>
 
-        <!-- Search -->
         <div class="row mb-3">
           <div class="col-sm-12 col-md-6">
             <div class="search-container">
@@ -279,7 +129,6 @@
                   </div>
                   <nav aria-label="User pagination">
                     <ul class="pagination">
-                      <!-- Previous Button -->
                       <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
                         <a class="page-link" href="?page=<%= currentPage - 1 %><%= locals.search ? '&search=' + search : '' %>">←</a>
                       </li>
@@ -302,7 +151,6 @@
                         </li>
                       <% } %>
 
-                      <!-- Next Button -->
                       <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
                         <a class="page-link" href="?page=<%= currentPage + 1 %><%= locals.search ? '&search=' + search : '' %>">→</a>
                       </li>

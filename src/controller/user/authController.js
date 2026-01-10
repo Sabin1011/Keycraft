@@ -1,12 +1,8 @@
 const User = require("../../models/userSchema");
 const sendEmail = require("../../utils/sendEmail");
 const bcrypt = require("bcrypt");
-const passport = require("passport");
-const generateRefferalCode = require("../../utils/generateReferralCode");
 const Wallet = require("../../models/walletSchema");
 const generateReferralCode = require("../../utils/generateReferralCode");
-
-// REGISTER
 
 const loadRegister = async (req, res) => {
   try {

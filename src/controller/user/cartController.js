@@ -1,14 +1,11 @@
 const express = require("express");
 const Product = require("../../models/productSchema");
-const router = express.Router();
-const Category = require("../../models/categorySchema");
 const Wishlist = require("../../models/wishlistModel");
 const Cart = require("../../models/cartModel");
 const User = require("../../models/userSchema");
 const Offer = require("../../models/offerSchema");
 const calculateCartTotals = require("../../utils/cartCalculator");
 const validateCartStock = require("../../utils/cartValidation");
-const { initMetadata } = require("pdfkit");
 
 const loadCart = async (req, res) => {
   try {
@@ -613,14 +610,6 @@ const removeFromCart = async (req, res) => {
         (sum, item) => sum + item.quantity,
         0
       );
-
-      const itemOfferDiscount = cart.items.reduce(
-        (sum, i) =>
-          sum + (i.originalPrice - i.discountedPrice) * i.quantity,
-        0
-      );
-      const cartOfferDiscount = cart.discountAmount || 0;
-      const totalDiscount = itemOfferDiscount + cartOfferDiscount;
 
       return res.json({
         success: true,

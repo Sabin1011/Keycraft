@@ -20,7 +20,7 @@ const loadCouponList = async (req, res) => {
       .limit(limit);
 
     return res.render("couponManage", {
-      // activePage: "coupons",
+      activePage: "coupons",
       coupons,
       currentPage,
       limit,
@@ -35,7 +35,9 @@ const loadCouponList = async (req, res) => {
 
 const loadAddCoupon = async (req, res) => {
   try {
-    res.render("addCoupon");
+    res.render("addCoupon",{
+      activePage: "coupons",
+    });
   } catch (error) {}
 };
 
@@ -136,7 +138,10 @@ const loadEditCoupon = async (req, res) => {
       return res.redirect("/admin/couponManage");
     }
 
-    res.render("editCoupon", { coupon });
+    res.render("editCoupon", { 
+      coupon,
+      activePage: "coupons",
+   });
   } catch (error) {
     console.log("Edit coupon load error:", error);
     res.redirect("/admin/couponManage");

@@ -1,0 +1,158 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+  color: #1f2937;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+/* Give more horizontal breathing room on large screens */
+@media (min-width: 1400px) {
+  .container-fluid {
+    max-width: 1400px;          /* ← key change: constrain width for better proportions */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+.container-fluid {
+  padding-top: 2rem;
+  padding-bottom: 3rem;         /* more vertical space at bottom */
+}
+
+/* Page title more prominent with space */
+.container-fluid h2 {
+  color: #111827;
+  font-weight: 700;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+}
+
+#filter {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #111827;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+#filter:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.15);
+}
+
+/* Cards — more spacious, softer, modern feel */
+.card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: #111827;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+  color: #374151;
+  padding: 1.75rem;           /* ← increased padding = more breathing room */
+}
+
+/* More space between cards in rows */
+.row.g-4 > .col,
+.row.g-3 > .col {
+  margin-bottom: 1.75rem;     /* better vertical spacing */
+}
+
+/* Stats cards (the small colorful ones at top) */
+.card.stat-card {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.card.stat-card h3 {
+  font-size: 2rem;
+  margin: 0.5rem 0;
+}
+
+/* List items with more space */
+.list-group-item {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  color: #374151;
+  padding: 1rem 1.5rem;
+  transition: background 0.2s ease;
+}
+
+.list-group-item:hover {
+  background: rgba(59, 130, 246, 0.04);
+}
+
+/* Charts get more room */
+canvas {
+  max-height: 420px;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.7s ease-out forwards;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }

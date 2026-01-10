@@ -1,0 +1,27 @@
+
+  .report-container { padding: 30px; }
+  .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
+  .card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  .card h4 { margin-bottom: 8px; color: #666; }
+  .card p { font-size: 20px; font-weight: bold; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+    background: #fff;
+  }
+  th, td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+  }
+  th {
+    background: #f4f4f4;
+  }

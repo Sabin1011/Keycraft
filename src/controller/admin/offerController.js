@@ -24,7 +24,7 @@ const loadOfferManage = async (req, res) => {
     const allCategories = await Category.find({}).lean();
 
     return res.render("offerManage", {
-      // activePage: "offers",
+      activePage: "offers",
       offers,
       allProducts,
       allCategories,
@@ -45,6 +45,7 @@ const loadAddOfferPage = async (req, res) => {
   const allCategories = await Category.find();
 
   res.render("addOffer", {
+    activePage: "offers",
     allProducts,
     allCategories,
   selectedProducts: [],
@@ -111,6 +112,7 @@ const loadEditOffer = async (req, res) => {
     const allCategories = await Category.find();
 
     res.render("editOffer", {
+      activePage: "offers",
       offer,
       allProducts,
       allCategories,
@@ -199,7 +201,6 @@ const toggleOfferStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Offer not found" });
     }
 
-    // 🔁 Toggle isActive
     offer.isActive = !offer.isActive;
     await offer.save();
 

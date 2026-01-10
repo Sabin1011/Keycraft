@@ -272,7 +272,6 @@ body {
   font-weight: 600;
 }
 
-/* Clear All Filters Button */
 .filters-sidebar .clear-btn[style*="width:100%"] {
   position: static;
   transform: none;

@@ -28,7 +28,7 @@ const loadCategory = async (req, res) => {
       .limit(limit);
 
     res.render("category", {
-      // activePage: "categories",
+      activePage: "category",
       categories,
       currentPage: page,
       totalCategories,
@@ -58,6 +58,7 @@ const loadCategory = async (req, res) => {
 const loadAddCategory = async (req, res) => {
   try {
     res.render("addCategory",{
+      activePage: "category",
       errors: {},    
       name: '',         
       description: ''
@@ -118,7 +119,7 @@ const loadEditCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
     const category = await Category.findById(categoryId);
-    res.render("editCategory", { category });
+    res.render("editCategory", { category,activePage: "category", });
   } catch (error) {
     console.log("Error loading edit category page:", error);
   }

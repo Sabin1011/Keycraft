@@ -25,7 +25,7 @@ const loadOrders = async (req, res) => {
       .limit(limit);
 
     res.render("adminOrderDetails", {
-      // activePage: "orders",
+      activePage: "orders",
       orders,
       statusOptions,
       search,
@@ -191,6 +191,7 @@ const loadSingleOrder = async (req, res) => {
     }
 
     res.render("singleOrderDetails", {
+      activePage: "orders",
       order,
     });
   } catch (error) {

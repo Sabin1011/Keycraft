@@ -2,15 +2,45 @@ const Order = require("../../models/orderSchema");
 const PDFDocument = require("pdfkit")
 const ExcelJS = require("exceljs")
 
+const getDateRange = (query) => {
+  const now = new Date();
+  let startDate, endDate;
+
+  switch (query.reportType) {
+    case "daily":
+      startDate = new Date(now.setHours(0, 0, 0, 0));
+      endDate = new Date();
+      break;
+
+    case "monthly":
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      endDate = new Date();
+      break;
+
+    case "yearly":
+      startDate = new Date(now.getFullYear(), 0, 1);
+      endDate = new Date();
+      break;
+
+    default:
+      startDate = query.startDate
+        ? new Date(query.startDate)
+        : new Date("1970-01-01");
+
+      endDate = query.endDate
+        ? new Date(query.endDate + "T23:59:59")
+        : new Date();
+  }
+
+  return { startDate, endDate };
+};
+
+
+
 const loadSalesReport = async (req, res) => {
   try {
-    const startDate = req.query.startDate
-      ? new Date(req.query.startDate)
-      : new Date("1970-01-01");
-
-    const endDate = req.query.endDate
-      ? new Date(req.query.endDate + "T23:59:59")
-      : new Date();
+    
+    const { startDate, endDate } = getDateRange(req.query);
 
     const orders = await Order.find({
       createdAt: { $gte: startDate, $lte: endDate },
@@ -41,11 +71,13 @@ const loadSalesReport = async (req, res) => {
     }
     
     res.render("salesReport", {
-
+      activePage: "sales-report",
       orders,
       startDate: req.query.startDate || "",
       endDate: req.query.endDate || "",
+      reportType: req.query.reportType || "",
       summary: {  
+        
         totalOrders,
         grossSales,
         offerDiscount,
@@ -63,13 +95,7 @@ const loadSalesReport = async (req, res) => {
 
 const downloadSalesReportPDF = async (req, res) => {
   try {
-    const startDate = req.query.startDate
-      ? new Date(req.query.startDate)
-      : new Date("1970-01-01");
-
-    const endDate = req.query.endDate
-      ? new Date(req.query.endDate + "T23:59:59")
-      : new Date();
+    const {startDate, endDate} = getDateRange(req.query);
 
     const orders = await Order.find({
       createdAt: { $gte: startDate, $lte: endDate },
@@ -140,9 +166,8 @@ Status: ${order.status}
 
 const downloadSalesReportExcel = async(req, res) =>{
   try {
-    const startDate = req.query.startDate?new Date(req.query.startDate):new Date("1970-01-01");
 
-    const endDate = req.query.endDate?new Date(req.query.endDate+"T23:59:59"):new Date();
+    const {startDate, endDate} = getDateRange(req.query);
 
     const orders = await Order.find({
       createdAt:{$gte:startDate,$lte:endDate},
@@ -157,8 +182,8 @@ const downloadSalesReportExcel = async(req, res) =>{
     orders.forEach(order =>{
       grossSales += order.subtotal || 0;
       offerDiscount += order.offerDiscount || 0;
-      couponDiscount += order.coupondiscount || 0;
-      netRevenue += order.netRevenue || 0;
+      couponDiscount += order.discountAmount  || 0;
+      netRevenue += order.finalAmount  || 0;
     });
 
     const workbook = new ExcelJS.Workbook();

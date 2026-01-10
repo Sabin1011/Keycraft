@@ -1,71 +1,5 @@
 <%- include('../partials/admin/header') %>
-
-<style>
-  body {
-    background-color: #f8f9fa;
-    font-family: "Poppins", sans-serif;
-  }
-
-  .container {
-    max-width: 900px;
-  }
-
-  .page-title-box {
-    margin: 20px 0;
-  }
-
-  .btn-black {
-    background: #000;
-    color: #fff;
-  }
-
-  .btn-black:hover {
-    background: #333;
-  }
-
-  .select-box {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 12px;
-    background: #fff;
-  }
-
-  .select-box label {
-    font-weight: 600;
-    margin-bottom: 6px;
-    display: block;
-  }
-
-  .styled-multiselect {
-    width: 100%;
-    height: 180px;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    background: #fafafa;
-    font-size: 14px;
-  }
-
-  .selected-preview {
-    margin-top: 10px;
-    padding: 10px;
-    min-height: 45px;
-    border-radius: 8px;
-    border: 1px dashed #bbb;
-    background: #fdfdfd;
-  }
-
-  .preview-badge {
-    display: inline-block;
-    background: #401f75;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 12px;
-    margin: 3px;
-    font-size: 13px;
-  }
-</style>
-
+<link rel="stylesheet" href="/css/admin/editOffer.css">
 <body data-sidebar="dark">
 <div class="main-content">
   <div class="page-content">
@@ -103,49 +37,46 @@
               <option value="cart" <%= offer.offerType === "cart" ? "selected" : "" %>>Cart Offer</option>
             </select>
 
-            <!-- PRODUCT SELECT -->
-            
             <h5>Select Products</h5>
-<div id="productSelect" class="mb-3 select-box <%= offer.offerType !== 'product' ? 'd-none' : '' %>">
-  <label>Select Products</label>
+            <div id="productSelect" class="mb-3 select-box <%= offer.offerType !== 'product' ? 'd-none' : '' %>">
+              <label>Select Products</label>
 
-  <select class="styled-multiselect" name="productIds" multiple>
-    <% allProducts.forEach(p => { %>
-      <option
-        value="<%= p._id %>"
-        <%= selectedProducts.includes(p._id.toString()) ? "selected" : "" %>
-      >
-        <%= p.name %>
-      </option>
-    <% }) %>
-  </select>
+              <select class="styled-multiselect" name="productIds" multiple>
+                <% allProducts.forEach(p => { %>
+                  <option
+                    value="<%= p._id %>"
+                    <%= selectedProducts.includes(p._id.toString()) ? "selected" : "" %>
+                  >
+                    <%= p.name %>
+                  </option>
+                <% }) %>
+              </select>
 
-  <small class="text-muted">Hold CTRL (Windows) or CMD (Mac) to select multiple</small>
-  <div id="productPreview" class="selected-preview"></div>
-</div>
+              <small class="text-muted">Hold CTRL (Windows) or CMD (Mac) to select multiple</small>
+              <div id="productPreview" class="selected-preview"></div>
+            </div>
 
 
   
 
             <div id="categorySelect" class="mb-3 select-box <%= offer.offerType !== 'category' ? 'd-none' : '' %>">
-  <label>Select Categories</label>
+              <label>Select Categories</label>
 
-  <select class="styled-multiselect" name="categoryIds" multiple>
-    <% allCategories.forEach(c => { %>
-      <option
-        value="<%= c._id %>"
-        <%= selectedCategories.includes(c._id.toString()) ? "selected" : "" %>
-      >
-        <%= c.name %>
-      </option>
-    <% }) %>
-  </select>
+              <select class="styled-multiselect" name="categoryIds" multiple>
+                <% allCategories.forEach(c => { %>
+                  <option
+                    value="<%= c._id %>"
+                    <%= selectedCategories.includes(c._id.toString()) ? "selected" : "" %>
+                  >
+                    <%= c.name %>
+                  </option>
+                <% }) %>
+              </select>
 
-  <small class="text-muted">Hold CTRL (Windows) or CMD (Mac) to select multiple</small>
-  <div id="categoryPreview" class="selected-preview"></div>
-</div>
+              <small class="text-muted">Hold CTRL (Windows) or CMD (Mac) to select multiple</small>
+              <div id="categoryPreview" class="selected-preview"></div>
+            </div>
 
-            <!-- CART MIN PURCHASE -->
             <div id="minPurchaseWrapper" class="mb-3 <%= offer.offerType !== "cart" ? "d-none" : "" %>">
               <label class="form-label">Minimum Purchase Amount</label>
               <input

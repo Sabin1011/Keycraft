@@ -14,7 +14,6 @@ const aboutController = require("../controller/user/aboutController.js");
 const auth = require("../middleware/auth");
 const { profileUpload } = require("../middleware/multer");
 
-// Register Routes
 router.get("/register", authController.loadRegister);
 router.post("/register", authController.register);
 

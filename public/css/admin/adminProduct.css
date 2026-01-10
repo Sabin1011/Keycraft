@@ -1,0 +1,488 @@
+/* Dark Admin Page Theme - Black / White / Gray */
+
+body {
+  background: #1a1a1a;
+  background-attachment: fixed;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  color: #e0e0e0;
+}
+
+.page-title-box {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.page-title-box h2,
+.page-title-box h1,
+.page-title-box h3 {
+  color: #ffffff;
+  font-weight: 600;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+.search-container {
+  position: relative;
+  margin-bottom: 20px;
+  max-width: 400px;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  position: relative;
+  flex-grow: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 35px 8px 35px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s;
+  outline: none;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.search-input:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.cancel-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
+  cursor: pointer;
+  display: none;
+  transition: color 0.2s;
+}
+
+.cancel-icon:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.search-input:not(:placeholder-shown) ~ .cancel-icon {
+  display: block;
+}
+
+.search-button {
+  margin-left: 8px;
+  padding: 8px 15px;
+  background: #555555;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  height: 38px;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.search-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  background: #666666;
+}
+
+.search-button:active {
+  transform: translateY(0);
+}
+
+/* Add Product Button Style */
+.add-product-btn {
+  background: #555555;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.add-product-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  background: #666666;
+}
+
+.add-product-btn:active {
+  transform: translateY(0);
+}
+
+/* Table Styles */
+.user-table {
+  margin-bottom: 0;
+}
+
+.user-table thead th {
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 14px 12px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-top: none;
+}
+
+.user-table tbody td {
+  padding: 14px 12px;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #e0e0e0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.user-table tbody tr {
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.user-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(3px);
+}
+
+.product-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.product-name {
+  font-weight: 500;
+  color: #ffffff;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.product-desc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Status and Action Button Styles */
+.badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.status-blocked {
+  background: rgba(120, 120, 120, 0.25);
+  color: #cccccc;
+  border: 1px solid rgba(120, 120, 120, 0.4);
+}
+
+.action-icons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.edit-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.edit-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.block-btn,
+.unblock-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.block-btn {
+  background: rgba(120, 120, 120, 0.3);
+  color: #dddddd;
+  border: 1px solid rgba(120, 120, 120, 0.45);
+}
+
+.block-btn:hover {
+  background: rgba(120, 120, 120, 0.45);
+  transform: translateY(-2px);
+}
+
+.unblock-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.unblock-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.soft-deleted-row {
+  opacity: 0.45;
+  background: rgba(80, 80, 80, 0.15);
+}
+
+/* Pagination Styles */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 20px 15px 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pagination-info {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pagination {
+  margin-bottom: 0;
+}
+
+.pagination .page-item .page-link {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.75);
+  padding: 8px 14px;
+  margin: 0 3px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  font-weight: 500;
+}
+
+.pagination .page-item.active .page-link {
+  background: #555555;
+  border-color: #666666;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.pagination .page-item.disabled .page-link {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* No Data Styling */
+.no-data {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.no-data i {
+  font-size: 56px;
+  margin-bottom: 15px;
+  opacity: 0.3;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.no-data p {
+  font-size: 16px;
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Card Body Padding */
+.card-body {
+  padding: 20px;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Table Responsive Wrapper */
+.table-responsive {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Animation for rows */
+@keyframes fadeInRow {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.user-table tbody tr {
+  animation: fadeInRow 0.3s ease-out;
+}
+
+/* Header Actions Container */
+.d-flex.justify-content-between.align-items-center {
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* Form Controls */
+select.form-select,
+select.form-control,
+input.form-control {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  border-radius: 6px;
+}
+
+select.form-select:focus,
+select.form-control:focus,
+input.form-control:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  outline: none;
+}
+
+select.form-select option,
+select.form-control option {
+  background: #222222;
+  color: #ffffff;
+}
+
+/* Labels */
+label {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+/* Alerts */
+.alert {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+}

@@ -1,33 +1,9 @@
 <%- include('../partials/admin/header') %>
 
-<style>
-  .box {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  th,
-  td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
-  }
-  th {
-    background: #333;
-    color: white;
-  }
-</style>
-
+<link rel="stylesheet" href="/css/admin/singleOrderDetails.css">
 <div class="container">
   <h2>Order Details</h2>
 
-  <!-- Order Info -->
   <div class="box">
     <p><strong>Order ID:</strong> <%= order.orderId %></p>
     <p><strong>Status:</strong> <%= order.status %></p>
