@@ -236,6 +236,11 @@ router.post(
   auth.isLoggedIn,
   checkoutController.validateCartStock
 );
+router.get(
+  "/returned-orders",
+  auth.isLoggedIn,
+  orderController.loadReturnedOrders
+);
 
 router.get("/about", aboutController.loadAbout);
 

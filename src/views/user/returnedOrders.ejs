@@ -1,0 +1,40 @@
+<%- include('../partials/user/header') %>
+
+<link rel="stylesheet" href="/css/user/returned-orders.css">
+
+<div class="page-wrapper">
+  <h2>Returned Orders</h2>
+
+  <% if (returnedOrders.length === 0) { %>
+    <p style="text-align:center;margin-top:30px;">No returned items yet.</p>
+  <% } %>
+
+  <% returnedOrders.forEach(order => { %>
+    <div class="order-box">
+      <h4>Order ID: <%= order.orderId %></h4>
+      <p>Date: <%= new Date(order.createdAt).toDateString() %></p>
+
+      <% order.items.forEach(item => { %>
+        <div class="item-row">
+          <img src="<%= item.product.images[0] %>" />
+
+          <div class="item-info">
+            <h4><%= item.product.name %></h4>
+            <p>Qty: <%= item.quantity %></p>
+            <p>Price: ₹<%= item.price.toFixed(2) %></p>
+
+            <% if(item.status === "Returned"){ %>
+              <span style="color:#2e7d32;font-weight:600;">Returned</span>
+            <% } else { %>
+              <span style="color:#856404;font-weight:600;">Return Requested</span>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% }) %>
+
+  <a href="/my-orders" class="btn btn-secondary">Back to Orders</a>
+</div>
+
+<%- include('../partials/user/footer') %>

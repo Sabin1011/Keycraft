@@ -1,5 +1,5 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/public/css/admin/userManage.css">
+<link rel="stylesheet" href="/css/admin/userManage.css">
 
 <body data-sidebar="dark">
   <div class="main-content">
@@ -121,6 +121,8 @@
                 </div>
 
                 <!-- Pagination -->
+
+                
                 <% if (totalUsers > 0) { %>
                 <div class="pagination-container">
                   <div class="pagination-info">
@@ -144,7 +146,6 @@
                         }
                       %>
 
-                      <!-- Page Numbers -->
                       <% for (let i = startPage; i <= endPage; i++) { %>
                         <li class="page-item <%= i === currentPage ? 'active' : '' %>">
                           <a class="page-link" href="?page=<%= i %><%= locals.search ? '&search=' + search : '' %>"><%= i %></a>
@@ -169,7 +170,6 @@
 
     <%- include('../partials/admin/footer') %>
 
-    <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -189,7 +189,6 @@
           cancelButtonText: "Cancel"
         }).then((result) => {
           if (result.isConfirmed) {
-            // Show loading
             Swal.fire({
               title: 'Processing...',
               text: 'Please wait',
@@ -199,7 +198,6 @@
               }
             });
 
-            // Send AJAX request to block/unblock user
             fetch(`/admin/blockUser/${userId}`, {
               method: 'PATCH',
               headers: {
@@ -234,7 +232,6 @@
         window.location.href = '/admin/userManage';
       }
 
-      // Auto-hide alerts after 5 seconds
       document.addEventListener('DOMContentLoaded', function() {
         const alerts = document.querySelectorAll('.alert');
         alerts.forEach(alert => {
@@ -243,8 +240,6 @@
             bsAlert.close();
           }, 5000);
         });
-
-        // Show/hide cancel icon based on search input
         const searchInput = document.getElementById('searchInput');
         const cancelIcon = document.querySelector('.cancel-icon');
         
@@ -253,7 +248,6 @@
             cancelIcon.style.display = this.value.length > 0 ? 'block' : 'none';
           });
           
-          // Initial check
           cancelIcon.style.display = searchInput.value.length > 0 ? 'block' : 'none';
         }
       });

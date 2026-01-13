@@ -93,7 +93,42 @@
       <% }) %>
     </tbody>
   </table>
+  <div class="pagination">
+
+  <% if (currentPage > 1) { %>
+    <a href="?page=<%= currentPage - 1 %>&reportType=<%= reportType %>&startDate=<%= startDate %>&endDate=<%= endDate %>">
+      ⬅ Prev
+    </a>
+  <% } %>
+
+  <% if (startPage > 1) { %>
+    <a href="?page=1&reportType=<%= reportType %>&startDate=<%= startDate %>&endDate=<%= endDate %>">1</a>
+    <span>...</span>
+  <% } %>
+
+  <% for (let i = startPage; i <= endPage; i++) { %>
+    <a 
+      href="?page=<%= i %>&reportType=<%= reportType %>&startDate=<%= startDate %>&endDate=<%= endDate %>"
+      class="<%= i === currentPage ? 'active' : '' %>">
+      <%= i %>
+    </a>
+  <% } %>
+
+  <% if (endPage < totalPages) { %>
+    <span>...</span>
+    <a href="?page=<%= totalPages %>&reportType=<%= reportType %>&startDate=<%= startDate %>&endDate=<%= endDate %>">
+      <%= totalPages %>
+    </a>
+  <% } %>
+
+  <% if (currentPage < totalPages) { %>
+    <a href="?page=<%= currentPage + 1 %>&reportType=<%= reportType %>&startDate=<%= startDate %>&endDate=<%= endDate %>">
+      Next ➡
+    </a>
+  <% } %>
+
 </div>
+
 
 <%- include('../partials/admin/footer') %>
     

@@ -30,11 +30,6 @@ const loadprofile = async (req, res) => {
       user.referralCode = code;
     }
 
-    //     if (userId) {
-    //   const cart = await Cart.findOne({ userId });
-    //   cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-    // }
-
     const cart = await Cart.findOne({ userId });
     if (cart && cart.items) {
       cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -176,12 +171,20 @@ const changePassword = async (req, res) => {
 
 const loadAddAddress = async (req, res) => {
   try {
+    let cartCount = 0;
     const userId = req.session.userId;
     const user = await User.findById(userId).lean();
 
+    if (userId) {
+      const cart = await Cart.findOne({ userId });
+      if (cart && cart.items) {
+        cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+      }
+    }
     const returnUrl = req.query.returnUrl || "/profile";
 
     res.render("addAddress", {
+      cartCount,
       user,
       address: null,
       mode: "add",
@@ -286,10 +289,17 @@ const saveAddress = async (req, res) => {
 
 const loadEditAddress = async (req, res) => {
   try {
+    let cartCount = 0;
     const addressId = req.params.id;
     const user = await User.findById(req.session.userId || req.user._id);
     const returnUrl = req.query.returnUrl || "/profile";
-
+    const userId = req.session.userId;
+    if (userId) {
+      const cart = await Cart.findOne({ userId });
+      if (cart && cart.items) {
+        cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+      }
+    }
     if (!user) return res.redirect("/login");
 
     const address = user.addresses.id(addressId);
@@ -299,6 +309,7 @@ const loadEditAddress = async (req, res) => {
     }
 
     res.render("editAddress", {
+      cartCount,
       address,
       user,
       mode: "edit",

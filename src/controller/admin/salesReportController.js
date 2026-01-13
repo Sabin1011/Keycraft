@@ -1,6 +1,6 @@
 const Order = require("../../models/orderSchema");
-const PDFDocument = require("pdfkit")
-const ExcelJS = require("exceljs")
+const PDFDocument = require("pdfkit");
+const ExcelJS = require("exceljs");
 
 const getDateRange = (query) => {
   const now = new Date();
@@ -35,19 +35,28 @@ const getDateRange = (query) => {
   return { startDate, endDate };
 };
 
-
-
 const loadSalesReport = async (req, res) => {
   try {
-    
     const { startDate, endDate } = getDateRange(req.query);
 
-    const orders = await Order.find({
-      createdAt: { $gte: startDate, $lte: endDate },
-      status: { $in: ["Confirmed", "Delivered"] }
-    }).sort({ createdAt: -1 });
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
 
-    let totalOrders = orders.length;
+    const baseFilter = {
+      createdAt: { $gte: startDate, $lte: endDate },
+      status: { $in: ["Confirmed", "Delivered"] },
+    };
+
+    const orders = await Order.find(baseFilter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalOrders = await Order.countDocuments(baseFilter);
+
+    const totalPages = Math.ceil(totalOrders / limit);
+
     let grossSales = 0;
     let offerDiscount = 0;
     let couponDiscount = 0;
@@ -56,7 +65,7 @@ const loadSalesReport = async (req, res) => {
     let paymentStats = {
       razorpay: 0,
       wallet: 0,
-      cod: 0
+      cod: 0,
     };
 
     for (const order of orders) {
@@ -69,24 +78,36 @@ const loadSalesReport = async (req, res) => {
         paymentStats[order.paymentMethod]++;
       }
     }
-    
+
+    const visiblePages = 5;
+
+    let startPage = Math.max(1, page - Math.floor(visiblePages / 2));
+    let endPage = startPage + visiblePages - 1;
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - visiblePages + 1);
+    }
+
     res.render("salesReport", {
       activePage: "sales-report",
       orders,
+      currentPage: page,
       startDate: req.query.startDate || "",
       endDate: req.query.endDate || "",
       reportType: req.query.reportType || "",
-      summary: {  
-        
+      totalPages,
+      startPage,
+      endPage,
+      summary: {
         totalOrders,
         grossSales,
         offerDiscount,
         couponDiscount,
-        netRevenue
+        netRevenue,
       },
-      paymentStats
+      paymentStats,
     });
-
   } catch (error) {
     console.error("Sales Report Error:", error);
     res.redirect("/admin/dashboard");
@@ -95,11 +116,11 @@ const loadSalesReport = async (req, res) => {
 
 const downloadSalesReportPDF = async (req, res) => {
   try {
-    const {startDate, endDate} = getDateRange(req.query);
+    const { startDate, endDate } = getDateRange(req.query);
 
     const orders = await Order.find({
       createdAt: { $gte: startDate, $lte: endDate },
-      status: { $in: ["Confirmed", "Delivered"] }
+      status: { $in: ["Confirmed", "Delivered"] },
     });
 
     let grossSales = 0;
@@ -107,7 +128,7 @@ const downloadSalesReportPDF = async (req, res) => {
     let couponDiscount = 0;
     let netRevenue = 0;
 
-    orders.forEach(order => {
+    orders.forEach((order) => {
       grossSales += order.subtotal || 0;
       offerDiscount += order.offerDiscount || 0;
       couponDiscount += order.discountAmount || 0;
@@ -126,7 +147,9 @@ const downloadSalesReportPDF = async (req, res) => {
     doc.fontSize(20).text("Sales Report", { align: "center" });
     doc.moveDown();
 
-    doc.fontSize(12).text(`Period: ${startDate.toDateString()} - ${endDate.toDateString()}`);
+    doc
+      .fontSize(12)
+      .text(`Period: ${startDate.toDateString()} - ${endDate.toDateString()}`);
     doc.moveDown();
 
     doc.fontSize(14).text("Summary");
@@ -144,14 +167,16 @@ const downloadSalesReportPDF = async (req, res) => {
     doc.fontSize(12).text("Orders", { underline: true });
     doc.moveDown(0.5);
 
-    orders.forEach(order => {
+    orders.forEach((order) => {
       doc.fontSize(10).text(
         `Order: ${order.orderId || order._id}
 Date: ${order.createdAt.toDateString()}
 Payment: ${order.paymentMethod}
 Subtotal: ₹${(order.subtotal || 0).toFixed(2)}
-Discount: ₹${((order.offerDiscount || 0) + (order.discountAmount || 0)).toFixed(2)}
-Final: ₹${(order.finalAmount||0).toFixed(2)}
+Discount: ₹${((order.offerDiscount || 0) + (order.discountAmount || 0)).toFixed(
+          2
+        )}
+Final: ₹${(order.finalAmount || 0).toFixed(2)}
 Status: ${order.status}
 -----------------------------`
       );
@@ -164,26 +189,25 @@ Status: ${order.status}
   }
 };
 
-const downloadSalesReportExcel = async(req, res) =>{
+const downloadSalesReportExcel = async (req, res) => {
   try {
-
-    const {startDate, endDate} = getDateRange(req.query);
+    const { startDate, endDate } = getDateRange(req.query);
 
     const orders = await Order.find({
-      createdAt:{$gte:startDate,$lte:endDate},
-      status:{$in:["Confirmed", "Delivered"]}
-    }).sort({createdAt: -1});
+      createdAt: { $gte: startDate, $lte: endDate },
+      status: { $in: ["Confirmed", "Delivered"] },
+    }).sort({ createdAt: -1 });
 
     let grossSales = 0;
     let offerDiscount = 0;
     let couponDiscount = 0;
     let netRevenue = 0;
 
-    orders.forEach(order =>{
+    orders.forEach((order) => {
       grossSales += order.subtotal || 0;
       offerDiscount += order.offerDiscount || 0;
-      couponDiscount += order.discountAmount  || 0;
-      netRevenue += order.finalAmount  || 0;
+      couponDiscount += order.discountAmount || 0;
+      netRevenue += order.finalAmount || 0;
     });
 
     const workbook = new ExcelJS.Workbook();
@@ -191,12 +215,12 @@ const downloadSalesReportExcel = async(req, res) =>{
 
     worksheet.mergeCells("A1:G1");
     worksheet.getCell("A1").value = "Sales Report";
-    worksheet.getCell("A1").font = {size: 16, bold:true};
-    worksheet.getCell("A1").alignment = {horizontal: "center"};
+    worksheet.getCell("A1").font = { size: 16, bold: true };
+    worksheet.getCell("A1").alignment = { horizontal: "center" };
 
     worksheet.addRow([]);
     worksheet.addRow([
-      `Period: ${startDate.toDateString()} = ${endDate.toDateString()}`
+      `Period: ${startDate.toDateString()} = ${endDate.toDateString()}`,
     ]);
 
     worksheet.addRow([]);
@@ -208,7 +232,6 @@ const downloadSalesReportExcel = async(req, res) =>{
     worksheet.addRow(["Coupon Discount", couponDiscount]);
     worksheet.addRow(["Net Revenue", netRevenue]);
 
-
     worksheet.addRow([]);
     worksheet.addRow([]);
 
@@ -219,16 +242,16 @@ const downloadSalesReportExcel = async(req, res) =>{
       "Subtotal",
       "Discount",
       "Final Amount",
-      "Status"
+      "Status",
     ]);
 
     const headerRow = worksheet.lastRow;
-    headerRow.eachCell(cell => {
+    headerRow.eachCell((cell) => {
       cell.font = { bold: true };
-      cell.alignment = {horizontal: "center"};
+      cell.alignment = { horizontal: "center" };
     });
 
-    orders.forEach(order => {
+    orders.forEach((order) => {
       worksheet.addRow([
         order.orderId || order._id.toString(),
         order.createdAt.toDateString(),
@@ -240,8 +263,7 @@ const downloadSalesReportExcel = async(req, res) =>{
       ]);
     });
 
-
-    worksheet.columns.forEach(column => {
+    worksheet.columns.forEach((column) => {
       column.width = 18;
     });
 
@@ -254,7 +276,7 @@ const downloadSalesReportExcel = async(req, res) =>{
       "Content-Disposition",
       "attachment; filename=sales-report.xlsx"
     );
-    
+
     await workbook.xlsx.write(res);
     res.end();
   } catch (error) {
@@ -264,7 +286,7 @@ const downloadSalesReportExcel = async(req, res) =>{
 };
 
 module.exports = {
-    loadSalesReport,
-    downloadSalesReportPDF,
-    downloadSalesReportExcel,
-}
+  loadSalesReport,
+  downloadSalesReportPDF,
+  downloadSalesReportExcel,
+};

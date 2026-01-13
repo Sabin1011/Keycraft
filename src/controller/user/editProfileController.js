@@ -1,7 +1,5 @@
 const User = require("../../models/userSchema");
-const Product = require("../../models/productSchema");
-const Category = require("../../models/categorySchema");
-const mongoose = require("mongoose");
+const Cart = require("../../models/cartModel");
 const path = require("path");
 const fs = require("fs");
 const sendEmail = require("../../utils/sendEmail");
@@ -10,14 +8,22 @@ const bcrypt = require("bcrypt");
 
 const loadEditProfilePage = async (req, res) => {
   try {
+    let cartCount = 0;
     const userId = req.session.user?._id || req.user?._id;
     const user = await User.findById(userId);
 
+    if (userId) {
+      const cart = await Cart.findOne({ userId });
+      if (cart && cart.items) {
+        cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+      }
+    }
     if (!user) {
       return res.redirect("/login");
     }
 
     res.render("editProfile", {
+      cartCount,
       user: user,
       error: req.session.errorMessage || undefined,
       success: req.session.successMessage || undefined,

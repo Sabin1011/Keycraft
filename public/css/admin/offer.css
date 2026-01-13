@@ -1,52 +1,321 @@
+/* Unified Light Admin Theme - Offers Page */
+
 body {
-  background-color: #f8f9fa;
+  background: #f8fafc;
+  background-attachment: fixed;
   font-family: "Poppins", sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  color: #1f2937;
 }
+
+.main-content {
+  background: #f8fafc;
+}
+
+.page-content {
+  padding: 1.5rem 0;
+}
+
+.container-fluid {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
 .page-title-box {
-  margin-top: 20px;
+  margin: 1.5rem 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
-.search-box {
-  position: relative;
+
+.page-title-box h4 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+/* Search Form */
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 520px;
   width: 100%;
 }
 
-.search-box .search-icon {
+.search-box {
+  position: relative;
+  flex: 1;
+}
+
+.search-icon {
   position: absolute;
-  left: 14px;
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 18px;
-  color: #6c757d;
+  color: #94a3b8;
   pointer-events: none;
 }
 
 .search-input {
-  padding-left: 42px;
-  height: 44px;
+  width: 100%;
+  height: 46px;
+  padding: 0 16px 0 48px;
+  border: 1px solid #cbd5e1;
   border-radius: 10px;
-  border: 1px solid #dee2e6;
-  font-size: 14px;
-  transition: all 0.25s ease;
-  background-color: #fff;
+  font-size: 0.95rem;
+  background: #ffffff;
+  color: #0f172a;
+  transition: all 0.22s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .search-input::placeholder {
-  color: #adb5bd;
+  color: #94a3b8;
 }
 
 .search-input:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
   outline: none;
 }
 
+/* Add Offer Button */
 .add-button {
-  background: #000;
+  height: 46px;
+  padding: 0 20px;
+  border-radius: 10px;
+  background: #1f293b;
   color: white;
-  border-radius: 4px;
-  padding: 8px 15px;
+  font-size: 0.95rem;
+  font-weight: 600;
   border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.22s ease;
+  box-shadow: 0 2px 8px rgba(31, 41, 59, 0.12);
 }
+
 .add-button:hover {
-  background: #333;
+  background: #334155;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(31, 41, 59, 0.2);
+}
+
+/* Alerts */
+.alert {
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid transparent;
+}
+
+.alert-success {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.alert-danger {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+/* Card & Table */
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.card-body {
+  padding: 1.75rem 2rem;
+}
+
+.table-responsive {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table {
+  margin-bottom: 0;
+  width: 100%;
+}
+
+.table thead th {
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 14px 16px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.table tbody td {
+  padding: 16px;
+  vertical-align: middle;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.table tbody tr {
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background: #f9fafb;
+  transform: translateX(3px);
+}
+
+/* Offer Type & Status Badges */
+.badge {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.bg-info {
+  background-color: #e0f2fe !important;
+  color: #0369a1 !important;
+  border: 1px solid #7dd3fc;
+}
+
+.bg-success {
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
+  border: 1px solid #a7f3d0;
+}
+
+.bg-danger {
+  background-color: #fef2f2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fecaca;
+}
+
+/* Action Buttons */
+.btn-sm {
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-warning {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.btn-warning:hover {
+  background: #fde68a;
+}
+
+.btn-danger {
+  background: #ef4444;
+  border: none;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+.btn-success {
+  background: #10b981;
+  border: none;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+/* Pagination */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.pagination {
+  margin: 0;
+}
+
+.pagination .page-item .page-link {
+  border: 1px solid #d1d5db;
+  color: #374151;
+  background: #ffffff;
+  padding: 8px 14px;
+  margin: 0 4px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.22s ease;
+}
+
+.pagination .page-item.active .page-link {
+  background: #374151;
+  border-color: #374151;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(55, 65, 81, 0.18);
+}
+
+.pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #9ca3af;
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* No offers / empty state */
+.text-center.py-4.text-muted {
+  padding: 5rem 1rem !important;
+  color: #9ca3af !important;
+}
+
+.text-center.py-4.text-muted i {
+  font-size: 3.5rem;
+  opacity: 0.35;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.text-center.py-4.text-muted p {
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+  color: #6b7280;
 }

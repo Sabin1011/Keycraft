@@ -4,12 +4,18 @@ const Cart = require("../../models/cartModel");
 const Product = require("../../models/productSchema");
 const PDFDocument = require("pdfkit");
 const Wallet = require("../../models/walletSchema");
-// const { default: orders } = require("razorpay/dist/types/orders");
 
 const loadMyOrders = async (req, res) => {
   try {
+    let cartCount = 0;
     const userId = req.session.userId;
 
+    if (userId) {
+      const cart = await Cart.findOne({ userId });
+      if (cart && cart.items) {
+        cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+      }
+    }
     const user = await User.findById(userId);
     const search = req.query.search || "";
 
@@ -25,6 +31,7 @@ const loadMyOrders = async (req, res) => {
 
     res.render("myOrders", {
       orders,
+      cartCount,
       user,
       search,
     });
@@ -479,7 +486,41 @@ const cancelPreview = async (req, res) => {
   }
 };
 
+const loadReturnedOrders = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    const orders = await Order.find({
+      userId,
+      "items.status": { $in: ["Returned", "Return Requested"] }
+    })
+      .populate("items.product")
+      .sort({ createdAt: -1 });
+
+    // Filter only returned items inside each order
+    const returnedOrders = orders.map(order => {
+      const returnedItems = order.items.filter(
+        item => item.status === "Returned" || item.status === "Return Requested"
+      );
+
+      return {
+        ...order.toObject(),
+        items: returnedItems
+      };
+    });
+
+    res.render("returnedOrders", {
+      returnedOrders
+    });
+  } catch (error) {
+    console.error("Load Returned Orders Error:", error);
+    res.redirect("/my-orders");
+  }
+};
+
+
 module.exports = {
+  loadReturnedOrders,
   loadMyOrders,
   loadOrderDetails,
   cancelOrder,

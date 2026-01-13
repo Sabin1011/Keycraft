@@ -3,7 +3,7 @@ const User = require("../../models/userSchema");
 const loadUserManage = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = 2;
+    const limit = 5;
     const skip = (page - 1) * limit;
     const search = req.query.search ? req.query.search.trim() : "";
 
