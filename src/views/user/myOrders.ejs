@@ -1,65 +1,67 @@
 <%- include('../partials/user/header') %>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<link rel="stylesheet" href="/css/user/myOrders.css">
+<link rel="stylesheet" href="/css/user/myOrders.css" />
 <section class="orders-section">
-  
   <div class="orders-container">
-    <div style="margin-bottom: 20px; display: flex; gap: 10px;">
-  <form action="/my-orders" method="GET" style="display: flex; gap: 10px; width: 100%;">
-    <input 
-      type="text" 
-      name="search" 
-      placeholder="Search by Order ID..." 
-      value="<%= typeof search !== 'undefined' ? search : '' %>"
-      style="
-        flex: 1;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        font-size: 15px;
-      "
-    />
-
-    <button 
-      type="submit" 
-      class="btn" 
-      style="
-        background: #575757; 
-        padding: 10px 18px;
-        border-radius: 6px;
-        color: #fff;
-        font-weight: 500;
-      "
-    >
-      Search
-    </button>
-
-    <% if (typeof search !== "undefined" && search.trim() !== "") { %>
-      <a 
-        href="/my-orders" 
-        class="btn"
-        style="
-          background: #6d6d6d; 
-          padding: 10px 18px;
-          border-radius: 6px;
-          color: #fff;
-          font-weight: 500;
-          text-decoration: none;
-        "
+    <div style="margin-bottom: 20px; display: flex; gap: 10px">
+      <form
+        action="/my-orders"
+        method="GET"
+        style="display: flex; gap: 10px; width: 100%"
       >
-        Clear
-      </a>
-    <% } %>
-  </form>
-</div>
+        <input
+          type="text"
+          name="search"
+          placeholder="Search by Order ID..."
+          value="<%= typeof search !== 'undefined' ? search : '' %>"
+          style="
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+          "
+        />
+
+        <button
+          type="submit"
+          class="btn"
+          style="
+            background: #575757;
+            padding: 10px 18px;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: 500;
+          "
+        >
+          Search
+        </button>
+
+        <% if (typeof search !== "undefined" && search.trim() !== "") { %>
+        <a
+          href="/my-orders"
+          class="btn"
+          style="
+            background: #6d6d6d;
+            padding: 10px 18px;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: 500;
+            text-decoration: none;
+          "
+        >
+          Clear
+        </a>
+        <% } %>
+      </form>
+    </div>
 
     <h2 style="margin-bottom: 20px; color: #000000">My Orders</h2>
 
     <% if (orders.length === 0) { %>
     <p>You haven't placed any orders yet.</p>
-    <% } %> 
-    <% orders.forEach(order => { %>
+    <% } %> <% orders.forEach(order => { %>
 
     <div class="orders-card">
       <div class="order-info">
@@ -67,126 +69,109 @@
         <div class="order-date">
           Placed on: <%= new Date(order.createdAt).toDateString() %>
         </div>
-      <div class="order-status">
-        Status:
-        <% if (order.paymentStatus === "Failed") { %>
-          Payment Failed
-        <% } else { %>
-          <%= order.status %>
-        <% } %>
-      </div>
+        <div class="order-status">
+          Status: <% if (order.paymentStatus === "Failed") { %> Payment Failed
+          <% } else { %> <%= order.status %> <% } %>
+        </div>
 
         <div class="order-total">
-        <%
-          const paidAmount = order.finalAmount ??
-          (order.totalAmount - (order.discountAmount || 0));
-        %>
-
-
-          <% if (order.paymentStatus === "Failed") { %>
-            <span style="color:#c0392b;">Payment not completed</span>
-          <% } else { %>
-            Total Paid: ₹<%= paidAmount.toFixed(2) %>
-          <% } %>
-
-          <% if (order.discountAmount > 0) { %>
-            <span style="color:green; font-size:12px;">
-              (Saved ₹<%= order.discountAmount %>)
-            </span>
-          <% } %>
-          <% if(order.couponId) { %>
-            <p style="font-size: 14px; color: #666;">
-              Coupon Used: <strong><%= order.couponId.code %></strong>
-            </p>
+          <% const paidAmount = order.finalAmount ?? (order.totalAmount -
+          (order.discountAmount || 0)); %> <% if (order.paymentStatus ===
+          "Failed") { %>
+          <span style="color: #c0392b">Payment not completed</span>
+          <% } else { %> Total Paid: ₹<%= paidAmount.toFixed(2) %> <% } %> <% if
+          (order.discountAmount > 0) { %>
+          <span style="color: green; font-size: 12px">
+            (Saved ₹<%= order.discountAmount %>)
+          </span>
+          <% } %> <% if(order.couponId) { %>
+          <p style="font-size: 14px; color: #666">
+            Coupon Used: <strong><%= order.couponId.code %></strong>
+          </p>
           <% } %>
         </div>
       </div>
-<div class="button-group">
+      <div class="button-group">
+        <% if (order.paymentStatus === "Failed") { %>
 
-  <% if (order.paymentStatus === "Failed") { %>
+        <button
+          class="btn btn-primary"
+          onclick="retryPayment('<%= order._id %>')"
+          style="background: #923119; color: #fff"
+        >
+          Retry Payment
+        </button>
 
-    <button
-      class="btn btn-primary"
-      onclick="retryPayment('<%= order._id %>')"
-      style="background:#923119; color:#fff;"
-    >
-      Retry Payment
-    </button>
+        <% } else { %>
 
-  <% } else { %>
+        <a href="/order/<%= order.orderId %>" class="btn btn-details">
+          View Details
+        </a>
 
+        <% const canCancelOrder = !["Delivered", "Returned", "Cancelled",
+        "Partially Returned", "Return Requested"] .includes(order.status); %> <%
+        if (canCancelOrder) { %>
+        <form
+          id="cancelForm_<%= order.orderId %>"
+          action="/order/<%= order.orderId %>/cancel"
+          method="post"
+          onsubmit="return handleCancel(event, '<%= order.orderId %>')"
+        >
+          <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
+          <button type="submit" class="btn btn-cancel">Cancel</button>
+        </form>
+        <% } %> <% const hasReturnableItem = (order.status === "Delivered" ||
+        order.status === "Partially Returned") && order.items.some(item =>
+        item.status === "Active"); %> <% if (hasReturnableItem) { %>
+        <button
+          class="btn btn-return"
+          onclick="requestReturn('<%= order.orderId %>')"
+        >
+          Return Order
+        </button>
 
-    <a href="/order/<%= order.orderId %>" class="btn btn-details">
-      View Details
-    </a>
+        <% } %>
 
-    <%  
-      const canCancelOrder =
-        !["Delivered", "Returned", "Cancelled", "Partially Returned"]
-          .includes(order.status);
-    %>
+        <a href="/order/<%= order.orderId %>/invoice" class="btn btn-invoice">
+          Invoice
+        </a>
 
-    <% if (canCancelOrder) { %>
-      <form
-        id="cancelForm_<%= order.orderId %>"
-        action="/order/<%= order.orderId %>/cancel"
-        method="post"
-        onsubmit="return handleCancel(event, '<%= order.orderId %>')"
-      >
-        <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
-        <button type="submit" class="btn btn-cancel">Cancel</button>
-      </form>
-    <% } %>
-
-    <%
-      const hasReturnableItem =
-        (order.status === "Delivered" || order.status === "Partially Returned") &&
-        order.items.some(item => item.status === "Active");
-    %>
-
-    <% if (hasReturnableItem) { %>
-      <a href="/orders/<%= order.orderId %>" class="btn btn-return">
-        Return Order
-      </a>
-    <% } %>
-
-    <a href="/order/<%= order.orderId %>/invoice" class="btn btn-invoice">
-      Invoice
-    </a>
-
-  <% } %>
-
-</div>
-
+        <% } %>
+      </div>
     </div>
     <% }) %>
   </div>
 </section>
 
 <script>
-
-function handleReturn(event, orderId) {
-    event.preventDefault();
-
+  function requestReturn(orderId) {
     Swal.fire({
-        title: "Return Order?",
-        text: "Please enter a reason for return",
-        input: "text",
-        inputPlaceholder: "Reason is required",
-        showCancelButton: true,
-        confirmButtonText: "Submit",
-        cancelButtonText: "Cancel",
-        inputValidator: (value) => !value && "Reason required!"
-    }).then(result => {
-        if (result.isConfirmed) {
-            document.getElementById("returnReason_" + orderId).value = result.value;
-            document.getElementById("returnForm_" + orderId).submit();
-        }
+      title: "Return Order?",
+      text: "Please enter reason for return",
+      input: "text",
+      inputPlaceholder: "Reason is required",
+      showCancelButton: true,
+      confirmButtonText: "Submit",
+      inputValidator: (value) => !value && "Reason required",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/order/${orderId}/return`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            reason: result.value,
+            redirectTo: "/my-orders",
+          }),
+        }).then(() => {
+          window.location.reload();
+        });
+      }
     });
-}
-
+  }
   function handleCancel(event, orderId) {
-    event.preventDefault(); 
+    event.preventDefault();
 
     Swal.fire({
       title: "Cancel Order?",
@@ -203,79 +188,92 @@ function handleReturn(event, orderId) {
       },
     }).then((result) => {
       if (result.isConfirmed) {
-
-        document.getElementById("reason_" + orderId).value = result.value;
-
-        document.getElementById("cancelForm_" + orderId).submit();
+        fetch(`/order/${orderId}/cancel`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ reason: result.value }),
+        })
+          .then((response) => {
+            if (response.redirected) {
+              window.location.href = response.url;
+            } else {
+              window.location.href =
+                "/my-orders?success=Order cancelled successfully";
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            window.location.href = "/my-orders?error=Something went wrong";
+          });
       }
     });
 
-    return false; 
+    return false;
   }
 
   async function retryPayment(orderId) {
-  try {
-    Swal.fire({
-      title: "Redirecting to payment...",
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
-
-    const res = await fetch(`/retry-payment/${orderId}`);
-    const data = await res.json();
-
-    if (!data.success) {
-      Swal.fire("Error", "Unable to retry payment", "error");
-      return;
-    }
-
-    openRazorpayRetry(data);
-
-  } catch (err) {
-    console.error(err);
-    Swal.fire("Error", "Something went wrong", "error");
-  }
-}
-function openRazorpayRetry(data) {
-  const options = {
-    key: data.key,
-    amount: data.amount,
-    currency: "INR",
-    name: "KeyCraft",
-    description: "Retry Payment",
-    order_id: data.razorpayOrderId,
-
-    handler: function (response) {
-      fetch("/verify-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...response,
-          orderId: data.orderId
-        })
-      })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          window.location.href = `/order-success?orderId=${data.orderId}`;
-        } else {
-          window.location.href = `/payment-failed?orderId=${data.orderId}`;
-        }
+    try {
+      Swal.fire({
+        title: "Redirecting to payment...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
       });
-    },
 
-    modal: {
-      ondismiss: function () {
-        window.location.href = `/payment-failed?orderId=${data.orderId}`;
+      const res = await fetch(`/retry-payment/${orderId}`);
+      const data = await res.json();
+
+      if (!data.success) {
+        Swal.fire("Error", "Unable to retry payment", "error");
+        return;
       }
-    },
 
-    theme: { color: "#401f75" }
-  };
+      openRazorpayRetry(data);
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Something went wrong", "error");
+    }
+  }
+  function openRazorpayRetry(data) {
+    const options = {
+      key: data.key,
+      amount: data.amount,
+      currency: "INR",
+      name: "KeyCraft",
+      description: "Retry Payment",
+      order_id: data.razorpayOrderId,
 
-  new Razorpay(options).open();
-}
+      handler: function (response) {
+        fetch("/verify-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...response,
+            orderId: data.orderId,
+          }),
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            if (result.success) {
+              window.location.href = `/order-success?orderId=${data.orderId}`;
+            } else {
+              window.location.href = `/payment-failed?orderId=${data.orderId}`;
+            }
+          });
+      },
 
+      modal: {
+        ondismiss: function () {
+          window.location.href = `/payment-failed?orderId=${data.orderId}`;
+        },
+      },
+
+      theme: { color: "#401f75" },
+    };
+
+    new Razorpay(options).open();
+  }
 </script>
 
 <%- include('../partials/user/footer') %>

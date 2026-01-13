@@ -1,44 +1,41 @@
 <%- include('../partials/user/header') %>
-<link rel="stylesheet" href="/css/user/orderSuccess.css">
-
+<link rel="stylesheet" href="/css/user/orderSuccess.css" />
 
 <section class="success-section">
   <div class="success-card">
     <h2>Order Placed Successfully!</h2>
     <p>Your order ID is <strong><%= order._id %></strong></p>
-    <div style="margin-top: 20px; text-align:left;">
-      
+    <div style="margin-top: 20px; text-align: left">
       <p>
         <strong>Subtotal:</strong>
         ₹<%= order.subtotal.toFixed(2) %>
       </p>
 
       <% if (order.offerDiscount > 0) { %>
-        <p>
-          <strong>Offer Discount:</strong>
-          <span style="color: green;">
-            -₹<%= order.offerDiscount.toFixed(2) %>
-          </span>
-        </p>
+      <p>
+        <strong>Offer Discount:</strong>
+        <span style="color: green">
+          -₹<%= order.offerDiscount.toFixed(2) %>
+        </span>
+      </p>
+      <% } %> <% if (order.discountAmount > 0) { %>
+      <p>
+        <strong>Coupon Discount:</strong>
+        <span style="color: green">
+          -₹<%= order.discountAmount.toFixed(2) %>
+        </span>
+      </p>
       <% } %>
 
-      <% if (order.discountAmount > 0) { %>
-        <p>
-          <strong>Coupon Discount:</strong>
-          <span style="color: green;">
-            -₹<%= order.discountAmount.toFixed(2) %>
-          </span>
-        </p>
-      <% } %>
-
-      <p style="font-size: 18px;">
+      <p style="font-size: 18px">
         <strong>Total Paid:</strong>
         ₹<%= order.finalAmount.toFixed(2) %>
       </p>
-
     </div>
-        
-    <a href="/order/<%= order._id %>" class="btn btn-primary">View Order Details</a>
+
+    <a href="/order/<%= order._id %>" class="btn btn-primary"
+      >View Order Details</a
+    >
     <a href="/" class="btn btn-secondary">Continue Shopping</a>
   </div>
 </section>

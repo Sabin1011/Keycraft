@@ -13,9 +13,8 @@
       <div class="card">
         <div class="card-body">
 
-          <form action="/admin/offer/edit" method="POST">
+          <form id="offerForm">
 
-            <!-- IMPORTANT -->
             <input type="hidden" name="offerId" value="<%= offer._id %>">
 
             <label class="form-label">Offer Title</label>
@@ -132,7 +131,7 @@
               required
             >
 
-            <button class="btn btn-black w-100 py-2">
+            <button type="button" onclick="updateOffer()" class="btn btn-black w-100 py-2">
               Update Offer
             </button>
 
@@ -145,6 +144,11 @@
   </div>
 
 <%- include('../partials/admin/footer') %>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
   const offerType = document.getElementById("offerType");
   const productSelect = document.getElementById("productSelect");
@@ -194,6 +198,43 @@
   document.querySelector("select[name='categoryIds']")?.addEventListener("change",()=>{
     updatePreview("categoryIds","categoryPreview")
   })
+
+
+  function updateOffer() {
+const form = document.getElementById("offerForm");
+const formData = new FormData(form);
+
+const data = {};
+formData.forEach((value, key) => {
+  if (data[key]) {
+    if (!Array.isArray(data[key])) {
+      data[key] = [data[key]];
+    }
+    data[key].push(value);
+  } else {
+    data[key] = value;
+  }
+});
+
+  fetch("/admin/offer/<%= offer._id %>", {
+    method: "PATCH",
+    credentials: "same-origin", 
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      Swal.fire("Updated", "Offer updated successfully", "success")
+        .then(() => window.location.href="/admin/offerManage");
+    }
+    else {
+      Swal.fire("Error", "Failed to update offer","error")    
+    }
+  });
+}
 </script>
 
 </body>

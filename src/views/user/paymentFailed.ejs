@@ -1,8 +1,7 @@
 <%- include('../partials/user/header') %>
-<link rel="stylesheet" href="/css/user/paymentFailed.css">
+<link rel="stylesheet" href="/css/user/paymentFailed.css" />
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 
 <section class="failure-container">
   <div class="failure-card">
@@ -10,93 +9,83 @@
 
     <h2>Payment Failed</h2>
     <p>
-      Your payment could not be completed or was cancelled.<br>
+      Your payment could not be completed or was cancelled.<br />
       No amount has been deducted.
     </p>
 
-    <button
-  class="btn btn-retry"
-  onclick="retryPayment('<%= order._id %>')"
->
-  Retry Payment
-</button>
+    <button class="btn btn-retry" onclick="retryPayment('<%= order._id %>')">
+      Retry Payment
+    </button>
 
-
-    <a href="/my-orders" class="btn btn-orders">
-      Go to My Orders
-    </a>
-
+    <a href="/my-orders" class="btn btn-orders"> Go to My Orders </a>
   </div>
 </section>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
-async function retryPayment(orderId) {
-  try {
-    Swal.fire({
-      title: "Redirecting to payment...",
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
-
-    const res = await fetch(`/retry-payment/${orderId}`);
-    const data = await res.json();
-
-    if (!data.success) {
-      Swal.fire("Error", "Unable to retry payment", "error");
-      return;
-    }
-
-    openRazorpayRetry(data);
-
-  } catch (err) {
-    console.error("Retry payment error:", err);
-    Swal.fire("Error", "Something went wrong", "error");
-  }
-}
-
-function openRazorpayRetry(data) {
-  const options = {
-    key: data.key,
-    amount: data.amount,
-    currency: "INR",
-    name: "KeyCraft",
-    description: "Retry Payment",
-    order_id: data.razorpayOrderId,
-
-    handler: function (response) {
-      fetch("/verify-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...response,
-          orderId: data.orderId
-        })
-      })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          window.location.href = `/order-success?orderId=${data.orderId}`;
-        } else {
-          window.location.href = `/payment-failed?orderId=${data.orderId}`;
-        }
+  async function retryPayment(orderId) {
+    try {
+      Swal.fire({
+        title: "Redirecting to payment...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
       });
-    },
 
-    modal: {
-      ondismiss: function () {
-        window.location.href = `/payment-failed?orderId=${data.orderId}`;
+      const res = await fetch(`/retry-payment/${orderId}`);
+      const data = await res.json();
+
+      if (!data.success) {
+        Swal.fire("Error", "Unable to retry payment", "error");
+        return;
       }
-    },
 
-    theme: { color: "#401f75" }
-  };
+      openRazorpayRetry(data);
+    } catch (err) {
+      console.error("Retry payment error:", err);
+      Swal.fire("Error", "Something went wrong", "error");
+    }
+  }
 
-  new Razorpay(options).open();
-}
+  function openRazorpayRetry(data) {
+    const options = {
+      key: data.key,
+      amount: data.amount,
+      currency: "INR",
+      name: "KeyCraft",
+      description: "Retry Payment",
+      order_id: data.razorpayOrderId,
 
+      handler: function (response) {
+        fetch("/verify-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...response,
+            orderId: data.orderId,
+          }),
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            if (result.success) {
+              window.location.href = `/order-success?orderId=${data.orderId}`;
+            } else {
+              window.location.href = `/payment-failed?orderId=${data.orderId}`;
+            }
+          });
+      },
+
+      modal: {
+        ondismiss: function () {
+          window.location.href = `/payment-failed?orderId=${data.orderId}`;
+        },
+      },
+
+      theme: { color: "#401f75" },
+    };
+
+    new Razorpay(options).open();
+  }
 </script>
-
 
 <%- include('../partials/user/footer') %>

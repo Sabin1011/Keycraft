@@ -70,6 +70,40 @@
 
 
       <% orders.forEach(order => { %>
+        <% 
+  const returnItems = order.items.filter(
+    item => item.status === "Return Requested"
+  );
+  const totalItems = order.items.length;
+%>
+
+
+<% if (returnItems.length > 0) { %>
+<tr>
+  <td colspan="7">
+    <div style="
+      background:#fff3cd;
+      border:1px solid #ffeeba;
+      padding:12px 16px;
+      border-radius:6px;
+      margin-bottom:10px;
+    ">
+      <strong style="color:#856404;">
+        🔄 Return Requested
+      </strong>
+
+      <div style="margin-top:6px; color:#856404; font-size:14px;">
+        <% if (returnItems.length === totalItems) { %>
+          Entire order has been requested for return
+        <% } else { %>
+          <%= returnItems.length %> item(s) requested for return
+        <% } %>
+      </div>
+    </div>
+  </td>
+</tr>
+<% } %>
+
         <tr>
           <td><%= order.orderId %></td>
 
@@ -82,12 +116,12 @@
           <td>₹ <%= order.finalAmount %></td>
 
           <td>
-            <form action="/admin/orders/update-status/<%= order.orderId %>" method="POST">
-              <select name="status" id="" class="status-select">
+            
+              <select name="status" id="status-<%= order.orderId %>" class="status-select">
                 <%statusOptions.forEach(s=>{ %>
                   <option value="<%=s %>" <%=order.status === s? "selected" : "" %> > <%=s %> </option>
                 <%});%>
-              </select>
+              </select>       
           </td>
 
           <td>
@@ -96,8 +130,8 @@
 
 
           <td>
-              <button type="submit" class="btn-update">Update</button>
-            </form>
+              <button type="button" class="btn-update" onclick="updateOrderStatus('<%= order.orderId %>')">Update</button>
+            
           </td>
 
           <td>
@@ -121,5 +155,60 @@
     </tbody>
   </table>
 </div>
+
+<script>
+function acceptReturn(orderId, itemId) {
+  Swal.fire({
+    title: "Accept Return?",
+    text: "This will refund the amount and restock inventory.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes, Accept",
+  }).then(result => {
+    if (result.isConfirmed) {
+      fetch(`/order/${orderId}/accept-return/${itemId}`, {
+        method: "PATCH"
+      }).then(() => location.reload());
+    }
+  });
+}
+
+function rejectReturn(orderId, itemId) {
+  Swal.fire({
+    title: "Reject Return?",
+    text: "This will mark item as Delivered again.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes, Reject",
+  }).then(result => {
+    if (result.isConfirmed) {
+      fetch(`/order/${orderId}/reject-return/${itemId}`, {
+        method: "PATCH"
+      }).then(() => location.reload());
+    }
+  });
+}
+
+function updateOrderStatus(orderId) {
+  const status = document.getElementById("status-" + orderId).value;
+
+  fetch(`/admin/orders/${orderId}/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ status })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      Swal.fire("Updated!", "Order status updated", "success")
+        .then(() => location.reload());
+    } else {
+      Swal.fire("Error", "Failed to update status", "error");
+    }
+  });
+}
+</script>
 
 <%- include('../partials/admin/footer') %>

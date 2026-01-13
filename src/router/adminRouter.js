@@ -27,8 +27,8 @@ router.get(
   categoryController.loadEditCategory
 );
 
-router.post(
-  "/updateCategory/:id",
+router.patch(
+  "/category/:id",
   auth.adminAuth,
   categoryController.updateCategory
 );
@@ -47,7 +47,6 @@ router.get("/adminProduct", auth.adminAuth, productController.loadAdminProduct);
 router.get(
   "/adminAddProduct",
   auth.adminAuth,
-
   productController.loadAddProduct
 );
 
@@ -77,18 +76,20 @@ router.patch(
 );
 
 router.get("/orders", auth.adminAuth, adminOrderController.loadOrders);
-router.post(
-  "/orders/update-status/:id",
+
+router.patch(
+  "/orders/:orderId/status",
   auth.adminAuth,
   adminOrderController.updateOrderStatus
 );
 
-router.post(
+router.patch(
   "/order/:orderId/accept-return/:itemId",
   auth.adminAuth,
   adminOrderController.acceptReturn
 );
-router.post(
+
+router.patch(
   "/order/:orderId/reject-return/:itemId",
   auth.adminAuth,
   adminOrderController.rejectReturn
@@ -109,7 +110,12 @@ router.get("/offerManage", auth.adminAuth, OfferController.loadOfferManage);
 router.get("/offer/add", auth.adminAuth, OfferController.loadAddOfferPage);
 router.post("/offer/add", auth.adminAuth, OfferController.addOffer);
 router.get("/offer/edit/:id", auth.adminAuth, OfferController.loadEditOffer);
-router.post("/offer/edit", auth.adminAuth, OfferController.updateOffer);
+router.patch(
+  "/offer/:offerId",
+  auth.adminAuth,
+  OfferController.updateOffer
+);
+
 router.patch(
   "/offer/toggle/:id",
   auth.adminAuth,

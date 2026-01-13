@@ -12,15 +12,12 @@
     <p><strong>Placed On:</strong> <%= order.createdAt.toLocaleString() %></p>
     <p><strong>Total Amount:</strong> ₹ <%= order.finalAmount %></p>
   </div>
-
-  <!-- User Info -->
   <div class="box">
     <h4>User Details</h4>
     <p><strong>Name:</strong> <%= order.userId?.username %></p>
     <p><strong>Email:</strong> <%= order.userId?.email %></p>
   </div>
 
-  <!-- Address -->
   <div class="box">
     <h4>Delivery Address</h4>
     <p>
@@ -31,11 +28,8 @@
     </p>
   </div>
 
-  <!-- Items -->
   <div class="box">
     <h4>Ordered Items</h4>
-
-
 
     <% const allReturned = order.items.every(i => i.status === "Returned"); %>
 
@@ -70,29 +64,14 @@
 
           <td>
             <% if(item.status === "Return Requested"){ %>
-            <form
-              method="POST"
-              action="/admin/order/<%= order.orderId %>/accept-return/<%= item._id %>"
-              style="display: inline"
+            <button
+              style="background:#28a745; color:#fff; padding:5px 10px; border-radius:5px;"
+              onclick="acceptReturn('<%= order.orderId %>', '<%= item._id %>')"
             >
-              <button
-                style="
-                  background: #28a745;
-                  color: #fff;
-                  border: none;
-                  padding: 5px 10px;
-                  border-radius: 5px;
-                "
-              >
-                Accept
-              </button>
-            </form>
+              Accept
+            </button>
 
-            <form
-              method="POST"
-              action="/admin/order/<%= order.orderId %>/reject-return/<%= item._id %>"
-              style="display: inline"
-            >
+
               <button
                 style="
                   background: #dc3545;
@@ -101,10 +80,11 @@
                   padding: 5px 10px;
                   border-radius: 5px;
                 "
+                onclick="rejectReturn('<%= order.orderId %>','<%=item.id %>')"
               >
                 Reject
               </button>
-            </form>
+            
 
             <% } else if(item.status === "Returned") { %>
             <span style="color: green; font-weight: 600">Returned</span>
@@ -133,3 +113,30 @@
 </div>
 
 <%- include('../partials/admin/footer') %>
+
+<script>
+
+  function acceptReturn(orderId, itemId) {
+    fetch(`/admin/order/${orderId}/accept-return/${itemId}`,{
+      method: 'PATCH'
+    })
+    .then(res=>res.json())
+    .then(data => {
+      if(data.success){
+           location.reload();
+      }
+    });
+  } 
+
+  function rejectReturn(orderId, itemId) {
+    fetch(`/admin/order/${orderId}/reject-return/${itemId}`,{
+      method: 'PATCH'
+    })
+    .then(res=>res.json())
+    .then(data => {
+      if(data.success){
+        location.reload();
+      }
+    })
+  }
+</script>
