@@ -125,7 +125,8 @@ const loadEditCategory = async (req, res) => {
   }
 };
 
-// UPDATE CATEGORY
+
+// Update Category: to edit category or description.
 
 const updateCategory = async (req, res) => {
   try {
@@ -134,9 +135,11 @@ const updateCategory = async (req, res) => {
 
     await Category.updateOne({ _id: categoryId }, { name, description });
 
-    res.redirect("/admin/category");
+    res.json({success:true});
+
   } catch (error) {
     console.log("Error updating category:", error);
+    res.status(500).json({ success: false });
   }
 };
 

@@ -55,7 +55,7 @@ const updateStatus = async (req, res) => {
 
 const updateOrderStatus = async (req, res) => {
   try {
-    const orderId = req.params.id;
+    const orderId = req.params.orderId;
     const { status } = req.body;
 
     const updatedOrder = await Order.findOneAndUpdate(
@@ -68,7 +68,7 @@ const updateOrderStatus = async (req, res) => {
       console.log("Order not found for orderId : ", orderId);
     }
 
-    res.redirect("/admin/orders");
+    res.json({ success: true });
   } catch (error) {
     console.log("Admin status update error:", error);
     res.redirect("/admin/orders");
@@ -101,6 +101,7 @@ const acceptReturn = async (req, res) => {
         (sum,v)=>sum +v.quantity,
         0
       )
+
       await product.save();
     }
 
@@ -137,25 +138,28 @@ const acceptReturn = async (req, res) => {
       await wallet.save();
     }
 
-    const allReturned = order.items.every(
-      i => i.status === "Returned"
-    );
+    const statuses  = order.items.map(i => i.status);
 
-    if(allReturned) {
+    if(statuses.every(s=> s==="Returned")) {
       order.status = "Returned";
       order.orderStatus = "Refunded";
-    
-    } else{
-      order.status = "Partially Returned"
     }
+
+    else if(statuses.some(s=>s==="Returned")) {
+      order.status = "Partially Returned";
+      order.orderStatus = "NotRefunded";
+    }
+
     await order.save(); 
 
-    return res.redirect(`/admin/orders/${orderId}`);
+    return res.json({ success: true });
+
   } catch (error) {
     console.log("Accept return error:", error);
-    return res.redirect("/admin/orders/");
+   return res.json({ success: true });
+
   }
-};
+};  
 
 const rejectReturn = async (req, res) => {
   try {
@@ -168,13 +172,15 @@ const rejectReturn = async (req, res) => {
     const item = order.items.id(itemId);
     if(!item) return res.redirect(`/admin/orders/${orderId}`);
 
-    item.status = "Delivered";
+    item.status = "Active";
+    order.status = "Delivered";
     await order.save()  
 
-    return res.redirect(`/admin/orders/${orderId}`);
+    res.json({ success: true });
   } catch (error) {
     console.log("Reject return error:", error);
-    res.redirect("/admin/orders/");
+    return res.status(400).json({ success: false });
+
   }
 };
 

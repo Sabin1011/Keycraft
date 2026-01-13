@@ -131,10 +131,10 @@ const loadEditOffer = async (req, res) => {
   }
 };
 
-const updateOffer = async (req, res) => {
+const   updateOffer = async (req, res) => {
   try {
+    const offerId = req.params.offerId;
     const {
-      offerId,
       title,
       description,
       offerType,
@@ -185,10 +185,11 @@ const updateOffer = async (req, res) => {
       { runValidators:true}
     );
 
-    res.redirect("/admin/offerManage");
+    res.json({success:true});
+
   } catch (error) {
     console.error("Update Offer Error:", error);
-    res.redirect("/admin/offerManage");
+    res.status(500).json({ success: false });
   }
 };
 

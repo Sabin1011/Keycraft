@@ -21,7 +21,9 @@
       <div class="col-lg-8 col-xl-6 mx-auto">
         <div class="card">
           <div class="card-body">
-            <form id="EditCategoryForm" method="POST" action="/admin/updateCategory/<%= category._id %>">
+
+
+            <form id="EditCategoryForm">
               
               <div class="mb-4">
                 <label for="categoryName" class="form-label">
@@ -58,7 +60,7 @@
                 <button type="button" class="cancel-btn" onclick="goBack()">
                   Cancel
                 </button>
-                <button type="submit" class="submit-btn">
+                <button type="button" class="submit-btn" onclick="updateCategory()">
                   <i class='bx bx-edit'></i> Update Category
                 </button>
               </div>
@@ -78,6 +80,33 @@
   <script>
     function goBack() {
       window.location.href = '/admin/category';
+    }
+
+    function updateCategory(){
+      const name = document.getElementById("categoryName").value;
+      const description = document.getElementById("categoryDescription").value;
+
+      fetch("/admin/category/<%= category._id %>",{
+        method: "PATCH",
+        headers: {
+          "content-type":"application/json"
+        },
+        body: JSON.stringify({name, description})
+      })
+
+      .then(res=>res.json())
+      .then(data =>{
+        if(data.success) {
+          Swal.fire("Updated!", "Category updated successfully.", "success")
+          .then(()=>{
+            window.location.href = "/admin/category";
+          });
+
+        } else {
+          Swal.fire("Error", "Update failed", "error");
+        }
+        
+      })
     }
 
   </script>

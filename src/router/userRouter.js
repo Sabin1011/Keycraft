@@ -117,7 +117,7 @@ router.post(
   auth.isLoggedIn,
   wishlistController.addToWishlist
 );
-router.post(
+router.delete(
   "/wishlist/remove/:id",
   auth.isLoggedIn,
   wishlistController.removeFromWishlist
@@ -183,22 +183,23 @@ router.post(
   checkoutController.verifyRazorpayPayment
 );
 
-router.post(
+router.patch(
   "/order/:orderId/cancel",
   auth.isLoggedIn,
   orderController.cancelOrder
 );
-router.post(
+router.patch(
   "/order/:orderId/return",
   auth.isLoggedIn,
   orderController.returnOrder
 );
-router.post(
+router.patch(
   "/order/:orderId/cancel-item/:itemId",
   auth.isLoggedIn,
   orderController.cancelOrderItem
 );
-router.post(
+
+router.patch(
   "/order/:orderId/return-item/:itemId",
   auth.isLoggedIn,
   orderController.returnOrderItem

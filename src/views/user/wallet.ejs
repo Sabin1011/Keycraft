@@ -1,49 +1,45 @@
 <%- include('../partials/user/header') %>
 
-<link rel="stylesheet" href="/css/user/wallet.css">
+<link rel="stylesheet" href="/css/user/wallet.css" />
 <div class="wallet-wrapper">
   <div class="wallet-card">
-
     <div class="wallet-header">
       <div class="wallet-title">My Wallet</div>
     </div>
 
-    <p style="color:#666; font-size:14px; margin-bottom:20px;">
-      Your wallet balance contains store credits issued for cancelled or returned orders.
-      Wallet balance can be used for future purchases.
+    <p style="color: #666; font-size: 14px; margin-bottom: 20px">
+      Your wallet balance contains store credits issued for cancelled or
+      returned orders. Wallet balance can be used for future purchases.
     </p>
-    <!-- Wallet Balance -->
     <div class="wallet-balance">
       <span>Available Balance</span>
       <h2>₹<%= wallet.balance.toFixed(2) %></h2>
     </div>
 
-    <!-- Transactions -->
     <div class="tx-title">Transaction History</div>
 
     <% if (wallet.transactions.length === 0) { %>
-      <div class="empty-wallet">
-        <i>💼</i>
-        <p>No wallet transactions yet</p>
+    <div class="empty-wallet">
+      <i>💼</i>
+      <p>No wallet transactions yet</p>
+    </div>
+    <% } else { %> <% wallet.transactions.slice().reverse().forEach(tx => { %>
+    <div class="transaction">
+      <div class="tx-left">
+        <div class="tx-reason"><%= tx.reason %></div>
+        <div class="tx-date"><%= new Date(tx.createdAt).toDateString() %></div>
+        <span
+          class="tx-badge <%= tx.type === 'credit' ? 'badge-credit' : 'badge-debit' %>"
+        >
+          <%= tx.type === 'credit' ? 'CREDIT' : 'DEBIT' %>
+        </span>
       </div>
-    <% } else { %>
-      <% wallet.transactions.slice().reverse().forEach(tx => { %>
-        <div class="transaction">
-          <div class="tx-left">
-            <div class="tx-reason"><%= tx.reason %></div>
-            <div class="tx-date"><%= new Date(tx.createdAt).toDateString() %></div>
-            <span class="tx-badge <%= tx.type === 'credit' ? 'badge-credit' : 'badge-debit' %>">
-              <%= tx.type === 'credit' ? 'CREDIT' : 'DEBIT' %>
-            </span>
-          </div>
 
-          <div class="tx-amount <%= tx.type === 'credit' ? 'credit' : 'debit' %>">
-            <%= tx.type === 'credit' ? '+' : '-' %>₹<%= tx.amount %>
-          </div>
-        </div>
-      <% }) %>
-    <% } %>
-
+      <div class="tx-amount <%= tx.type === 'credit' ? 'credit' : 'debit' %>">
+        <%= tx.type === 'credit' ? '+' : '-' %>₹<%= tx.amount %>
+      </div>
+    </div>
+    <% }) %> <% } %>
   </div>
 </div>
 

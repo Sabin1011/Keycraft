@@ -11,7 +11,6 @@ const sendEmail = require("../../utils/sendEmail");
 
 const bcrypt = require("bcrypt");
 
-// HOME
 
 const loadHome = async (req, res) => {
   try {

@@ -35,49 +35,38 @@
         <% } %>
       </div>
 
-      <%
-        const canCancelItem =
-          item.status === "Active" &&
-          !["Delivered", "Partially Returned", "Returned"].includes(order.status);
-      %>
+      <% const canCancelItem = item.status === "Active" && !["Delivered",
+      "Partially Returned", "Returned"].includes(order.status); %> <% if
+      (canCancelItem) { %>
 
-      <% if (canCancelItem) { %>
-        <form
-          id="cancelForm_<%= item._id %>"
-          action="/order/<%= order.orderId %>/cancel-item/<%= item._id %>"
-          method="POST"
-          onsubmit="return handleCancel(event, '<%= order.orderId %>', '<%= item._id %>')"
-        >
-          <input type="hidden" name="redirectTo" value="<%= currentUrl %>" />
-          <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
-          <button class="btn btn-cancel">Cancel Item</button>
-        </form>
-      <% } %>
+      <input type="hidden" name="redirectTo" value="<%= currentUrl %>" />
+      <input type="hidden" id="reason_<%= order.orderId %>" name="reason" />
+      <button
+        class="btn btn-cancel"
+        style="height: 40px"
+        onclick="cancelItem('<%= order.orderId %>', '<%= item._id %>')"
+      >
+        Cancel Item
+      </button>
 
+      <% } %> <% const canReturnItem = (order.status === "Delivered" ||
+      order.status === "Partially Returned") && item.status === "Active"; %> <%
+      if (canReturnItem) { %>
 
+      <input type="hidden" name="redirectTo" value="<%= currentUrl %>" />
+      <button
+        class="btn btn-return"
+        onclick="returnItem('<%=order.orderId %>','<%= item._id %>')"
+        style="height: 40px"
+      >
+        Return Item
+      </button>
 
-      <% 
-        const canReturnItem =
-          (order.status === "Delivered" || order.status === "Partially Returned") &&
-          item.status === "Active";
-      %>
-
-      <% if (canReturnItem) { %>
-        <form
-          action="/order/<%= order.orderId %>/return-item/<%= item._id %>"
-          method="POST"
-        >
-          <input type="hidden" name="redirectTo" value="<%= currentUrl %>" />
-          <button class="btn btn-return">Return Item</button>
-        </form>
-      <% } %>
-
-
-      <% if (item.status === "Return Requested") { %>
-        <span style="color:#856404;font-weight:600;">Return Requested</span>
+      <% } %> <% if (item.status === "Return Requested") { %>
+      <span style="color: #856404; font-weight: 600">Return Requested</span>
       <% } else if (item.status === "Returned") { %>
-        <span style="color:#2e7d32;font-weight:600;">Returned</span>
-      <% } %> 
+      <span style="color: #2e7d32; font-weight: 600">Returned</span>
+      <% } %>
     </div>
 
     <% }) %>
@@ -146,70 +135,71 @@
 </div>
 
 <script>
-  function handleReturn(event, orderId) {
-    event.preventDefault();
-
+  function returnItem(orderId, itemId) {
     Swal.fire({
-      title: "Return Order?",
-      text: "Please enter a reason for return",
-      input: "text",
-      inputPlaceholder: "Reason is required",
+      title: "Return Item?",
+      text: "Are you sure you want to return this item?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Submit",
-      cancelButtonText: "Cancel",
-      inputValidator: (value) => !value && "Reason required!",
+      confirmButtonText: "Yes, return",
     }).then((result) => {
       if (result.isConfirmed) {
-        document.getElementById("returnReason_" + orderId).value = result.value;
-        document.getElementById("returnForm_" + orderId).submit();
+        fetch(`/order/${orderId}/return-item/${itemId}`, {
+          method: "PATCH",
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire(
+                "Requested",
+                "Return request submitted",
+                "success"
+              ).then(() => location.reload());
+            }
+          });
       }
     });
   }
 
-  async function handleCancel(event, orderId, itemId) {
-    event.preventDefault();
+  async function cancelItem(orderId, itemId) {
+    const previewRes = await fetch(
+      `/order/${orderId}/cancel-preview/${itemId}`
+    );
+    const preview = await previewRes.json();
 
-    const reasonPopup = await Swal.fire({
-      title: "Cancel Item?",
-      text: "Please provide a reason",
-      input: "text",
-      inputPlaceholder: "Reason is required",
-      showCancelButton: true,
-      confirmButtonText: "Next",
-      cancelButtonText: "Close",
-      inputValidator: (value) => !value && "Reason is required!",
-    });
+    let message = "This will refund and update your order.";
 
-    if (!reasonPopup.isConfirmed) return;
-
-    document.getElementById("reason_" + orderId).value = reasonPopup.value;
-
-    const preview = await fetch(`/order/${orderId}/cancel-preview/${itemId}`);
-    const data = await preview.json();
-
-    if (!data.couponWillBreak) {
-      document.getElementById("cancelForm_" + itemId).submit();
-      return false;
+    if (preview.couponWillBreak) {
+      message = `
+      Cancelling this item will remove your coupon.<br><br>
+      <b style="color:red">New Total: ₹${preview.newTotal}</b>
+    `;
     }
 
-    const confirmLoss = await Swal.fire({
-      title: "Coupon Will Be Removed!",
-      html: `
-      Cancelling this item reduces the total below minimum purchase.<br><br>
-      <strong>New Total: ₹${data.newTotal}</strong>
-      <p style="color:red; margin-top:10px;">Coupon will no longer apply.</p>
-    `,
+    const confirm = await Swal.fire({
+      title: "Cancel Item?",
+      html: message,
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Proceed",
-      cancelButtonText: "Keep Item",
+      cancelButtonText: "Keep item",
     });
 
-    if (confirmLoss.isConfirmed) {
-      document.getElementById("cancelForm_" + itemId).submit();
-    }
+    if (!confirm.isConfirmed) return;
 
-    return false;
+    const res = await fetch(`/order/${orderId}/cancel-item/${itemId}`, {
+      method: "PATCH",
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      Swal.fire("Cancelled", "Item cancelled successfully", "success").then(
+        () => location.reload()
+      );
+    } else {
+      Swal.fire("Error", "Cancel failed", "error");
+    }
   }
 </script>
 

@@ -494,8 +494,8 @@ const selectAddress = async (req, res) => {
 
     return res.json({
       success: true,
-      message:"Address selected Successfully"
-    })
+      message: "Address selected Successfully",
+    });
   } catch (error) {
     console.error("Error selecting address:", error);
     return res.status(500).json({

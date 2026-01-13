@@ -154,7 +154,6 @@
         const data = await res.json();
 
         if (data.success) {
-            // Remove the product card from DOM
             const card = button.closest('.product-card');
             if (card) card.remove();
         } else {
