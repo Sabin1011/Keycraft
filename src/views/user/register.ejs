@@ -18,13 +18,11 @@
             <h1 class="register-title">create account</h1>
 
             
-            <!-- General Server Error (only for unexpected crashes) -->
             <div class="error-message <%= generalError ? 'show' : '' %>" id="errorMessage">
                 <i class="fa fa-exclamation-circle"></i> <%= generalError || '' %>
             </div>
 
             <form id="registerForm" method="post" novalidate>
-                <!-- Username -->
                 <div class="input-wrapper">
                     <label>Username</label>
                     <input 
@@ -40,7 +38,6 @@
                     <% } %>
                 </div>
 
-                <!-- Email -->
                 <div class="input-wrapper">
                     <label>Email</label>
                     <input 
@@ -56,7 +53,6 @@
                     <% } %>
                 </div>
 
-                <!-- Phone -->
                 <div class="input-wrapper">
                     <label>Phone</label>
                     <input 
@@ -72,7 +68,6 @@
                     <% } %>
                 </div>
 
-                <!-- Password -->
                 <div class="input-wrapper password-wrapper">
                     <label>Password</label>
                     <input 
@@ -91,7 +86,6 @@
                     <% } %>
                 </div>
 
-                <!-- Confirm Password -->
                 <div class="input-wrapper password-wrapper">
                     <label>Confirm Password</label>
                     <input 
@@ -160,19 +154,16 @@
     <script>
         document.getElementById("registerForm").addEventListener("submit", (event) => {
 
-            // reset all field errors
             document.querySelectorAll(".input-error").forEach(e=>e.textContent = "");
 
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
             const confirmPassword = document.getElementById("confirmPassword").value;
 
-            // email regex
             if (!email || !password) {
                 alert("Please fill all fields");
             };
 
-            // minimum password length check
             if(password.length<6){
                 alert("Password must be of atleast 6 characters");
             };
@@ -193,7 +184,6 @@
         }
         
         function handleGoogleSignIn() {
-            // Simulate Google OAuth
             const submitBtn = event.target;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner" style="border-color: rgba(0,0,0,0.3); border-top-color: #222;"></span> connecting...';
@@ -203,7 +193,6 @@
             }, 1000);
         }
 
-        // Auto-focus first input
         window.addEventListener('load', () => {
             document.getElementById('name').focus();
         });

@@ -6,6 +6,10 @@ const getDateRange = (query) => {
   const now = new Date();
   let startDate, endDate;
 
+
+  if (startDate > now) startDate = now;
+  if (endDate > now) endDate = now;
+  
   switch (query.reportType) {
     case "daily":
       startDate = new Date(now.setHours(0, 0, 0, 0));

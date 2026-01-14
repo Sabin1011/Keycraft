@@ -1,10 +1,4 @@
 const User = require("../../models/userSchema");
-const Product = require("../../models/productSchema");
-const Category = require("../../models/categorySchema");
-const mongoose = require("mongoose");
-const path = require("path");
-const fs = require("fs");
-const sendEmail = require("../../utils/sendEmail");
 const Cart = require("../../models/cartModel");
 
 const bcrypt = require("bcrypt");
@@ -274,8 +268,6 @@ const saveAddress = async (req, res) => {
       redirectUrl: returnUrl,
     });
 
-    req.session.successMessage = "Address added successfully";
-    return res.redirect(returnUrl);
   } catch (error) {
     console.error("Error saving address:", error);
     req.session.errorMessage = "Failed to save address";
@@ -460,8 +452,6 @@ const setDefaultAddress = async (req, res) => {
   try {
     const addressId = req.params.id;
     const userId = req.session.userId || req.user._id;
-    const returnUrl = req.body.returnUrl || "/profile";
-
     const user = await User.findById(userId);
 
     if (!user) {

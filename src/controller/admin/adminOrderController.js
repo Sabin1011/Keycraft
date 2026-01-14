@@ -65,13 +65,13 @@ const updateOrderStatus = async (req, res) => {
     );
 
     if (!updatedOrder) {
-      console.log("Order not found for orderId : ", orderId);
+      return res.json({ success: false, message: "Order not found" });
     }
 
-    res.json({ success: true });
+    res.json({ success: true, message: "Order status updated" });
   } catch (error) {
-    console.log("Admin status update error:", error);
-    res.redirect("/admin/orders");
+    console.error("Admin status update error:", error);
+    res.json({ success: false, message: "Server error" });
   }
 };
 

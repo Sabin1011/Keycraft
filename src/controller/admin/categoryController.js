@@ -1,7 +1,5 @@
 const Category = require("../../models/categorySchema");
 
-// LOAD CATEGORY PAGE
-
 const loadCategory = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -20,7 +18,6 @@ const loadCategory = async (req, res) => {
     }
 
     const totalCategories = await Category.countDocuments(searchQuery);
-
 
     const categories = await Category.find(searchQuery)
       .sort({ createdAt: -1 })
@@ -53,27 +50,23 @@ const loadCategory = async (req, res) => {
   }
 };
 
-// LOAD ADD CATEGORY PAGE
-
 const loadAddCategory = async (req, res) => {
   try {
-    res.render("addCategory",{
+    res.render("addCategory", {
       activePage: "category",
-      errors: {},    
-      name: '',         
-      description: ''
+      errors: {},
+      name: "",
+      description: "",
     });
   } catch (error) {
     console.log("Error loading add category page:", error);
   }
 };
 
-// ADD CATEGORY
-
 const addCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
-    const errors ={};
+    const errors = {};
 
     if (!name || name.trim() === "") {
       errors.name = "Category name is required.";
@@ -83,11 +76,14 @@ const addCategory = async (req, res) => {
 
     if (!description || description.trim() === "") {
       errors.description = "Category description is required.";
-    } else if (description.trim().length < 10 || description.trim().length > 200) {
+    } else if (
+      description.trim().length < 10 ||
+      description.trim().length > 200
+    ) {
       errors.description = "Description must be between 10 and 200 characters.";
     }
 
-   const exist = await Category.findOne({
+    const exist = await Category.findOne({
       name: { $regex: new RegExp(`^${name.trim()}$`, "i") },
     });
 
@@ -97,14 +93,17 @@ const addCategory = async (req, res) => {
 
     if (Object.keys(errors).length > 0) {
       return res.render("addCategory", {
+        activePage: "category",
         errors,
         name,
         description,
       });
     }
 
-
-    const category = new Category({ name: name.trim(), description: description.trim() });
+    const category = new Category({
+      name: name.trim(),
+      description: description.trim(),
+    });
     await category.save();
 
     res.redirect("/admin/category");
@@ -113,20 +112,15 @@ const addCategory = async (req, res) => {
   }
 };
 
-// LOAD EDIT CATEGORY PAGE
-
 const loadEditCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
     const category = await Category.findById(categoryId);
-    res.render("editCategory", { category,activePage: "category", });
+    res.render("editCategory", { category, activePage: "category" });
   } catch (error) {
     console.log("Error loading edit category page:", error);
   }
 };
-
-
-// Update Category: to edit category or description.
 
 const updateCategory = async (req, res) => {
   try {
@@ -135,15 +129,12 @@ const updateCategory = async (req, res) => {
 
     await Category.updateOne({ _id: categoryId }, { name, description });
 
-    res.json({success:true});
-
+    res.json({ success: true });
   } catch (error) {
     console.log("Error updating category:", error);
     res.status(500).json({ success: false });
   }
 };
-
-// BLOCK AND UNBLOCK CATEGORY
 
 const blockCategory = async (req, res) => {
   try {

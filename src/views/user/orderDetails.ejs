@@ -53,7 +53,7 @@
       order.status === "Partially Returned") && item.status === "Active"; %> <%
       if (canReturnItem) { %>
 
-      <input type="hidden" name="redirectTo" value="<%= currentUrl %>" />
+      <i  nput type="hidden" name="redirectTo" value="<%= currentUrl %>" />
       <button
         class="btn btn-return"
         onclick="returnItem('<%=order.orderId %>','<%= item._id %>')"
@@ -66,6 +66,8 @@
       <span style="color: #856404; font-weight: 600">Return Requested</span>
       <% } else if (item.status === "Returned") { %>
       <span style="color: #2e7d32; font-weight: 600">Returned</span>
+      <% } else if(item.status === "Cancelled" ) {%>
+        <span style="color:#c62828; font-weight:600">Cancelled</span>
       <% } %>
     </div>
 
@@ -133,7 +135,7 @@
     >View Invoice</a
   >
 </div>
-
+      
 <script>
   function returnItem(orderId, itemId) {
     Swal.fire({

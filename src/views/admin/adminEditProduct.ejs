@@ -399,9 +399,8 @@ document.getElementById('editProductForm').addEventListener('submit', async func
     }
   });
   
-  formData.delete('existingImages');
   uploadedImages.filter(img => img.existing && !img.cropped).forEach(img => {
-    formData.append('existingImages[]', img.url);
+    formData.append('existingImages', img.url);
   });
   console.log('Total images:', uploadedImages.length);
   console.log('Existing unchanged:', uploadedImages.filter(img => img.existing && !img.cropped).length);

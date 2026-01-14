@@ -215,10 +215,18 @@ const loadSingleProduct = async (req, res) => {
       .limit(4)
       .lean();
     let cartCount = 0;
+
     if (userId) {
       const cart = await Cart.findOne({ userId });
-      cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+      if (cart && cart.items && cart.items.length > 0) {
+        cartCount = cart.items.reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        );
+      }
     }
+
 
     const wishlist = await Wishlist.findOne({ userId: req.session.userId });
     let wishlistProductIds = [];

@@ -1,6 +1,8 @@
 <%- include('../partials/admin/header') %>
 
 <link rel="stylesheet" href="/css/admin/orderDetails.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <div class="container">
   <h2>Order Management</h2>
   <table>
@@ -135,21 +137,19 @@
           </td>
 
           <td>
-  <a
-    href="/admin/orders/<%= order.orderId %>"
-    style="
-      background:#3498db;
-      color:white;
-      padding:6px 12px;
-      border-radius:5px;
-      text-decoration:none;
-    "
-  >
-    View
-  </a>
-</td>
-
-
+            <a
+              href="/admin/orders/<%= order.orderId %>"
+              style="
+                background:#3498db;
+                color:white;
+                padding:6px 12px;
+                border-radius:5px;
+                text-decoration:none;
+              "
+            >
+              View
+            </a>
+          </td>
         </tr>
       <% }) %>
     </tbody>

@@ -354,7 +354,7 @@ const cancelOrderItem = async (req, res) => {
 
         await wallet.save();
       }
-      order.items.pull(itemId);
+      item.status = "Cancelled";
 
       await order.save();
 
@@ -369,11 +369,14 @@ const cancelOrderItem = async (req, res) => {
         return res.json({ success: true });
       }
 
-      const newTotal = order.items.reduce(
+      const activeItems = order.items.filter(
+        i => i.status !== "Cancelled"
+      );
+
+      const newTotal = activeItems.reduce(
         (sum, i) => sum + i.price * i.quantity,
         0
       );
-
       order.subtotal = newTotal;
       order.totalAmount = newTotal;
 

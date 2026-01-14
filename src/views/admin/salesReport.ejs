@@ -26,8 +26,8 @@
       <option value="monthly" <%= reportType === "monthly" ? "selected" : "" %>>Monthly</option>
       <option value="yearly" <%= reportType === "yearly" ? "selected" : "" %>>Yearly</option>
     </select>
-    <input type="date" name="startDate" value="<%= startDate %>"<%= reportType ? "disabled" : "" %>>
-    <input type="date" name="endDate" value="<%= endDate %>" <%= reportType ? "disabled" : "" %>>
+    <input type="date" name="startDate" value="<%= startDate %>"  max="<%= new Date().toISOString().split('T')[0] %>" <%= reportType ? "disabled" : "" %>>
+    <input type="date" name="endDate" value="<%= endDate %>" max="<%= new Date().toISOString().split('T')[0] %>" <%= reportType ? "disabled" : "" %>>
     <button type="submit">Apply</button>
   </form>
 

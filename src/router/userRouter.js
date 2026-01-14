@@ -18,7 +18,6 @@ router.get("/register", authController.loadRegister);
 router.post("/register", authController.register);
 
 router.get("/otp", authController.loadOtp);
-router.get("/verify-otp", authController.verifyOtp);
 router.post("/verify-otp", authController.verifyOtp);
 router.get("/resend-otp", authController.resendOtp);
 
@@ -34,6 +33,10 @@ router.get("/forgot-password/verify-otp", authController.loadforgototp);
 router.post("/forgot-password/verify-otp", authController.verifyForgotOtp);
 router.post("/reset-password-success", authController.resetPassword);
 router.get("/forgotNewPassword", authController.loadEnterNewPassword);
+router.get(
+  "/forgot-password/resend-otp",
+  authController.resendForgotPasswordOtp
+);
 
 router.get("/shop", auth.isLoggedIn, userController.loadShop);
 

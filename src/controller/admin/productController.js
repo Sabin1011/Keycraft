@@ -204,7 +204,7 @@ const loadEditProduct = async (req, res) => {
 
     const categories = await Category.find({ status: true });
 
-    res.render("adminEditProduct", {
+    res.render("adminEditProduct",   {
       activePage: "product",
       product,
       categories,
@@ -230,10 +230,10 @@ const updateProduct = async (req, res) => {
     } = req.body;
 
     let existingImages = [];
-    if (req.body['existingImages[]']) {
-      existingImages = Array.isArray(req.body['existingImages[]']) 
-        ? req.body['existingImages[]'] 
-        : [req.body['existingImages[]']];
+    if (req.body.existingImages) {
+      existingImages = Array.isArray(req.body.existingImages) 
+        ? req.body.existingImages
+        : [req.body.existingImages];
     }
 
     const product = await Product.findById(productId);

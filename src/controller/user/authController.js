@@ -49,13 +49,14 @@ const register = async (req, res) => {
       errors.phone = "Phone number must be exactly 10 digits";
     }
 
+    const cleanPassword = password?.trim();
     const passwordRegex =
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!password) {
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!cleanPassword) {
       errors.password = "Password is required";
-    } else if (!passwordRegex.test(password)) {
+    } else if (!passwordRegex.test(cleanPassword)) {
       errors.password =
-        "Password must be 8+ chars with 1 uppercase, 1 number, 1 special (@$!%*?&)";
+        "Password must be at least 8 characters and include 1 uppercase letter, 1 number, and 1 special character";
     }
 
     if (!confirm_password) {
@@ -87,7 +88,7 @@ const register = async (req, res) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(cleanPassword, 12);
 
     const regUser = {
       username: username.trim(),
@@ -122,16 +123,13 @@ const register = async (req, res) => {
       },
     });
   }
-};
-
-// OTP
+};  
 
 function generateOTP() {
   const otp = Math.floor(1000 + Math.random() * 9000);
   return otp.toString();
 }
 
-// REGISTER OTP
 
 const loadOtp = async (req, res) => {
   try {
@@ -143,20 +141,120 @@ const loadOtp = async (req, res) => {
   }
 };
 
+// const verifyOtp = async (req, res) => {
+//   try {
+//     let regUser = req.session.user;
+//     let sendedOtp = req.session.sendedOtp;
+//     const { otp } = req.body;
+
+//     if (sendedOtp != otp) {
+//       console.log("wrong otp : ", otp);
+
+//       return res.render("Otp", {
+//         error: "Incorrect Otp. Try entering again ",
+//       });
+//     }
+//     console.log("otp entered successfully");
+
+//     const newUser = new User({
+//       username: regUser.username,
+//       email: regUser.email,
+//       phone: regUser.phone,
+//       password: regUser.password,
+//       referralCode: generateReferralCode(),
+//     });
+
+//     let referrer = null;
+//     if (req.session.referralCode) {
+//       referrer = await User.findOne({
+//         referralCode: req.session.referralCode,
+//       });
+//       if (referrer) {
+//         newUser.referredBy = referrer._id;
+//       }
+//     }
+
+//     await newUser.save();
+
+//     await Wallet.create({
+//       userId: newUser._id,
+//       balance: 0,
+//       transactions: [],
+//     });
+
+//     if (referrer) {
+//       await Wallet.findOneAndUpdate(
+//         { userId: referrer._id },
+//         {
+//           $inc: { balance: 200 },
+//           $push: {
+//             transactions: {
+//               amount: 200,
+//               type: "credit",
+//               reason: "Referral reward",
+//             },
+//           },
+//         },
+//         { upsert: true }
+//       );
+
+//       await Wallet.findOneAndUpdate(
+//         { userId: newUser._id },
+//         {
+//           $inc: { balance: 50 },
+//           $push: {
+//             transactions: {
+//               amount: 50,
+//               type: "credit",
+//               reason: "Signup referral bonus",
+//             },
+//           },
+//         }
+//       );
+
+//       newUser.referralRewarded = true;
+//       await newUser.save();
+//     }
+
+//     req.session.sendedOtp = null;
+//     req.session.user = null;
+//     req.session.referralCode = null;
+
+//     return res.redirect("/login");
+//   } catch (error) {}
+// };
+
 const verifyOtp = async (req, res) => {
   try {
-    let regUser = req.session.user;
-    let sendedOtp = req.session.sendedOtp;
+    const regUser = req.session.user;
+    const sendedOtp = req.session.sendedOtp;
+    const otpExpiry = req.session.otpExpiry;
     const { otp } = req.body;
 
-    if (sendedOtp != otp) {
-      console.log("wrong otp : ", otp);
+    if (!regUser || !sendedOtp) {
+      return res.redirect("/register");
+    }
 
+    if (!otpExpiry || Date.now() > otpExpiry) {
       return res.render("Otp", {
-        error: "Incorrect Otp. Try entering again ",
+        error: "OTP has expired. Please resend OTP.",
+        remainingTime: 0,
       });
     }
-    console.log("otp entered successfully");
+
+    if (String(sendedOtp) !== String(otp)) {
+      const remainingTime = Math.max(
+        0,
+        Math.floor((otpExpiry - Date.now()) / 1000)
+      );
+
+      return res.render("Otp", {
+        error: "Incorrect OTP. Please try again.",
+        remainingTime,
+      });
+    }
+
+    console.log("OTP verified successfully");
 
     const newUser = new User({
       username: regUser.username,
@@ -167,6 +265,7 @@ const verifyOtp = async (req, res) => {
     });
 
     let referrer = null;
+
     if (req.session.referralCode) {
       referrer = await User.findOne({
         referralCode: req.session.referralCode,
@@ -219,26 +318,33 @@ const verifyOtp = async (req, res) => {
     }
 
     req.session.sendedOtp = null;
+    req.session.otpExpiry = null;
     req.session.user = null;
     req.session.referralCode = null;
 
     return res.redirect("/login");
-  } catch (error) {}
+  } catch (error) {
+    console.error("Verify OTP error:", error);
+    return res.redirect("/register");
+  }
 };
-
-// resend otp
 
 const resendOtp = async (req, res) => {
   try {
     const user = req.session.user;
 
     if (!user) {
-      return res.render("register");
+      return res.redirect("/register");
+    }
+
+    if (req.session.otpExpiry && Date.now() < req.session.otpExpiry) {
+      return res.redirect("/otp");
     }
 
     const newOtp = generateOTP();
 
     req.session.sendedOtp = newOtp;
+    req.session.otpExpiry = Date.now() + 1 * 60 * 1000; 
 
     await sendEmail({
       to: user.email,
@@ -246,7 +352,7 @@ const resendOtp = async (req, res) => {
       text: `Your new OTP is: ${newOtp}`,
     });
 
-    return res.redirect("/verify-otp");
+    return res.redirect("/otp");
   } catch (error) {
     console.log("Error: ", error);
   }
@@ -474,6 +580,39 @@ const forgotPasswordOtpPage = (req, res) => {
   } catch (error) {}
 };
 
+const resendForgotPasswordOtp = async (req, res) => {
+  try {
+    const email = req.session.forgotEmail;
+
+    if (!email) {
+      return res.redirect("/forgot-password");
+    }
+
+    if (req.session.otpExpiry && Date.now() < req.session.otpExpiry) {
+      return res.redirect("/forgot-password/otp");
+    }
+
+    const newOtp = generateOTP();
+
+    req.session.forgotOtp = newOtp;
+    req.session.otpExpiry = Date.now() + 1 * 60 * 1000; 
+
+    await sendEmail({
+      to: email,
+      subject: "Reset Password OTP - KeyCraft",
+      text: `Your OTP is: ${newOtp}`,
+    });
+
+    console.log("Forgot password OTP resent:", newOtp);
+
+    return res.redirect("/forgot-password/otp");
+  } catch (error) {
+    console.error("Resend forgot OTP error:", error);
+    return res.redirect("/forgot-password");
+  }
+};
+
+
 const resetPassword = async (req, res) => {
   try {
     const { email, password, confirmPassword } = req.body;
@@ -519,6 +658,7 @@ const resetPassword = async (req, res) => {
 };
 
 module.exports = {
+  resendForgotPasswordOtp,
   loadRegister,
   register,
   loadOtp,
