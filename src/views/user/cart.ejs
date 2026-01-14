@@ -1,5 +1,5 @@
 <%- include('../partials/user/header') %>
-<link rel="stylesheet" href="/css/user/cart.css" />
+<link rel="stylesheet" href="/css/user/cart.css">
 
 <section class="cart-container">
   <div class="container">
@@ -12,8 +12,10 @@
     <div class="alert-message alert-<%= messageType %>"><%= message %></div>
     <% } %> <% if (cart && cart.items && cart.items.length > 0) { %>
     <div class="cart-content">
+
       <!-- Cart Items -->
       <div class="cart-items">
+
         <% cart.items.forEach(item => { %>
         <div class="cart-item">
           <div class="item-image">
@@ -35,26 +37,18 @@
             <div class="item-name"><%= item.product.name %></div>
 
             <% if (!item.isAvailable) { %>
-            <div
-              style="
-                color: #dc3545;
-                font-size: 13px;
-                font-weight: 600;
-                margin-top: 6px;
-              "
-            >
-              <%= item.outOfStockMessage %>
-            </div>
-            <% } %> <% if (item.selectedVariant) { %>
-            <p style="color: #334d3e">Variant:</p>
-            <strong style="color: rgb(83, 187, 104)"
-              ><%= item.selectedVariant.name %></strong
-            >
-            <% } else { %>
+              <div style="color:#dc3545;font-size:13px;font-weight:600;margin-top:6px;">
+                <%= item.outOfStockMessage %>
+              </div>
+            <% } %>
+
+            <% if (item.selectedVariant) { %> <p style="color: #334d3e;">Variant:</p>
+            <strong style="color: rgb(83, 187, 104);"><%= item.selectedVariant.name %></strong>
+            <% } else { %>  
             <span style="color: red; font-size: 13px">
               Variant unavailable
             </span>
-            <% } %>
+            <% } %> 
 
             <div class="item-price">
               <% if (item.discountedPrice < item.originalPrice) { %>
@@ -129,10 +123,9 @@
                 class="quantity-btn increase-btn"
                 data-product="<%= item.product._id %>"
                 data-variant="<%=item.variantId%>"
-                <%if(!item.isAvailable)
-                {%
+                <%if(!item.isAvailable) {%> disabled <%} %>
               >
-                disabled <%} %> > +
+                +
               </button>
             </div>
 
@@ -318,10 +311,11 @@
             icon: "warning",
             title: "Quantity limit",
             text: data.message,
-            confirmButtonColor: "#401f75",
+            confirmButtonColor: "#401f75"
           });
           return;
         }
+
 
         document.getElementById(`qty-${productId}-${variantId}`).textContent =
           data.quantity;
@@ -368,14 +362,12 @@
               data.totalDiscount.toFixed(2);
           }
 
-          document.getElementById("subtotal-items").textContent =
-            data.totalItems;
+          document.getElementById("subtotal-items").textContent = data.totalItems;
           document.getElementById("subtotal-amount").textContent =
             data.baseTotal.toFixed(2);
 
-          document.getElementById(
-            "grand-total"
-          ).textContent = `₹${data.totalPrice.toFixed(2)}`;
+          document.getElementById("grand-total").textContent =
+            `₹${data.totalPrice.toFixed(2)}`;
 
           if (data.totalItems === 0) {
             location.reload();
