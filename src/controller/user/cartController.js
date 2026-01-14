@@ -569,7 +569,7 @@ const removeFromCart = async (req, res) => {
       return res.redirect("/login");
     }
 
-    const cart = await Cart.findOne({ userId });
+    let cart = await Cart.findOne({ userId });
 
     if (!cart) {
       return res.redirect("/cart");
@@ -593,11 +593,10 @@ const removeFromCart = async (req, res) => {
 
     const itemRemoved = cart.items.length < initialItemCount;
 
-    cart.totalPrice = cart.items.reduce((total, item) => {
-      return total + item.product.price * item.quantity;
-    }, 0);
-
+    cart = await calculateCartTotals(cart);
+    const invalidItemExists = validateCartStock(cart);
     await cart.save();
+
 
     if (req.xhr) {
       if (!itemRemoved) {
@@ -606,15 +605,29 @@ const removeFromCart = async (req, res) => {
           message: "Item not found or Already removed",
         });
       }
+
+
       const totalItems = cart.items.reduce(
         (sum, item) => sum + item.quantity,
         0
       );
 
+      const itemOfferDiscount = cart.items.reduce(
+        (sum, item) =>
+          sum + (item.originalPrice - item.discountedPrice) * item.quantity,
+        0
+      );
+
+      const cartOfferDiscount = cart.cartDiscount || 0;
+      const totalDiscount = itemOfferDiscount + cartOfferDiscount;
+
       return res.json({
         success: true,
-        totalPrice: cart.totalPrice,
         totalItems,
+        baseTotal: cart.baseTotal,
+        totalDiscount,
+        totalPrice: cart.grandTotal,
+        invalidItemExists,
       });
     }
 
