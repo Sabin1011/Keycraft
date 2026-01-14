@@ -68,6 +68,7 @@ const adminlogin = async (req, res) => {
 
 const logout = async (req, res) => {
   req.session.destroy(() => {
+    res.clearCookie("connect.sid");
     res.redirect("/admin/login");
   });
 };

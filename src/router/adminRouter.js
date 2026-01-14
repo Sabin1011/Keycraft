@@ -140,7 +140,9 @@ router.get(
   auth.adminAuth,
   salesController.downloadSalesReportExcel
 );
-router.get("/logout", auth.adminAuth, adminController.logout);
+
+router.post("/logout", auth.adminAuth, adminController.logout);
+
 router.get(
   "/orders/:orderId",
   auth.adminAuth,

@@ -51,12 +51,11 @@ const isLoggedIn = async (req, res, next) => {
   }
 };
 
-// adminAuth
-
 const adminAuth = (req, res, next) => {
   if(!req.session.admin){
     return res.redirect("/admin/login");
   }
+  res.setHeader("Cache-Control","no-store");
   next();
 };
 

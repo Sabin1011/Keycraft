@@ -79,9 +79,12 @@
                 </a>
             </div>
 
-            <button class="logout-btn" onclick="window.location.href='/admin/logout'">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
+            <form action="/admin/logout" method="POST">
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
+
         </nav>
     </div>
 
@@ -95,6 +98,15 @@
         <img src="/assets/keycraft-logo.png" alt="" class="profile-icon">
         </div>
     </header>
+
+<script>
+  window.addEventListener("pageshow", function (event) {
+    if (event.persisted) {
+      window.location.reload();
+    }
+  });
+</script>
+
 
 
 
