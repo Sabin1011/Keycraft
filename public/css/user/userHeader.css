@@ -233,3 +233,36 @@ nav a:hover::after {
     margin-bottom: 12px;
   }
 }
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 2px; 
+    font-family: 'Raleway', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    text-decoration: none;
+    color: #000;
+}
+
+.logo span {
+    color: #e53935; 
+}
+
+.logo-icon {
+    width: 86px;
+    height: 86px;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .logo-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+}
+

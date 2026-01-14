@@ -53,10 +53,6 @@ body {
   box-shadow: 0 6px 16px rgba(31, 41, 59, 0.2);
 }
 
-/* ────────────────────────────────────────────────
-   Search form
-───────────────────────────────────────────────── */
-
 .search-form {
   display: flex;
   align-items: center;
