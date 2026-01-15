@@ -71,7 +71,18 @@
                 <%  
                   const p = product.productId;
                   const isBlocked = !p?.status || !p?.category?.status;
-                  const isOutOfStock = p?.totalStock <= 0;
+
+                  let isOutOfStock = false;
+
+                  if (product.variantId) {
+                    const v = p.variants.find(
+                      v => v._id.toString() === product.variantId.toString()
+                    );
+                    isOutOfStock = !v || v.quantity <= 0;
+                  } else {
+                    isOutOfStock = p.totalStock <= 0;
+                  }
+
                 %>
 
                 <% if (isBlocked) { %>

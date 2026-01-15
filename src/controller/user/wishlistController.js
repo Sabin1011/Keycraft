@@ -135,13 +135,26 @@ const addAllToCart = async (req, res) => {
 
     for (const item of wishlist.products) {
       const productId = item.productId;
-      const variantId = item.variantId || null;
+      let variantId = item.variantId || null;
       const quantity = 1;
 
       const product = await Product.findById(productId).populate("category");
-      if (!product) continue;
+      if (!product) continue; 
       if (!product.status || !product.category?.status) continue;
-      if (product.totalStock <= 0) continue;
+      
+      if (!variantId && product.variants && product.variants.length > 0) {
+        variantId = product.variants[0]._id.toString();
+      }
+
+      let availableStock = product.totalStock;
+
+      if (variantId) {
+        const variant = product.variants.id(variantId);
+        if (!variant || variant.quantity <= 0) continue;
+        availableStock = variant.quantity;
+      } else {
+        if (product.totalStock <= 0) continue;
+      }
 
       const existingIndex = cart.items.findIndex(
         (cartItem) =>
@@ -155,19 +168,24 @@ const addAllToCart = async (req, res) => {
 
         const MAX_LIMIT = 6;
         if (newQty > MAX_LIMIT) newQty = MAX_LIMIT;
-        if (newQty > product.totalStock) newQty = product.totalStock;
+        if (newQty >availableStock) newQty = availableStock;
 
         cart.items[existingIndex].quantity = newQty;
       } else {
-        cart.items.push({
+        const cartItem = {
           product: productId,
-          variantId: variantId,
           quantity: 1,
-        });
+        };
+
+        if (variantId) {
+          cartItem.variantId = variantId;
+        }
+
+        cart.items.push(cartItem);
+
       }
     }
 
-    // Recalculate total price
     await cart.populate({
       path: "items.product",
       populate: {
@@ -195,7 +213,7 @@ const addAllToCart = async (req, res) => {
     req.session.messageType = "error";
     return res.redirect("/wishlist");
   }
-};
+};  
 
 module.exports = {
   loadWishlist,

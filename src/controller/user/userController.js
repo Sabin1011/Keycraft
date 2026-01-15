@@ -214,6 +214,7 @@ const loadSingleProduct = async (req, res) => {
     })
       .limit(4)
       .lean();
+      
     let cartCount = 0;
 
     if (userId) {

@@ -3,11 +3,9 @@ const Cart = require("../../models/cartModel.js")
 
 // Imports the User model to fetch user details from MongoDB.
 
-
 const loadAbout = async (req, res) => {
   try {
     let cartCount = 0;
-
     
     const userId = req.session.userId;
 

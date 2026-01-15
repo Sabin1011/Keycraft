@@ -120,6 +120,7 @@ router.post(
   auth.isLoggedIn,
   wishlistController.addToWishlist
 );
+
 router.delete(
   "/wishlist/remove/:id",
   auth.isLoggedIn,

@@ -32,22 +32,21 @@ const wishlistSchema = new Schema(
 wishlistSchema.index({ userId: 1 }, { unique: true });
 
 wishlistSchema.pre("save", function (next) {
-  if (this.products && this.products.length > 0) {
-    const uniqueProducts = [];
-    const seenIds = new Set();
+  if (!this.products) return next();
 
-    for (const item of this.products) {
-      const idString = item.productId.toString();
-      if (!seenIds.has(idString)) {
-        seenIds.add(idString);
-        uniqueProducts.push(item);
-      }
+  const unique = new Map();
+
+  for (const item of this.products) {
+    const key = `${item.productId.toString()}-${item.variantId?.toString() || "default"}`;
+    if (!unique.has(key)) {
+      unique.set(key, item);
     }
-
-    this.products = uniqueProducts;
   }
+
+  this.products = Array.from(unique.values());
   next();
 });
+
 
 const Wishlist = mongoose.model("Wishlist", wishlistSchema);
 module.exports = Wishlist;

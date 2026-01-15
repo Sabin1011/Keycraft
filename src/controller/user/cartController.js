@@ -54,6 +54,10 @@ const loadCart = async (req, res) => {
     const cartOffers = offers.filter((o) => o.offerType === "cart");
 
     for (let item of cart.items) {
+      if (!item.variantId || item.variantId === "null") {
+        item.variantId = undefined;
+      }
+
       item.selectedVariant = item.variantId
         ? item.product.variants.id(item.variantId)
         : null;
@@ -65,41 +69,40 @@ const loadCart = async (req, res) => {
         item.isAvailable = false;
         item.outOfStockMessage = "Product unavailable";
         invalidItemExists = true;
-      } 
+      }
       if (item.variantId) {
-
-        if(!item.selectedVariant) {
+        if (!item.selectedVariant) {
           item.isAvailable = false;
           item.outOfStockMessage = "Selected variant not available";
           invalidItemExists = true;
           continue;
         }
 
-        if(item.selectedVariant.quantity<=0) {
+        if (item.selectedVariant.quantity <= 0) {
           item.isAvailable = false;
           item.outOfStockMessage = `Variant "${item.selectedVariant.name}" is out of stock`;
           invalidItemExists = true;
           continue;
         }
 
-        if(item.quantity >item.selectedVariant.quantity){
+        if (item.quantity > item.selectedVariant.quantity) {
           item.isAvailable = false;
-          item.outOfStockMessage = `Only ${item.selectedVariant.quantity} left for ${item.selectedVariant.name}`
-          item.quantity = item.selectedVariant.quantity;  
+          item.outOfStockMessage = `Only ${item.selectedVariant.quantity} left for ${item.selectedVariant.name}`;
+          item.quantity = item.selectedVariant.quantity;
           invalidItemExists = true;
           continue;
         }
       }
 
-      if(!item.selectedVariant){
-        if(item.product.totalStock <= 0){
+      if (!item.selectedVariant) {
+        if (item.product.totalStock <= 0) {
           item.isAvailable = false;
           item.outOfStockMessage = "Product out of stock";
           invalidItemExists = true;
           continue;
         }
 
-        if(item.quantity > item.product.totalStock) {
+        if (item.quantity > item.product.totalStock) {
           item.isAvailable = false;
           item.outOfStockMessage = `Only ${item.product.totalStock} left in stock`;
           item.quantity = item.product.totalStock;
@@ -407,29 +410,29 @@ const increaseQuantity = async (req, res) => {
           success: false,
           message: `Maximum quantity limit is ${MAX_LIMIT}`,
         });
-      }  
-      if(variantId) {
+      }
+      if (variantId) {
         const variant = product.variants.id(variantId);
-        
-        if(!variant) {
+
+        if (!variant) {
           return res.json({
-            success:false,
-            message:"Selected variant not found",
+            success: false,
+            message: "Selected variant not found",
           });
         }
 
-        if(newQuantity >variant.quantity) {
+        if (newQuantity > variant.quantity) {
           return res.json({
             success: false,
             message: `Only ${variant.quantity} left for ${variant.name}`,
           });
         }
       } else {
-        if(newQuantity > product.totalStock) {
+        if (newQuantity > product.totalStock) {
           return res.json({
-            success:false,
-            message:`Only ${product.totalStock} items available`,
-          })
+            success: false,
+            message: `Only ${product.totalStock} items available`,
+          });
         }
       }
 
@@ -597,7 +600,6 @@ const removeFromCart = async (req, res) => {
     const invalidItemExists = validateCartStock(cart);
     await cart.save();
 
-
     if (req.xhr) {
       if (!itemRemoved) {
         return res.json({
@@ -605,7 +607,6 @@ const removeFromCart = async (req, res) => {
           message: "Item not found or Already removed",
         });
       }
-
 
       const totalItems = cart.items.reduce(
         (sum, item) => sum + item.quantity,
