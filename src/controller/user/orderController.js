@@ -358,7 +358,13 @@ const cancelOrderItem = async (req, res) => {
 
       await order.save();
 
-      if (order.items.length === 0) {
+
+      const activeItems = order.items.filter(
+        i => i.status !== "Cancelled"
+      );
+
+      
+      if (activeItems.length === 0) {
         order.status = "Cancelled";
         order.subtotal = 0;
         order.totalAmount = 0;
@@ -369,9 +375,6 @@ const cancelOrderItem = async (req, res) => {
         return res.json({ success: true });
       }
 
-      const activeItems = order.items.filter(
-        i => i.status !== "Cancelled"
-      );
 
       const newTotal = activeItems.reduce(
         (sum, i) => sum + i.price * i.quantity,
