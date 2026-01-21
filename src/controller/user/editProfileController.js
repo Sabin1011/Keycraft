@@ -99,6 +99,15 @@ const updateProfile = async (req, res) => {
       req.session.errorMessage = "please enter a valid email address";
       return res.redirect("/profile/edit");
     }
+    
+    const emailName = trimmedEmail.split("@")[0];
+
+    if (emailName.length < 3) {
+      req.session.errorMessage =
+        "email username must be at least 3 characters before @";
+      return res.redirect("/profile/edit");
+    }
+
 
     if (trimmedPhone) {
       const phoneRegex = /^[\d\s\+\-\(\)]+$/;

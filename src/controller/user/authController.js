@@ -43,7 +43,13 @@ const register = async (req, res) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) {
       errors.email = "Enter a valid email address";
+    } else {
+      const emailName = email.split("@")[0];
+      if (emailName.length < 3) {
+        errors.email = "Email must have at least 3 characters before @";
+      }
     }
+
 
     if (!phone || !/^\d{10}$/.test(phone)) {
       errors.phone = "Phone number must be exactly 10 digits";
@@ -107,8 +113,10 @@ const register = async (req, res) => {
 
     req.session.sendedOtp = otp;
     req.session.user = regUser;
+    req.session.otpExpiry = Date.now() + 1 * 60 * 1000;
 
     console.log("OTP generated:", otp);
+    console.log("Otp expiry time:", new Date(req.session.otpExpiry));
 
     return res.redirect("/otp");
   } catch (error) {

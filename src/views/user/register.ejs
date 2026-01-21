@@ -151,24 +151,75 @@
         </div>
     </div>
 
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
     <script>
+        // document.getElementById("registerForm").addEventListener("submit", (event) => {
+
+        //     document.querySelectorAll(".input-error").forEach(e=>e.textContent = "");
+
+        //     const email = document.getElementById("email").value;
+        //     const password = document.getElementById("password").value;
+        //     const confirmPassword = document.getElementById("confirmPassword").value;
+
+        //     if (!email || !password) {
+        //         alert("Please fill all fields");
+        //     };
+
+        //     if(password.length<6){
+        //         alert("Password must be of atleast 6 characters");
+        //     };
+        // });
+        
         document.getElementById("registerForm").addEventListener("submit", (event) => {
+            event.preventDefault(); 
 
-            document.querySelectorAll(".input-error").forEach(e=>e.textContent = "");
-
-            const email = document.getElementById("email").value;
+            const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
             const confirmPassword = document.getElementById("confirmPassword").value;
 
-            if (!email || !password) {
-                alert("Please fill all fields");
-            };
+            if (!email || !password || !confirmPassword) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Missing Fields",
+                    text: "Please fill all required fields",
+                });
+                return;
+            }
 
-            if(password.length<6){
-                alert("Password must be of atleast 6 characters");
-            };
+            const emailParts = email.split("@");
+            if (emailParts[0].length < 3) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Invalid Email",
+                    text: "Email must have at least 3 characters before @",
+                });
+                return;
+            }
+
+            if (password.length < 8) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Weak Password",
+                    text: "Password must be at least 8 characters long",
+                });
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Password Mismatch",
+                    text: "Passwords do not match",
+                });
+                return;
+            }
+
+            event.target.submit();
         });
-        
+
         function togglePassword(inputId, icon) {
             const input = document.getElementById(inputId);
 

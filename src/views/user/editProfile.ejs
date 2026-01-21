@@ -154,6 +154,9 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 <script>
   let cropper = null;
   const imageInput = document.getElementById("imageInput");
@@ -244,7 +247,24 @@
 document
   .getElementById("editProfileForm")
   .addEventListener("submit", async function (e) {
-    e.preventDefault(); 
+    e.preventDefault();
+
+    const emailInput = document.getElementById("email").value.trim();
+    const emailParts = emailInput.split("@");
+
+    if (emailParts[0].length < 3) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Email",
+        text: "Email must have at least 3 characters before @",
+        confirmButtonText: "OK",
+      });
+
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa fa-save"></i> save changes';
+      return;
+    }
+
 
     const form = e.target;
     const submitBtn = document.getElementById("submitBtn");
